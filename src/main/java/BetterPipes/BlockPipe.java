@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -31,7 +32,10 @@ public class BlockPipe extends Block implements EntityBlock {
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        // Custom logic here, e.g., initializing block-specific data
+        updateFromNeighbourShapes(state,level,pos);
+    }
+    protected int getLightBlock(BlockState state, BlockGetter level, BlockPos pos) {
+        return 0;
     }
 
     @Override
