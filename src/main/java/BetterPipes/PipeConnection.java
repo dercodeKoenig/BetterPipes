@@ -11,6 +11,8 @@ import static BetterPipes.EntityPipe.*;
 public class PipeConnection implements IFluidHandler {
     public boolean isEnabled;
 
+    public boolean isExtraction = false;
+
     public int lastInputFromInside;
     public int lastInputFromOutside;
     public boolean getsInputFromInside;
@@ -79,6 +81,7 @@ public class PipeConnection implements IFluidHandler {
         tag.putBoolean("getsInputFromOutside", getsInputFromOutside);
         tag.putBoolean("outputsToInside", outputsToInside);
         tag.putBoolean("outputsToOutside", outputsToOutside);
+        tag.putBoolean("isExtraction", isExtraction);
         tank.writeToNBT(registries, tag);
         return tag;
     }
@@ -88,6 +91,7 @@ public class PipeConnection implements IFluidHandler {
         getsInputFromOutside = tag.getBoolean("getsInputFromOutside");
         outputsToInside = tag.getBoolean("outputsToInside");
         outputsToOutside = tag.getBoolean("outputsToOutside");
+        isExtraction = tag.getBoolean("isExtraction");
         tank.readFromNBT(registries, tag);
     }
 

@@ -44,6 +44,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     FluidStack last_tankFluid = FluidStack.EMPTY;
     int lastFill;
     int ticksWithFluidInTank = 0;
+    boolean isExtractionActive = false;
 
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
@@ -204,6 +205,39 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
         }
     }
+    void toggleExtractionActive() {
+        isExtractionActive = !isExtractionActive;
+
+        CompoundTag updateTag = new CompoundTag();
+        updateTag.putBoolean("isExtractionActive",isExtractionActive);
+        updateTag.putLong("time", System.currentTimeMillis());
+        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
+
+        setChanged();
+    }
+    void toggleExtractionMode() {
+        boolean setExtract = true;
+        for (Direction i : Direction.values()) {
+            if (connections.get(i).isEnabled && connections.get(i).isExtraction) setExtract = false;
+        }
+        if (setExtract) {
+            isExtractionActive = false;
+        }
+        for (Direction i : Direction.values()) {
+            if (!setExtract || connections.get(i).isEnabled)
+                connections.get(i).isExtraction = setExtract;
+        }
+
+        CompoundTag updateTag = new CompoundTag();
+        for (Direction direction : Direction.allShuffled(level.random)) {
+            PipeConnection conn = connections.get(direction);
+            updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
+        }
+        updateTag.putLong("time", System.currentTimeMillis());
+        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
+
+        setChanged();
+    }
 
     @Override
     public void readServer(CompoundTag compoundTag) {
@@ -211,6 +245,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             UUID from = compoundTag.getUUID("client_onload");
             ServerPlayer playerFrom = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(from);
             CompoundTag updateTag = new CompoundTag();
+            updateTag.putBoolean("isExtractionActive",isExtractionActive);
             CompoundTag tankTag = new CompoundTag();
             mainTank.writeToNBT(level.registryAccess(), tankTag);
             updateTag.put("mainTank", tankTag);
@@ -234,7 +269,9 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             long updateTime = compoundTag.getLong("time");
             if (updateTime >= lastUpdate) {
                 lastUpdate = updateTime;
-
+                if (compoundTag.contains("isExtractionActive")) {
+                    isExtractionActive = compoundTag.getBoolean("isExtractionActive");
+                }
                 if (compoundTag.contains("mainTank")) {
                     mainTank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
                 }
@@ -250,6 +287,9 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+
+        isExtractionActive = tag.getBoolean("isExtractionActive");
+
         mainTank.readFromNBT(registries, tag.getCompound("mainTank"));
 
         for (Direction direction : Direction.values()) {
@@ -262,6 +302,8 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
+
+        tag.putBoolean("isExtractionActive", isExtractionActive);
 
         CompoundTag tankTag = new CompoundTag();
         mainTank.writeToNBT(registries, tankTag);

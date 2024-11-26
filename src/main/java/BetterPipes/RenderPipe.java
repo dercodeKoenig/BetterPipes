@@ -577,10 +577,10 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
             // Render south face (z+ side)
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
             // Render north face (z- side)
             vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -816,7 +816,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                             !tile.connections.get(Direction.WEST).isEnabled &&
                             !tile.connections.get(Direction.EAST).isEnabled
             ) {
-                // vertical render
+                // is vertical render because no horizontal connections are found
 
                 float relativeFill = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
                 float wMin = 0.05f;
@@ -852,7 +852,6 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         xh2,xh3,zh2,zh3,
                         renderBelow,renderAbove);
  */
-
 
                 // first scan if it has only one output to use this as flow direction, second look if it has only one input to use as flow direction
                 Direction outFlow = null;
@@ -890,7 +889,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                     renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
                 }
             } else {
-                // horizontal render
+                // is horizontal render
                 float x0 = -0.25f + e;
                 float x1 = 0.25f - e;
                 float z0 = -0.25f + e;
@@ -1308,9 +1307,9 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
         renderEastConnection(tile, v,stack,packedLight,packedOverlay);
         renderWestConnection(tile, v,stack,packedLight,packedOverlay);
 
-        // if it has only y connections, render vertical fluid
-        renderFluids(tile,bufferSource,stack,packedLight,packedOverlay);
 
+
+        renderFluids(tile,bufferSource,stack,packedLight,packedOverlay);
 
     }
 
