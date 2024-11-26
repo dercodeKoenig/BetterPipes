@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,6 +55,7 @@ public class BlockPipe extends Block implements EntityBlock {
                 pipe.connections.get(direction).isEnabled = true;
             } else {
                 pipe.connections.get(direction).isEnabled = false;
+                pipe.connections.get(direction).tank.setFluid(FluidStack.EMPTY);
             }
         }
         return state;

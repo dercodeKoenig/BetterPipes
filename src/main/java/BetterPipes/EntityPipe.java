@@ -28,12 +28,14 @@ import static BetterPipes.Registry.ENTITY_PIPE;
 public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     private static final List<EntityPipe> ACTIVE_PIPES = new ArrayList<>();
 
-    public static int MAX_OUTPUT_RATE = 20;
-    public static int REQUIRED_FILL_FOR_MAX_OUTPUT = 150;
-    public static int CONNECTION_MAX_OUTPUT_RATE = 20;
-    public static int CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT = 75;
-    public static int CONNECTION_CAPACITY = 150;
-    public static int MAIN_CAPACITY = 300;
+    public static int MAX_OUTPUT_RATE = 5;
+    public static int REQUIRED_FILL_FOR_MAX_OUTPUT = 100;
+    public static int MAIN_CAPACITY = 200;
+
+    public static int CONNECTION_MAX_OUTPUT_RATE = 5;
+    public static int CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT = 50;
+    public static int CONNECTION_CAPACITY = 100;
+
     public static int STATE_UPDATE_TICKS = 60;
     public static int FORCE_OUTPUT_AFTER_TICKS = 20;
 
