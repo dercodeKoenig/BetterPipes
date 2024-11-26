@@ -6,6 +6,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 
 @Mod(BetterPipes.MODID)
@@ -13,7 +14,7 @@ public class BetterPipes {
     public static final String MODID = "betterpipes";
 
     public BetterPipes(IEventBus modEventBus, ModContainer modContaine) {
-        //NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(EntityPipe.class);
 
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::loadComplete);

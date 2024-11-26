@@ -10,6 +10,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -43,10 +45,11 @@ public class BlockPipe extends Block implements EntityBlock {
         IFluidHandler fluidHandler = null;
         BlockEntity e = level.getBlockEntity(neighborPos);
         if(e != null){
-            fluidHandler= e.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, neighborState, e, direction);
+            fluidHandler= e.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, neighborState, e, direction.getOpposite());
         }
         BlockEntity tile = level.getBlockEntity(pos);
         if (tile instanceof EntityPipe pipe) {
+            pipe.connections.get(direction).neighborFluidHandler = fluidHandler;
             if (fluidHandler != null) {
                 pipe.connections.get(direction).isEnabled = true;
             } else {
@@ -55,4 +58,9 @@ public class BlockPipe extends Block implements EntityBlock {
         }
         return state;
     }
+    //@Override
+    //public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        //return EntityPipe::tick;
+    //}
+
 }
