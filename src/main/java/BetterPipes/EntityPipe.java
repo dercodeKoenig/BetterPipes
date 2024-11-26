@@ -5,6 +5,7 @@ import ARLib.network.PacketBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,12 +14,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.*;
 
@@ -27,15 +28,21 @@ import static BetterPipes.Registry.ENTITY_PIPE;
 public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     private static final List<EntityPipe> ACTIVE_PIPES = new ArrayList<>();
 
+    public static int MAX_OUTPUT_RATE = 20;
+    public static int REQUIRED_FILL_FOR_MAX_OUTPUT = 150;
+    public static int CONNECTION_MAX_OUTPUT_RATE = 20;
+    public static int CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT = 75;
+    public static int CONNECTION_CAPACITY = 150;
+    public static int MAIN_CAPACITY = 300;
+    public static int STATE_UPDATE_TICKS = 60;
+    public static int FORCE_OUTPUT_AFTER_TICKS = 20;
+
     public Map<Direction, PipeConnection> connections = new HashMap<>();
-    FluidTank mainTank = new FluidTank(1000);
+    FluidTank mainTank = new simpleBlockEntityTank(MAIN_CAPACITY, this);
     FluidStack last_tankFluid = FluidStack.EMPTY;
     int lastFill;
     int ticksWithFluidInTank = 0;
-    int maxOutputRate = 10;
-    int fillRequiredForFullOutputRate = 400;
-    int connectionMaxOutputRate = 10;
-    int connectionFillRequiredForFullOutputRate = 200;
+
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
         super(ENTITY_PIPE.get(), pos, blockState);
@@ -64,11 +71,11 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (!level.isClientSide) {
             ACTIVE_PIPES.add(this);
         }
-        if(level.isClientSide){
+        if (level.isClientSide) {
             UUID from = Minecraft.getInstance().player.getUUID();
             CompoundTag tag = new CompoundTag();
             tag.putUUID("client_onload", from);
-            PacketDistributor.sendToServer(PacketBlockEntity.getBlockEntityPacket(this,tag));
+            PacketDistributor.sendToServer(PacketBlockEntity.getBlockEntityPacket(this, tag));
         }
     }
 
@@ -81,17 +88,15 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(LevelTickEvent.Pre event) {
-        if (!event.getLevel().isClientSide) {
-            for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-                i.tick_start();
-            }
-            for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-                i.tick_update_tanks();
-            }
-            for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-                i.tick_complete();
-            }
+    public static void onServerTick(ServerTickEvent.Pre event) {
+        for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+            i.tick_start();
+        }
+        for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+            i.tick_update_tanks();
+        }
+        for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+            i.tick_complete();
         }
     }
 
@@ -108,13 +113,13 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             if (conn.isEnabled) {
                 if (conn.lastFill > 0) {
                     if (!conn.getsInputFromInside) {
-                        double transferRateMultiplier = (double) conn.lastFill / connectionFillRequiredForFullOutputRate;
-                        int toTransfer = (int) (connectionMaxOutputRate * transferRateMultiplier);
-                        if (toTransfer > connectionMaxOutputRate && conn.lastInputWasFromAnotherPipe)
-                            toTransfer = connectionMaxOutputRate + 1;
-                        if (toTransfer > connectionMaxOutputRate && !conn.lastInputWasFromAnotherPipe)
-                            toTransfer = connectionMaxOutputRate;
-                        if (toTransfer == 0 && conn.ticksWithFluidInTank>=60)
+                        double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                        int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
+                        if (toTransfer > CONNECTION_MAX_OUTPUT_RATE && conn.lastInputWasFromAnotherPipe)
+                            toTransfer = CONNECTION_MAX_OUTPUT_RATE + 1;
+                        if (toTransfer > CONNECTION_MAX_OUTPUT_RATE && !conn.lastInputWasFromAnotherPipe)
+                            toTransfer = CONNECTION_MAX_OUTPUT_RATE;
+                        if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
                             toTransfer = 1;
 
                         FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
@@ -126,11 +131,11 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
                     if (!conn.getsInputFromOutside) {
                         if (conn.neighborFluidHandler != null) {
-                            double transferRateMultiplier = (double) conn.lastFill / connectionFillRequiredForFullOutputRate;
-                            int toTransfer = (int) (connectionMaxOutputRate * transferRateMultiplier);
-                            if (toTransfer > connectionMaxOutputRate)
-                                toTransfer = connectionMaxOutputRate + 1;
-                            if (toTransfer == 0 && conn.ticksWithFluidInTank>=60)
+                            double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                            int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
+                            if (toTransfer > CONNECTION_MAX_OUTPUT_RATE)
+                                toTransfer = CONNECTION_MAX_OUTPUT_RATE + 1;
+                            if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
                                 toTransfer = 1;
 
                             FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
@@ -146,17 +151,17 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                 }
                 if (lastFill > 0) {
                     if (!conn.outputsToInside) {
-                        double transferRateMultiplier = (double) lastFill / fillRequiredForFullOutputRate;
-                        int toTransfer = (int) (maxOutputRate * transferRateMultiplier);
-                        if (toTransfer > maxOutputRate)
-                            toTransfer = maxOutputRate + 1;
-                        if (toTransfer == 0 && ticksWithFluidInTank>=60)
+                        double transferRateMultiplier = (double) lastFill / REQUIRED_FILL_FOR_MAX_OUTPUT;
+                        int toTransfer = (int) (MAX_OUTPUT_RATE * transferRateMultiplier);
+                        if (toTransfer > MAX_OUTPUT_RATE)
+                            toTransfer = MAX_OUTPUT_RATE + 1;
+                        if (toTransfer == 0 && ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
                             toTransfer = 1;
 
                         FluidStack drained = mainTank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
                         int filled = conn.tank.fill(drained, IFluidHandler.FluidAction.SIMULATE);
                         toTransfer = Math.min(filled, toTransfer);
-                        //drain main tank into neighbor
+                        //drain main tank into connection
                         conn.fill(mainTank.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE, true);
                     }
                 }
@@ -165,10 +170,14 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     public void tick_complete() {
+        if (!mainTank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS + 1)
+            ticksWithFluidInTank++;
+        else if (mainTank.isEmpty()) {
+            ticksWithFluidInTank = 0;
+        }
         //System.out.println(mainTank.getFluidAmount());
         CompoundTag updateTag = new CompoundTag();
         boolean needsSendUpdate = false;
-
         // Check if the tank fluid stack has changed
         if (!FluidStack.isSameFluidSameComponents(last_tankFluid, mainTank.getFluid()) || last_tankFluid.getAmount() != mainTank.getFluidAmount()) {
             needsSendUpdate = true;
@@ -177,24 +186,19 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             mainTank.writeToNBT(level.registryAccess(), tag);
             updateTag.put("mainTank", tag);
         }
-        if(!mainTank.isEmpty() && ticksWithFluidInTank < 60)
-            ticksWithFluidInTank++;
-        else if (ticksWithFluidInTank != 0)
-            ticksWithFluidInTank=0;
-
         for (Direction direction : Direction.allShuffled(level.random)) {
             PipeConnection conn = connections.get(direction);
             if (conn.isEnabled) {
                 //System.out.println(conn.tank.getFluidAmount()+":"+direction);
                 conn.update();
                 if (conn.needsSync()) {
-                    CompoundTag tag = conn.getUpdateTag();
-                    updateTag.put(direction.getName(), tag);
+                    updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
                     needsSendUpdate = true;
                 }
             }
         }
         if (needsSendUpdate) {
+            updateTag.putLong("time", System.currentTimeMillis());
             PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
         }
     }
@@ -211,23 +215,59 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             for (Direction direction : Direction.allShuffled(level.random)) {
                 PipeConnection conn = connections.get(direction);
                 if (conn.isEnabled) {
-                    CompoundTag tag = conn.getUpdateTag();
+                    CompoundTag tag = conn.getUpdateTag(level.registryAccess());
                     updateTag.put(direction.getName(), tag);
                 }
             }
-            PacketDistributor.sendToPlayer(playerFrom,PacketBlockEntity.getBlockEntityPacket(this,updateTag));
+            updateTag.putLong("time", System.currentTimeMillis());
+            PacketDistributor.sendToPlayer(playerFrom, PacketBlockEntity.getBlockEntityPacket(this, updateTag));
+        }
+    }
+
+    long lastUpdate = 0;
+
+    @Override
+    public void readClient(CompoundTag compoundTag) {
+        if (compoundTag.contains(("time"))) {
+            long updateTime = compoundTag.getLong("time");
+            if (updateTime >= lastUpdate) {
+                lastUpdate = updateTime;
+
+                if (compoundTag.contains("mainTank")) {
+                    mainTank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
+                }
+                for (Direction direction : Direction.values()) {
+                    if (compoundTag.contains(direction.getName())) {
+                        connections.get(direction).handleUpdateTag(compoundTag.getCompound(direction.getName()),level.registryAccess());
+                    }
+                }
+            }
         }
     }
 
     @Override
-    public void readClient(CompoundTag compoundTag) {
-        if (compoundTag.contains("mainTank")) {
-            mainTank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
-        }
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        mainTank.readFromNBT(registries, tag.getCompound("mainTank"));
+
         for (Direction direction : Direction.values()) {
-            if (compoundTag.contains(direction.getName())) {
-                connections.get(direction).handleUpdateTag(compoundTag.getCompound(direction.getName()));
-            }
+            PipeConnection conn = connections.get(direction);
+            conn.handleUpdateTag(tag.getCompound(direction.getName()),registries);
+        }
+
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+
+        CompoundTag tankTag = new CompoundTag();
+        mainTank.writeToNBT(registries, tankTag);
+        tag.put("mainTank", tankTag);
+
+        for (Direction direction : Direction.values()) {
+            PipeConnection conn = connections.get(direction);
+            tag.put(direction.getName(), conn.getUpdateTag(registries));
         }
     }
 }

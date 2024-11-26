@@ -1,8 +1,12 @@
 package BetterPipes;
 
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+
+import static BetterPipes.EntityPipe.*;
 
 public class PipeConnection implements IFluidHandler {
     public boolean isEnabled;
@@ -24,10 +28,8 @@ public class PipeConnection implements IFluidHandler {
     int lastFill;
     IFluidHandler neighborFluidHandler;
 
-    EntityPipe parent;
     public PipeConnection(EntityPipe parent) {
-        tank = new simpleBlockEntityTank(500, parent);
-        this.parent =parent;
+        tank = new simpleBlockEntityTank(CONNECTION_CAPACITY, parent);
     }
 
     boolean last_getsInputFromInside;
@@ -35,6 +37,7 @@ public class PipeConnection implements IFluidHandler {
     boolean last_outputsToInside;
     boolean last_outputsToOutside;
     FluidStack last_tankFluid = FluidStack.EMPTY;
+
     public boolean needsSync() {
         boolean needsUpdate = false;
 
@@ -70,47 +73,50 @@ public class PipeConnection implements IFluidHandler {
         return needsUpdate;
     }
 
-public CompoundTag getUpdateTag(){
-    CompoundTag tag = new CompoundTag();
-    tag.putBoolean("getsInputFromInside",getsInputFromInside);
-    tag.putBoolean("getsInputFromOutside",getsInputFromOutside);
-    tag.putBoolean("outputsToInside",outputsToInside);
-    tag.putBoolean("outputsToOutside",outputsToOutside);
-    tank.writeToNBT(parent.getLevel().registryAccess(),tag);
-    return tag;
-}
-    public void handleUpdateTag(CompoundTag tag){
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("getsInputFromInside", getsInputFromInside);
+        tag.putBoolean("getsInputFromOutside", getsInputFromOutside);
+        tag.putBoolean("outputsToInside", outputsToInside);
+        tag.putBoolean("outputsToOutside", outputsToOutside);
+        tank.writeToNBT(registries, tag);
+        return tag;
+    }
+
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
         getsInputFromInside = tag.getBoolean("getsInputFromInside");
         getsInputFromOutside = tag.getBoolean("getsInputFromOutside");
         outputsToInside = tag.getBoolean("outputsToInside");
         outputsToOutside = tag.getBoolean("outputsToOutside");
-        tank.readFromNBT(parent.getLevel().registryAccess(),tag);
+        tank.readFromNBT(registries, tag);
     }
+
     void update() {
-        if (lastInputFromOutside < 20)
+        if (lastInputFromOutside < STATE_UPDATE_TICKS+1)
             lastInputFromOutside++;
         else if (getsInputFromOutside)
             getsInputFromOutside = false;
 
-        if (lastInputFromInside < 20)
+        if (lastInputFromInside < STATE_UPDATE_TICKS+1)
             lastInputFromInside++;
         else if (getsInputFromInside)
             getsInputFromInside = false;
 
-        if (lastOutputToInside < 20)
+        if (lastOutputToInside < STATE_UPDATE_TICKS+1)
             lastOutputToInside++;
         else if (outputsToInside)
             outputsToInside = false;
 
-        if (lastOutputToOutside < 20)
+        if (lastOutputToOutside < STATE_UPDATE_TICKS+1)
             lastOutputToOutside++;
         else if (outputsToOutside)
             outputsToOutside = false;
 
-        if(!tank.isEmpty() && ticksWithFluidInTank < 60)
+        if(!tank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS+1)
             ticksWithFluidInTank++;
-        else if (ticksWithFluidInTank != 0)
-            ticksWithFluidInTank=0;
+        else if (tank.isEmpty()) {
+            ticksWithFluidInTank = 0;
+        }
     }
 
     @Override
