@@ -1,8 +1,8 @@
 package BetterPipes;
 
+import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
 public class PipeConnection implements IFluidHandler {
     public boolean isEnabled;
@@ -18,14 +18,74 @@ public class PipeConnection implements IFluidHandler {
     public boolean outputsToInside;
     public boolean outputsToOutside;
 
+    public int ticksWithFluidInTank = 0;
+
     simpleBlockEntityTank tank;
     int lastFill;
     IFluidHandler neighborFluidHandler;
 
+    EntityPipe parent;
     public PipeConnection(EntityPipe parent) {
         tank = new simpleBlockEntityTank(500, parent);
+        this.parent =parent;
     }
 
+    boolean last_getsInputFromInside;
+    boolean last_getsInputFromOutside;
+    boolean last_outputsToInside;
+    boolean last_outputsToOutside;
+    FluidStack last_tankFluid = FluidStack.EMPTY;
+    public boolean needsSync() {
+        boolean needsUpdate = false;
+
+        // Check if the input from inside state has changed
+        if (last_getsInputFromInside != getsInputFromInside) {
+            needsUpdate = true;
+            last_getsInputFromInside = getsInputFromInside;
+        }
+
+        // Check if the input from outside state has changed
+        if (last_getsInputFromOutside != getsInputFromOutside) {
+            needsUpdate = true;
+            last_getsInputFromOutside = getsInputFromOutside;
+        }
+
+        // Check if the output to inside state has changed
+        if (last_outputsToInside != outputsToInside) {
+            needsUpdate = true;
+            last_outputsToInside = outputsToInside;
+        }
+
+        // Check if the output to outside state has changed
+        if (last_outputsToOutside != outputsToOutside) {
+            needsUpdate = true;
+            last_outputsToOutside = outputsToOutside;
+        }
+
+        // Check if the tank fluid stack has changed
+        if (!FluidStack.isSameFluidSameComponents(last_tankFluid, tank.getFluid()) || last_tankFluid.getAmount() != tank.getFluidAmount()) {
+            needsUpdate = true;
+            last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
+        }
+        return needsUpdate;
+    }
+
+public CompoundTag getUpdateTag(){
+    CompoundTag tag = new CompoundTag();
+    tag.putBoolean("getsInputFromInside",getsInputFromInside);
+    tag.putBoolean("getsInputFromOutside",getsInputFromOutside);
+    tag.putBoolean("outputsToInside",outputsToInside);
+    tag.putBoolean("outputsToOutside",outputsToOutside);
+    tank.writeToNBT(parent.getLevel().registryAccess(),tag);
+    return tag;
+}
+    public void handleUpdateTag(CompoundTag tag){
+        getsInputFromInside = tag.getBoolean("getsInputFromInside");
+        getsInputFromOutside = tag.getBoolean("getsInputFromOutside");
+        outputsToInside = tag.getBoolean("outputsToInside");
+        outputsToOutside = tag.getBoolean("outputsToOutside");
+        tank.readFromNBT(parent.getLevel().registryAccess(),tag);
+    }
     void update() {
         if (lastInputFromOutside < 20)
             lastInputFromOutside++;
@@ -46,6 +106,11 @@ public class PipeConnection implements IFluidHandler {
             lastOutputToOutside++;
         else if (outputsToOutside)
             outputsToOutside = false;
+
+        if(!tank.isEmpty() && ticksWithFluidInTank < 60)
+            ticksWithFluidInTank++;
+        else if (ticksWithFluidInTank != 0)
+            ticksWithFluidInTank=0;
     }
 
     @Override
