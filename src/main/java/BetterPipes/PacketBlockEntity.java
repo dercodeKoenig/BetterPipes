@@ -21,7 +21,7 @@ public class PacketBlockEntity implements CustomPacketPayload {
 
 
     public static final Type<PacketBlockEntity> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath("arlib", "my_data"));
+            new Type<>(ResourceLocation.fromNamespaceAndPath("betterpipes", "packetblockentity"));
 
 
     public PacketBlockEntity(String dim, int x, int y, int z, CompoundTag tag) {
