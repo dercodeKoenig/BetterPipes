@@ -135,26 +135,36 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
                     if (!conn.getsInputFromOutside) {
                         if (conn.neighborFluidHandler != null) {
-                            double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
-                            int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
-                            if (toTransfer > CONNECTION_MAX_OUTPUT_RATE)
-                                toTransfer = CONNECTION_MAX_OUTPUT_RATE + 1;
-                            if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
-                                toTransfer = 1;
+                            if (!conn.isExtraction) {
+                                double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
+                                if (toTransfer > CONNECTION_MAX_OUTPUT_RATE)
+                                    toTransfer = CONNECTION_MAX_OUTPUT_RATE + 1;
+                                if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
+                                    toTransfer = 1;
 
-                            FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
-                            int filled = conn.neighborFluidHandler.fill(drained, IFluidHandler.FluidAction.SIMULATE);
-                            toTransfer = Math.min(filled, toTransfer);
-                            //drain to outside tank
-                            if (conn.neighborFluidHandler instanceof PipeConnection pipeconn)
-                                pipeconn.fillFromOtherPipe(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-                            else
-                                conn.neighborFluidHandler.fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
+                                int filled = conn.neighborFluidHandler.fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                                toTransfer = Math.min(filled, toTransfer);
+                                //drain to outside tank
+                                if (conn.neighborFluidHandler instanceof PipeConnection pipeconn)
+                                    pipeconn.fillFromOtherPipe(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                else
+                                    conn.neighborFluidHandler.fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                            }
                         }
                     }
                 }
+                    if(isExtractionActive && conn.isExtraction){
+                        FluidStack drained = conn.neighborFluidHandler.drain(CONNECTION_MAX_OUTPUT_RATE, IFluidHandler.FluidAction.SIMULATE);
+                        int filled = conn.fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                        int toTransfer = Math.min(filled, drained.getAmount());
+                        drained = conn.neighborFluidHandler.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE);
+                        conn.fill(drained, IFluidHandler.FluidAction.EXECUTE);
+                    }
+
                 if (lastFill > 0) {
-                    if (!conn.outputsToInside) {
+                    if (!conn.outputsToInside &&!conn.isExtraction) {
                         double transferRateMultiplier = (double) lastFill / REQUIRED_FILL_FOR_MAX_OUTPUT;
                         int toTransfer = (int) (MAX_OUTPUT_RATE * transferRateMultiplier);
                         if (toTransfer > MAX_OUTPUT_RATE)
@@ -206,41 +216,59 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
         }
     }
-    void toggleExtractionActive() {
-        isExtractionActive = !isExtractionActive;
-
-        CompoundTag updateTag = new CompoundTag();
-        updateTag.putBoolean("isExtractionActive",isExtractionActive);
-        updateTag.putLong("time", System.currentTimeMillis());
-        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
-
-        setChanged();
-    }
-    void toggleExtractionMode() {
-
-        isExtractionMode = true;
-        for (Direction i : Direction.values()) {
-            if (connections.get(i).isEnabled && connections.get(i).isExtraction) isExtractionMode = false;
-        }
-        if (isExtractionMode) {
+    public void setExtractionMode(boolean mode) {
+        if(isExtractionMode!=mode)
             isExtractionActive = false;
-        }
+
+        isExtractionMode = mode;
+
         for (Direction i : Direction.values()) {
             if (!isExtractionMode || (connections.get(i).isEnabled && !(connections.get(i).neighborFluidHandler instanceof PipeConnection)))
                 connections.get(i).isExtraction = isExtractionMode;
         }
 
         CompoundTag updateTag = new CompoundTag();
-        for (Direction direction : Direction.allShuffled(level.random)) {
+        for (Direction direction : Direction.values()) {
             PipeConnection conn = connections.get(direction);
             updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
         }
         updateTag.putLong("time", System.currentTimeMillis());
         updateTag.putBoolean("isExtractionMode", isExtractionMode);
-        updateTag.putBoolean("isExtractionActive",isExtractionActive);
+        updateTag.putBoolean("isExtractionActive", isExtractionActive);
         PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
 
         setChanged();
+    }
+    public  void setExtractionActive(boolean mode){
+        if(isExtractionActive != mode) {
+            isExtractionActive = mode;
+            CompoundTag updateTag = new CompoundTag();
+            updateTag.putBoolean("isExtractionActive", isExtractionActive);
+            updateTag.putLong("time", System.currentTimeMillis());
+            PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
+            setChanged();
+        }
+    }
+    public void toggleExtractionActive() {
+        setExtractionActive(!isExtractionActive);
+    }
+    public void toggleExtractionMode() {
+
+        boolean hasAnyConnectionsInExtractionMode = false;
+        for (Direction i : Direction.values()) {
+            if (connections.get(i).isEnabled && connections.get(i).isExtraction) hasAnyConnectionsInExtractionMode = true;
+        }
+        if(hasAnyConnectionsInExtractionMode){
+            setExtractionMode(false);
+        }else{
+            boolean hasAnyValidConnections = false;
+            for (Direction i : Direction.values()) {
+                if (connections.get(i).isEnabled && !(connections.get(i).neighborFluidHandler instanceof PipeConnection)) hasAnyValidConnections = true;
+            }
+            if(hasAnyValidConnections){
+                setExtractionMode(!isExtractionActive);
+            }
+        }
     }
 
     @Override

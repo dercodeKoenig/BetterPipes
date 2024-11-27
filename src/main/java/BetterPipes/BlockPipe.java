@@ -27,6 +27,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
 import static BetterPipes.Registry.ENTITY_PIPE;
+import static BetterPipes.Registry.ITEMS;
 
 public class BlockPipe extends Block implements EntityBlock {
 
@@ -41,7 +42,7 @@ public class BlockPipe extends Block implements EntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if(!level.isClientSide) {
+        if(!level.isClientSide && player.getMainHandItem().isEmpty()) {
             BlockEntity tile = level.getBlockEntity(pos);
             if (tile instanceof EntityPipe pipe) {
                 if (player.isShiftKeyDown()) {
@@ -74,20 +75,32 @@ public class BlockPipe extends Block implements EntityBlock {
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         IFluidHandler fluidHandler = null;
-        BlockEntity e = level.getBlockEntity(neighborPos);
-        if (e != null) {
-            fluidHandler = e.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, neighborState, e, direction.getOpposite());
-        }
-        BlockEntity tile = level.getBlockEntity(pos);
-        if (tile instanceof EntityPipe pipe) {
-            pipe.connections.get(direction).neighborFluidHandler = fluidHandler;
-            if (fluidHandler != null) {
-                pipe.connections.get(direction).isEnabled = true;
-            } else {
-                pipe.connections.get(direction).isEnabled = false;
-                pipe.connections.get(direction).tank.setFluid(FluidStack.EMPTY);
+
+            BlockEntity e = level.getBlockEntity(neighborPos);
+            if (e != null) {
+                fluidHandler = e.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, neighborState, e, direction.getOpposite());
             }
-        }
+            BlockEntity tile = level.getBlockEntity(pos);
+            if (tile instanceof EntityPipe pipe) {
+                pipe.connections.get(direction).neighborFluidHandler = fluidHandler;
+                if (fluidHandler != null) {
+                    pipe.connections.get(direction).isEnabled = true;
+                } else {
+                    pipe.connections.get(direction).isEnabled = false;
+                    if (!level.isClientSide()) {
+                        pipe.connections.get(direction).tank.setFluid(FluidStack.EMPTY);
+                        pipe.connections.get(direction).isExtraction = false;
+                        boolean hasAnyExtraction = false;
+                        for (Direction i : Direction.values()) {
+                            if (pipe.connections.get(i).isExtraction)
+                                hasAnyExtraction = true;
+                        }
+                        if (!hasAnyExtraction) {
+                            pipe.setExtractionMode(false);
+                        }
+                    }
+                }
+            }
         return state;
     }
     //@Override
