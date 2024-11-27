@@ -1,18 +1,12 @@
 package BetterPipes;
 
-import ARLib.blockentities.EntityFluidInputBlock;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 import static BetterPipes.BetterPipes.MODID;
@@ -28,13 +22,12 @@ public class Registry {
 
     public static final DeferredHolder<Block, Block> PIPE = BLOCKS.register(
             "pipe",
-            () -> new BlockPipe(BlockBehaviour.Properties.of().noOcclusion().instabreak())
+            () -> new BlockPipe(BlockBehaviour.Properties.of().noOcclusion().strength(0.1f))
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EntityPipe>> ENTITY_PIPE = BLOCK_ENTITIES.register(
             "entity_pipe",
             () -> BlockEntityType.Builder.of(EntityPipe::new, PIPE.get()).build(null)
     );
-
 
 
 
@@ -46,17 +39,4 @@ public class Registry {
         BLOCK_ENTITIES.register(modBus);
     }
 
-    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(ENTITY_PIPE.get(), RenderPipe::new);
-    }
-
-    public static void addCreative(BuildCreativeModeTabContentsEvent e){
-        if (e.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS){
-            e.accept(PIPE.get());
-        }
-    }
-
-    public static void registerCapabilities(RegisterCapabilitiesEvent e) {
-        e.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ENTITY_PIPE.get(), (tile, side) -> tile.getFluidHandler(side));
-    }
 }

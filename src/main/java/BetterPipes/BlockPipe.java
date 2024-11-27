@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -26,8 +27,10 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
-import static BetterPipes.Registry.ENTITY_PIPE;
-import static BetterPipes.Registry.ITEMS;
+import java.util.ArrayList;
+import java.util.List;
+
+import static BetterPipes.Registry.*;
 
 public class BlockPipe extends Block implements EntityBlock {
 
@@ -39,7 +42,12 @@ public class BlockPipe extends Block implements EntityBlock {
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return ENTITY_PIPE.get().create(pos, state);
     }
-
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        List<ItemStack> drops = new ArrayList<>();
+        drops.add(new ItemStack(PIPE.get(),1));
+        return drops;
+    }
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if(!level.isClientSide && player.getMainHandItem().isEmpty()) {

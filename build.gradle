@@ -103,11 +103,6 @@ dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
 
-    implementation files('libs/arlib-1.0.0-deobf.jar')
-
-
-
-
         /* other minecraft dependencies are here */
 
     //implementation "curse.maven:jei-238222:5846880"

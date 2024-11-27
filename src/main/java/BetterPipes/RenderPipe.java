@@ -1,9 +1,6 @@
 package BetterPipes;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -19,14 +16,20 @@ import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtension
 
 import java.util.function.BiFunction;
 
-import static ARLib.obj.GroupObject.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL;
 import static BetterPipes.BetterPipes.MODID;
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/block/fluid_pipe1.png");
 
-
+    public static VertexFormat POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL = VertexFormat.builder()
+            .add("Position", VertexFormatElement.POSITION)
+            .add("Color", VertexFormatElement.COLOR)
+            .add("UV0", VertexFormatElement.UV0)
+            .add("UV1", VertexFormatElement.UV1)
+            .add("UV2", VertexFormatElement.UV2)
+            .add("Normal", VertexFormatElement.NORMAL)
+            .build();
     public RenderPipe(BlockEntityRendererProvider.Context c){
         super();
     }
@@ -945,8 +948,8 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 float wMax = 0.25f - e;
 
                 float actualW = wMin + (wMax - wMin) * relativeFill;
-                float y0 = -0.25f + e;
-                float y1 = 0.25f + e;
+                float y0 = -0.25f;
+                float y1 = 0.25f;
                 float x0 = -actualW;
                 float x1 = actualW;
                 float z0 = -actualW;
@@ -1100,7 +1103,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
                     float actualW = wMin + (wMax - wMin) * relativeFill;
                      y0 = -0.25f + e;
-                     y1 = 0.25f + e;
+                     y1 = 0.25f;
                      x0 = -actualW;
                      x1 = actualW;
                      z0 = -actualW;
@@ -1152,8 +1155,8 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 float wMax = 0.25f - e;
 
                 float actualW = wMin + (wMax - wMin) * relativeFill;
-                float y0 = 0.25f + e;
-                float y1 = 0.5f + e;
+                float y0 = 0.25f-e;
+                float y1 = 0.5f;
                 float x0 = -actualW;
                 float x1 = actualW;
                 float z0 = -actualW;
@@ -1209,8 +1212,8 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 float wMax = 0.25f - e;
 
                 float actualW = wMin + (wMax - wMin) * relativeFill;
-                float y0 = -0.5f + e;
-                float y1 = -0.25f + e;
+                float y0 = -0.5f;
+                float y1 = -0.25f+e;
                 float x0 = -actualW;
                 float x1 = actualW;
                 float z0 = -actualW;
@@ -1263,7 +1266,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
 
                 float x0 = -0.5f;
-                float x1 = -0.25f;
+                float x1 = -0.25f+e;
                 float z0 = -0.25f + e;
                 float z1 = 0.25f - e;
                 float y0 = -0.25f + e;
@@ -1300,7 +1303,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
                 TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
 
-                float x0 = 0.25f;
+                float x0 = 0.25f-e;
                 float x1 = 0.5f;
                 float z0 = -0.25f + e;
                 float z1 = 0.25f - e;
@@ -1340,7 +1343,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
                 float x0 = -0.25f+e;
                 float x1 = 0.25f-e;
-                float z0 = 0.25f;
+                float z0 = 0.25f-e;
                 float z1 = 0.5f;
                 float y0 = -0.25f + e;
                 float y1 = -0.25f - e + 0.5f * relativeFill;
@@ -1379,7 +1382,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 float x0 = -0.25f+e;
                 float x1 = 0.25f-e;
                 float z0 = -0.5f;
-                float z1 = -0.25f;
+                float z1 = -0.25f+e;
                 float y0 = -0.25f + e;
                 float y1 = -0.25f - e + 0.5f * relativeFill;
                 float y0BottomOffsetNorth = y0;

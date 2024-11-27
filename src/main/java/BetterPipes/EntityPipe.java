@@ -1,7 +1,5 @@
 package BetterPipes;
 
-import ARLib.network.INetworkTagReceiver;
-import ARLib.network.PacketBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,7 +34,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     public static int CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT = 100;
     public static int CONNECTION_CAPACITY = 200;
 
-    public static int STATE_UPDATE_TICKS = 60;
+    public static int STATE_UPDATE_TICKS = 40;
     public static int FORCE_OUTPUT_AFTER_TICKS = 20;
 
     public Map<Direction, PipeConnection> connections = new HashMap<>();
@@ -120,7 +118,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                         double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
                         int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
                         if (toTransfer > CONNECTION_MAX_OUTPUT_RATE && conn.lastInputWasFromAnotherPipe)
-                            toTransfer = CONNECTION_MAX_OUTPUT_RATE + 1;
+                            toTransfer = CONNECTION_MAX_OUTPUT_RATE + (int)(transferRateMultiplier*CONNECTION_MAX_OUTPUT_RATE/10f);
                         if (toTransfer > CONNECTION_MAX_OUTPUT_RATE && !conn.lastInputWasFromAnotherPipe)
                             toTransfer = CONNECTION_MAX_OUTPUT_RATE;
                         if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
@@ -139,7 +137,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                                 double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
                                 int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
                                 if (toTransfer > CONNECTION_MAX_OUTPUT_RATE)
-                                    toTransfer = CONNECTION_MAX_OUTPUT_RATE + 1;
+                                    toTransfer = CONNECTION_MAX_OUTPUT_RATE + (int)(transferRateMultiplier*CONNECTION_MAX_OUTPUT_RATE/10f);
                                 if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
                                     toTransfer = 1;
 
@@ -168,7 +166,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                         double transferRateMultiplier = (double) lastFill / REQUIRED_FILL_FOR_MAX_OUTPUT;
                         int toTransfer = (int) (MAX_OUTPUT_RATE * transferRateMultiplier);
                         if (toTransfer > MAX_OUTPUT_RATE)
-                            toTransfer = MAX_OUTPUT_RATE + 1;
+                            toTransfer = MAX_OUTPUT_RATE + (int)(transferRateMultiplier*CONNECTION_MAX_OUTPUT_RATE/10f);
                         if (toTransfer == 0 && ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
                             toTransfer = 1;
 
