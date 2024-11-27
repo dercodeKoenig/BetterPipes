@@ -45,6 +45,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     int lastFill;
     int ticksWithFluidInTank = 0;
     boolean isExtractionActive = false;
+    boolean isExtractionMode = false;
 
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
@@ -216,16 +217,17 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         setChanged();
     }
     void toggleExtractionMode() {
-        boolean setExtract = true;
+
+        isExtractionMode = true;
         for (Direction i : Direction.values()) {
-            if (connections.get(i).isEnabled && connections.get(i).isExtraction) setExtract = false;
+            if (connections.get(i).isEnabled && connections.get(i).isExtraction) isExtractionMode = false;
         }
-        if (setExtract) {
+        if (isExtractionMode) {
             isExtractionActive = false;
         }
         for (Direction i : Direction.values()) {
-            if (!setExtract || connections.get(i).isEnabled)
-                connections.get(i).isExtraction = setExtract;
+            if (!isExtractionMode || (connections.get(i).isEnabled && !(connections.get(i).neighborFluidHandler instanceof PipeConnection)))
+                connections.get(i).isExtraction = isExtractionMode;
         }
 
         CompoundTag updateTag = new CompoundTag();
@@ -234,6 +236,8 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
         }
         updateTag.putLong("time", System.currentTimeMillis());
+        updateTag.putBoolean("isExtractionMode", isExtractionMode);
+        updateTag.putBoolean("isExtractionActive",isExtractionActive);
         PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
 
         setChanged();
@@ -245,7 +249,10 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             UUID from = compoundTag.getUUID("client_onload");
             ServerPlayer playerFrom = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(from);
             CompoundTag updateTag = new CompoundTag();
+
             updateTag.putBoolean("isExtractionActive",isExtractionActive);
+            updateTag.putBoolean("isExtractionMode", isExtractionMode);
+
             CompoundTag tankTag = new CompoundTag();
             mainTank.writeToNBT(level.registryAccess(), tankTag);
             updateTag.put("mainTank", tankTag);
@@ -272,6 +279,9 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                 if (compoundTag.contains("isExtractionActive")) {
                     isExtractionActive = compoundTag.getBoolean("isExtractionActive");
                 }
+                if (compoundTag.contains("isExtractionMode")) {
+                    isExtractionMode = compoundTag.getBoolean("isExtractionMode");
+                }
                 if (compoundTag.contains("mainTank")) {
                     mainTank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
                 }
@@ -289,6 +299,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         super.loadAdditional(tag, registries);
 
         isExtractionActive = tag.getBoolean("isExtractionActive");
+        isExtractionMode = tag.getBoolean("isExtractionMode");
 
         mainTank.readFromNBT(registries, tag.getCompound("mainTank"));
 
@@ -304,6 +315,8 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         super.saveAdditional(tag, registries);
 
         tag.putBoolean("isExtractionActive", isExtractionActive);
+        tag.putBoolean("isExtractionMode", isExtractionMode);
+
 
         CompoundTag tankTag = new CompoundTag();
         mainTank.writeToNBT(registries, tankTag);

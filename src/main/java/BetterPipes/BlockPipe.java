@@ -41,14 +41,16 @@ public class BlockPipe extends Block implements EntityBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        BlockEntity tile = level.getBlockEntity(pos);
-        if (tile instanceof EntityPipe pipe) {
-            if (player.isShiftKeyDown()) {
-                pipe.toggleExtractionMode();
-            } else {
-                pipe.toggleExtractionActive();
+        if(!level.isClientSide) {
+            BlockEntity tile = level.getBlockEntity(pos);
+            if (tile instanceof EntityPipe pipe) {
+                if (player.isShiftKeyDown()) {
+                    pipe.toggleExtractionMode();
+                } else {
+                    pipe.toggleExtractionActive();
+                }
+                return InteractionResult.PASS;
             }
-            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
