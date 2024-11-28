@@ -1,6 +1,7 @@
 package BetterPipes;
 
-import it.unimi.dsi.fastutil.doubles.DoubleList;
+import BetterPipes.networkPackets.INetworkTagReceiver;
+import BetterPipes.networkPackets.PacketBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -16,12 +17,9 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -46,15 +44,17 @@ public class BlockPipe extends Block implements EntityBlock {
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return ENTITY_PIPE.get().create(pos, state);
     }
+
     @Override
     protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         List<ItemStack> drops = new ArrayList<>();
-        drops.add(new ItemStack(this,1));
+        drops.add(new ItemStack(this, 1));
         return drops;
     }
+
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if(!level.isClientSide && player.getMainHandItem().isEmpty()) {
+        if (!level.isClientSide && player.getMainHandItem().isEmpty()) {
             BlockEntity tile = level.getBlockEntity(pos);
             if (tile instanceof EntityPipe pipe) {
                 if (player.isShiftKeyDown()) {
@@ -88,7 +88,7 @@ public class BlockPipe extends Block implements EntityBlock {
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (!level.isClientSide()) {
             BlockEntity tile = level.getBlockEntity(pos);
-if(tile==null)return state;
+            if (tile == null) return state;
             IFluidHandler fluidHandler = tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, direction.getOpposite());
 
             if (tile instanceof EntityPipe pipe) {
@@ -110,8 +110,8 @@ if(tile==null)return state;
                 }
                 CompoundTag updateTag = new CompoundTag();
                 updateTag.putLong("time", System.currentTimeMillis());
-                updateTag.put(direction.getName(),pipe.connections.get(direction).getUpdateTag(tile.getLevel().registryAccess()));
-                PacketDistributor.sendToPlayersTrackingChunk((ServerLevel)tile.getLevel(),new ChunkPos(tile.getBlockPos()), PacketBlockEntity.getBlockEntityPacket(tile, updateTag));
+                updateTag.put(direction.getName(), pipe.connections.get(direction).getUpdateTag(tile.getLevel().registryAccess()));
+                PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) tile.getLevel(), new ChunkPos(tile.getBlockPos()), PacketBlockEntity.getBlockEntityPacket(tile, updateTag));
             }
         }
         return state;
@@ -120,5 +120,4 @@ if(tile==null)return state;
     //public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
     //return EntityPipe::tick;
     //}
-
 }

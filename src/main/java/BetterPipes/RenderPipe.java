@@ -13,7 +13,6 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 import static BetterPipes.BetterPipes.MODID;
 import static net.minecraft.client.renderer.RenderStateShard.*;
@@ -1146,13 +1145,13 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     }
 
     boolean shouldRenderCentered(Fluid f) {
-        return true;
-        //return f.getFluidType().isLighterThanAir();
+        //return true;
+        return f.getFluidType().isLighterThanAir();
     }
 
     void renderFluids(EntityPipe tile, MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay) {
         // render center
-        if (!tile.mainTank.isEmpty()) {
+        if (!tile.tank.isEmpty()) {
 
             float u0f = tile.renderData.spriteFLowing.getU0();
             float u1f = tile.renderData.spriteFLowing.getU1();
@@ -1175,7 +1174,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             ) {
                 // is vertical render because no horizontal connections are found
 
-                float relativeFill = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                float relativeFill = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
 
 
                 float actualW = wMin + (wMax - wMin) * relativeFill;
@@ -1254,14 +1253,14 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                             color, source.getBuffer(tile.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                 }
             } else {
-                if (!shouldRenderCentered(tile.mainTank.getFluid().getFluid())) {
+                if (!shouldRenderCentered(tile.tank.getFluid().getFluid())) {
                     // is horizontal render
                     float x0 = -0.25f + e;
                     float x1 = 0.25f - e;
                     float z0 = -0.25f + e;
                     float z1 = 0.25f - e;
                     float y0 = -0.25f + e;
-                    float y1 = y0 - 2 * e + 0.5f * (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                    float y1 = y0 - 2 * e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
                     float y0BottomOffsetNorth = y0;
                     float y0BottomOffsetSouth = y0;
                     float y0BottomOffsetWest = y0;
@@ -1347,7 +1346,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     }
 
                     if (tile.connections.get(Direction.UP).isEnabled) {
-                        float relativeFill = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                        float relativeFill = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
 
                         float actualW = wMin + (wMax - wMin) * relativeFill;
                         y0 = -0.25f + e;
@@ -1396,7 +1395,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     int numOutputs = 0;
                     int numInputs = 0;
 
-                    float relativeFill = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                    float relativeFill = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
 
                     float actualW = wMin + (wMax - wMin) * relativeFill;
                     for (Direction d : Direction.values()) {
@@ -1674,7 +1673,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float y0BottomOffsetNorth = y0;
                     float y0BottomOffsetSouth = y0;
                     float y0BottomOffsetWest = y0;
-                    float y0BottomOffsetEast = y0 - 2 * e + 0.5f * (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                    float y0BottomOffsetEast = y0 - 2 * e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
                     if (conn.neighborFluidHandler instanceof PipeConnection p)
                         y0BottomOffsetWest = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
@@ -1755,7 +1754,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float y1 = -0.25f - e + 0.5f * relativeFill;
                     float y0BottomOffsetNorth = y0;
                     float y0BottomOffsetSouth = y0;
-                    float y0BottomOffsetWest = y0 - 2 * e + 0.5f * (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                    float y0BottomOffsetWest = y0 - 2 * e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
                     ;
                     float y0BottomOffsetEast = y0;
                     if (conn.neighborFluidHandler instanceof PipeConnection p)
@@ -1836,7 +1835,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float z1 = 0.5f;
                     float y0 = -0.25f + e;
                     float y1 = -0.25f - e + 0.5f * relativeFill;
-                    float y0BottomOffsetNorth = y0 - 2 * e + 0.5f * (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                    float y0BottomOffsetNorth = y0 - 2 * e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
                     float y0BottomOffsetSouth = y0;
                     float y0BottomOffsetWest = y0;
                     float y0BottomOffsetEast = y0;
@@ -1920,7 +1919,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float y0 = -0.25f + e;
                     float y1 = -0.25f - e + 0.5f * relativeFill;
                     float y0BottomOffsetNorth = y0;
-                    float y0BottomOffsetSouth = y0 - 2 * e + 0.5f * (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                    float y0BottomOffsetSouth = y0 - 2 * e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
                     float y0BottomOffsetWest = y0;
                     ;
                     float y0BottomOffsetEast = y0;

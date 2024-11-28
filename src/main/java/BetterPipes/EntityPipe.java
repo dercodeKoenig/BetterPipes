@@ -1,5 +1,9 @@
 package BetterPipes;
 
+import BetterPipes.networkPackets.INetworkTagReceiver;
+import BetterPipes.networkPackets.PacketBlockEntity;
+import BetterPipes.networkPackets.PacketFluidAmountUpdate;
+import BetterPipes.networkPackets.PacketFluidUpdate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,11 +14,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -42,7 +46,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     public static int FORCE_OUTPUT_AFTER_TICKS = 20;
 
     public Map<Direction, PipeConnection> connections = new HashMap<>();
-    FluidTank mainTank = new simpleBlockEntityTank(MAIN_CAPACITY, this);
+    FluidTank tank = new simpleBlockEntityTank(MAIN_CAPACITY, this);
     FluidStack last_tankFluid = FluidStack.EMPTY;
     int lastFill;
     int ticksWithFluidInTank = 0;
@@ -53,12 +57,9 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
         super(ENTITY_PIPE.get(), pos, blockState);
-        connections.put(Direction.UP, new PipeConnection(this));
-        connections.put(Direction.DOWN, new PipeConnection(this));
-        connections.put(Direction.EAST, new PipeConnection(this));
-        connections.put(Direction.WEST, new PipeConnection(this));
-        connections.put(Direction.SOUTH, new PipeConnection(this));
-        connections.put(Direction.NORTH, new PipeConnection(this));
+        for(Direction i : Direction.values()) {
+            connections.put(i, new PipeConnection(this, i));
+        }
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             renderData = makeFluidRenderType(Fluids.WATER, getBlockPos().toString());
@@ -112,7 +113,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     public void tick_start() {
-        lastFill = mainTank.getFluidAmount();
+        lastFill = tank.getFluidAmount();
         for (Direction direction : Direction.values()) {
             connections.get(direction).lastFill = connections.get(direction).tank.getFluidAmount();
         }
@@ -134,10 +135,10 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                             toTransfer = 1;
 
                         FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
-                        int filled = mainTank.fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                        int filled = tank.fill(drained, IFluidHandler.FluidAction.SIMULATE);
                         toTransfer = Math.min(filled, toTransfer);
                         //drain into main tank
-                        mainTank.fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE, true), IFluidHandler.FluidAction.EXECUTE);
+                        tank.fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE, true), IFluidHandler.FluidAction.EXECUTE);
                     }
 
                     if (!conn.getsInputFromOutside) {
@@ -179,11 +180,11 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                         if (toTransfer == 0 && ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
                             toTransfer = 1;
 
-                        FluidStack drained = mainTank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
+                        FluidStack drained = tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
                         int filled = conn.tank.fill(drained, IFluidHandler.FluidAction.SIMULATE);
                         toTransfer = Math.min(filled, toTransfer);
                         //drain main tank into connection
-                        conn.fill(mainTank.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE, true);
+                        conn.fill(tank.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE, true);
                     }
                 }
             }
@@ -191,22 +192,26 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     public void tick_complete() {
-        if (!mainTank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS + 1)
+        if (!tank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS + 1)
             ticksWithFluidInTank++;
-        else if (mainTank.isEmpty()) {
+        else if (tank.isEmpty()) {
             ticksWithFluidInTank = 0;
         }
-        //System.out.println(mainTank.getFluidAmount());
+        // Check if the tank fluid stack has changed
+        // this has it's own packet now for efficiency
+        // to not always send the large nbt
+        if (!FluidStack.isSameFluidSameComponents(last_tankFluid, tank.getFluid())) {
+            if(!tank.getFluid().isEmpty())
+                PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getLevel(), new ChunkPos(getBlockPos()), PacketFluidUpdate.getPacketFluidUpdate(getBlockPos(),null,tank.getFluid().getFluid()));
+        }
+        if(last_tankFluid.getAmount() != tank.getFluidAmount()){
+            PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getLevel(), new ChunkPos(getBlockPos()), PacketFluidAmountUpdate.getPacketFluidUpdate(getBlockPos(),null,tank.getFluidAmount()));
+        }
+        last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
+
+
         CompoundTag updateTag = new CompoundTag();
         boolean needsSendUpdate = false;
-        // Check if the tank fluid stack has changed
-        if (!FluidStack.isSameFluidSameComponents(last_tankFluid, mainTank.getFluid()) || last_tankFluid.getAmount() != mainTank.getFluidAmount()) {
-            needsSendUpdate = true;
-            last_tankFluid = mainTank.getFluid().copy();
-            CompoundTag tag = new CompoundTag();
-            mainTank.writeToNBT(level.registryAccess(), tag);
-            updateTag.put("mainTank", tag);
-        }
         for (Direction direction : Direction.allShuffled(level.random)) {
             PipeConnection conn = connections.get(direction);
             if (conn.isEnabled) {
@@ -288,18 +293,21 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             updateTag.putBoolean("isExtractionActive",isExtractionActive);
             updateTag.putBoolean("isExtractionMode", isExtractionMode);
 
-            CompoundTag tankTag = new CompoundTag();
-            mainTank.writeToNBT(level.registryAccess(), tankTag);
-            updateTag.put("mainTank", tankTag);
-            for (Direction direction : Direction.allShuffled(level.random)) {
+            for (Direction direction : Direction.values()) {
                 PipeConnection conn = connections.get(direction);
                 if (conn.isEnabled) {
                     CompoundTag tag = conn.getUpdateTag(level.registryAccess());
                     updateTag.put(direction.getName(), tag);
+                    conn.sendInitialTankUpdates(playerFrom);
                 }
             }
             updateTag.putLong("time", System.currentTimeMillis());
             PacketDistributor.sendToPlayer(playerFrom, PacketBlockEntity.getBlockEntityPacket(this, updateTag));
+
+            PacketDistributor.sendToPlayer(playerFrom, PacketFluidAmountUpdate.getPacketFluidUpdate(getBlockPos(),null,tank.getFluidAmount()));
+            if(!tank.getFluid().isEmpty())
+                PacketDistributor.sendToPlayer(playerFrom, PacketFluidUpdate.getPacketFluidUpdate(getBlockPos(),null,tank.getFluid().getFluid()));
+
         }
     }
 
@@ -318,8 +326,8 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                     isExtractionMode = compoundTag.getBoolean("isExtractionMode");
                 }
                 if (compoundTag.contains("mainTank")) {
-                    mainTank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
-                    renderData = makeFluidRenderType(mainTank.getFluid().getFluid(), getBlockPos().toString());
+                    tank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
+                    renderData = makeFluidRenderType(tank.getFluid().getFluid(), getBlockPos().toString());
                 }
                 for (Direction direction : Direction.values()) {
                     if (compoundTag.contains(direction.getName())) {
@@ -330,6 +338,27 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         }
     }
 
+
+    long lastFluidInTankUpdate;
+    public void setFluidInTank(Fluid f, long time){
+        if(time > lastFluidInTankUpdate) {
+            lastFluidInTankUpdate = time;
+            tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
+            renderData = makeFluidRenderType(tank.getFluid().getFluid(), getBlockPos().toString());
+        }
+    }
+
+    long lastFluidAmountUpdate;
+    public void setFluidAmountInTank(int amount, long time) {
+        if (time > lastFluidAmountUpdate) {
+            lastFluidAmountUpdate = time;
+            Fluid myFluid = tank.getFluid().getFluid();
+            if (myFluid == Fluids.EMPTY && amount > 0) myFluid = Fluids.WATER;
+            if(amount <= 0) myFluid = Fluids.EMPTY;
+            tank.setFluid(new FluidStack(myFluid, amount));
+        }
+    }
+
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
@@ -337,7 +366,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         isExtractionActive = tag.getBoolean("isExtractionActive");
         isExtractionMode = tag.getBoolean("isExtractionMode");
 
-        mainTank.readFromNBT(registries, tag.getCompound("mainTank"));
+        tank.readFromNBT(registries, tag.getCompound("mainTank"));
 
         for (Direction direction : Direction.values()) {
             PipeConnection conn = connections.get(direction);
@@ -355,7 +384,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
 
         CompoundTag tankTag = new CompoundTag();
-        mainTank.writeToNBT(registries, tankTag);
+        tank.writeToNBT(registries, tankTag);
         tag.put("mainTank", tankTag);
 
         for (Direction direction : Direction.values()) {

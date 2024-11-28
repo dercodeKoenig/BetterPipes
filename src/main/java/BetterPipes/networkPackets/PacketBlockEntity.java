@@ -1,5 +1,6 @@
-package BetterPipes;
+package BetterPipes.networkPackets;
 
+import BetterPipes.DimensionUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;

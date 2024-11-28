@@ -1,5 +1,9 @@
 package BetterPipes;
 
+import BetterPipes.networkPackets.INetworkTagReceiver;
+import BetterPipes.networkPackets.PacketBlockEntity;
+import BetterPipes.networkPackets.PacketFluidAmountUpdate;
+import BetterPipes.networkPackets.PacketFluidUpdate;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -62,6 +66,9 @@ public class BetterPipes {
     public void registerNetworkStuff(RegisterPayloadHandlersEvent event) {
         final PayloadRegistrar registrar = event.registrar("1");
         PacketBlockEntity.register(registrar);
+        PacketFluidUpdate.register(registrar);
+        PacketFluidAmountUpdate.register(registrar);
+
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent e) {
