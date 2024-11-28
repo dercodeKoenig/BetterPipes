@@ -82,6 +82,7 @@ public class PipeConnection implements IFluidHandler {
         tag.putBoolean("outputsToInside", outputsToInside);
         tag.putBoolean("outputsToOutside", outputsToOutside);
         tag.putBoolean("isExtraction", isExtraction);
+        tag.putBoolean("isEnabled", isEnabled);
         tank.writeToNBT(registries, tag);
         return tag;
     }
@@ -92,6 +93,7 @@ public class PipeConnection implements IFluidHandler {
         outputsToInside = tag.getBoolean("outputsToInside");
         outputsToOutside = tag.getBoolean("outputsToOutside");
         isExtraction = tag.getBoolean("isExtraction");
+        isEnabled = tag.getBoolean("isEnabled");
         tank.readFromNBT(registries, tag);
     }
 

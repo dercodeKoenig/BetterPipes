@@ -3,11 +3,14 @@ package BetterPipes;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -25,6 +28,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -82,33 +86,34 @@ public class BlockPipe extends Block implements EntityBlock {
 
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        IFluidHandler fluidHandler = null;
-
-            BlockEntity e = level.getBlockEntity(neighborPos);
-            if (e != null) {
-                fluidHandler = e.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, neighborState, e, direction.getOpposite());
-            }
+        if (!level.isClientSide()) {
             BlockEntity tile = level.getBlockEntity(pos);
+
+            IFluidHandler fluidHandler = tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, direction.getOpposite());
+
             if (tile instanceof EntityPipe pipe) {
                 pipe.connections.get(direction).neighborFluidHandler = fluidHandler;
                 if (fluidHandler != null) {
                     pipe.connections.get(direction).isEnabled = true;
                 } else {
                     pipe.connections.get(direction).isEnabled = false;
-                    if (!level.isClientSide()) {
-                        pipe.connections.get(direction).tank.setFluid(FluidStack.EMPTY);
-                        pipe.connections.get(direction).isExtraction = false;
-                        boolean hasAnyExtraction = false;
-                        for (Direction i : Direction.values()) {
-                            if (pipe.connections.get(i).isExtraction)
-                                hasAnyExtraction = true;
-                        }
-                        if (!hasAnyExtraction) {
-                            pipe.setExtractionMode(false);
-                        }
+                    pipe.connections.get(direction).tank.setFluid(FluidStack.EMPTY);
+                    pipe.connections.get(direction).isExtraction = false;
+                    boolean hasAnyExtraction = false;
+                    for (Direction i : Direction.values()) {
+                        if (pipe.connections.get(i).isExtraction)
+                            hasAnyExtraction = true;
+                    }
+                    if (!hasAnyExtraction) {
+                        pipe.setExtractionMode(false);
                     }
                 }
+                CompoundTag updateTag = new CompoundTag();
+                updateTag.putLong("time", System.currentTimeMillis());
+                updateTag.put(direction.getName(),pipe.connections.get(direction).getUpdateTag(tile.getLevel().registryAccess()));
+                PacketDistributor.sendToPlayersTrackingChunk((ServerLevel)tile.getLevel(),new ChunkPos(tile.getBlockPos()), PacketBlockEntity.getBlockEntityPacket(tile, updateTag));
             }
+        }
         return state;
     }
     //@Override
