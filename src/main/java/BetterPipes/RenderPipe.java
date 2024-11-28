@@ -1817,10 +1817,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float v0f = conn.renderData.spriteFLowing.getV0();
             float v1f = conn.renderData.spriteFLowing.getV1();
 
-            float u0s = conn.renderData.spriteFLowing.getU0();
-            float u1s = conn.renderData.spriteFLowing.getU1();
-            float v0s = conn.renderData.spriteFLowing.getV0();
-            float v1s = conn.renderData.spriteFLowing.getV1();
+            float u0s = conn.renderData.spriteStill.getU0();
+            float u1s = conn.renderData.spriteStill.getU1();
+            float v0s = conn.renderData.spriteStill.getV0();
+            float v1s = conn.renderData.spriteStill.getV1();
 
             int color = conn.renderData.color;
 
@@ -1900,10 +1900,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float v0f = conn.renderData.spriteFLowing.getV0();
             float v1f = conn.renderData.spriteFLowing.getV1();
 
-            float u0s = conn.renderData.spriteFLowing.getU0();
-            float u1s = conn.renderData.spriteFLowing.getU1();
-            float v0s = conn.renderData.spriteFLowing.getV0();
-            float v1s = conn.renderData.spriteFLowing.getV1();
+            float u0s = conn.renderData.spriteStill.getU0();
+            float u1s = conn.renderData.spriteStill.getU1();
+            float v0s = conn.renderData.spriteStill.getV0();
+            float v1s = conn.renderData.spriteStill.getV1();
 
             int color = conn.renderData.color;
 
