@@ -1,12 +1,18 @@
 package BetterPipes;
 
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import static BetterPipes.EntityPipe.*;
+import static BetterPipes.RenderPipe.makeFluidRenderType;
 
 public class PipeConnection implements IFluidHandler {
     public boolean isEnabled;
@@ -30,8 +36,15 @@ public class PipeConnection implements IFluidHandler {
     int lastFill;
     IFluidHandler neighborFluidHandler;
 
+
+    fluidRenderData renderData;
+
+
     public PipeConnection(EntityPipe parent) {
         tank = new simpleBlockEntityTank(CONNECTION_CAPACITY, parent);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            renderData = makeFluidRenderType(Fluids.WATER);
+        }
     }
 
     boolean last_getsInputFromInside;
@@ -95,6 +108,9 @@ public class PipeConnection implements IFluidHandler {
         isExtraction = tag.getBoolean("isExtraction");
         isEnabled = tag.getBoolean("isEnabled");
         tank.readFromNBT(registries, tag);
+
+        renderData = makeFluidRenderType(tank.getFluid().getFluid());
+
     }
 
     void update() {

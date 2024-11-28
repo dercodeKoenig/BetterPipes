@@ -10,7 +10,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -22,6 +25,7 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import java.util.*;
 
 import static BetterPipes.Registry.ENTITY_PIPE;
+import static BetterPipes.RenderPipe.makeFluidRenderType;
 
 public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     private static final List<EntityPipe> ACTIVE_PIPES = new ArrayList<>();
@@ -44,6 +48,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     int ticksWithFluidInTank = 0;
     boolean isExtractionActive = false;
     boolean isExtractionMode = false;
+    fluidRenderData renderData;
 
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
@@ -54,6 +59,10 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         connections.put(Direction.WEST, new PipeConnection(this));
         connections.put(Direction.SOUTH, new PipeConnection(this));
         connections.put(Direction.NORTH, new PipeConnection(this));
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            renderData = makeFluidRenderType(Fluids.WATER);
+        }
     }
 
     public IFluidHandler getFluidHandler(Direction side) {
@@ -310,6 +319,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                 }
                 if (compoundTag.contains("mainTank")) {
                     mainTank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
+                    renderData = makeFluidRenderType(mainTank.getFluid().getFluid());
                 }
                 for (Direction direction : Direction.values()) {
                     if (compoundTag.contains(direction.getName())) {

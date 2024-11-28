@@ -11,13 +11,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import static BetterPipes.BetterPipes.MODID;
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
-ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/block/fluid_pipe1.png");
+    ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID, "textures/block/fluid_pipe1.png");
 
     public static VertexFormat POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL = VertexFormat.builder()
             .add("Position", VertexFormatElement.POSITION)
@@ -27,332 +29,24 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             .add("UV2", VertexFormatElement.UV2)
             .add("Normal", VertexFormatElement.NORMAL)
             .build();
-    public RenderPipe(BlockEntityRendererProvider.Context c){
-        super();
-    }
-    static float e = 0.002f;
-    void renderTopConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay){
-        if(tile.connections.get(Direction.UP).isEnabled){
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if(tile.connections.get(Direction.UP).isExtraction){
-                v0 = 0f;
-                v1 = 0.25f;
-            }
 
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(0,0,-1).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(0,0,-1).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.5f, -0.25f).setNormal(0,0,-1).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.5f, -0.25f).setNormal(0,0,-1).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+    public static fluidRenderData makeFluidRenderType(Fluid f) {
+        if(f== Fluids.EMPTY)f=Fluids.WATER;
+        IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(f);
+        int color = extensions.getTintColor();
+        ResourceLocation fluidtextureStill = extensions.getStillTexture();
+        TextureAtlasSprite spriteStill = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureStill);
+        ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
+        TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
 
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(0,0,1).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(0,0,1).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.5f, 0.25f).setNormal(0,0,1).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.5f, 0.25f).setNormal(0,0,1).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(-1,0,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(-1,0,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.5f, 0.25f).setNormal(-1,0,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.5f, -0.25f).setNormal(-1,0,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(1,0,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(1,0,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.5f, 0.25f).setNormal(1,0,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.5f, -0.25f).setNormal(1,0,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        }else{
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if(tile.isExtractionMode && ! tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if(tile.isExtractionMode && tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(0,1,0).setUv(u1,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(0,1,0).setUv(u0,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(0,1,0).setUv(u0,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(0,1,0).setUv(u1,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-    void renderBottomConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay){
-        if(tile.connections.get(Direction.DOWN).isEnabled){
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if(tile.connections.get(Direction.DOWN).isExtraction){
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(0,0,-1).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(0,0,-1).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.5f, -0.25f).setNormal(0,0,-1).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.5f, -0.25f).setNormal(0,0,-1).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(0,0,1).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(0,0,1).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.5f, 0.25f).setNormal(0,0,1).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.5f, 0.25f).setNormal(0,0,1).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(-1,0,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(-1,0,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.5f, 0.25f).setNormal(-1,0,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.5f, -0.25f).setNormal(-1,0,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(1,0,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(1,0,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.5f, 0.25f).setNormal(1,0,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.5f, -0.25f).setNormal(1,0,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        }else{
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if(tile.isExtractionMode && ! tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if(tile.isExtractionMode && tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(0,-1,0).setUv(u1,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(0,-1,0).setUv(u0,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(0,-1,0).setUv(u0,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(0,-1,0).setUv(u1,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
-    void renderEastConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay){
-        if(tile.connections.get(Direction.EAST).isEnabled){
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if(tile.connections.get(Direction.EAST).isExtraction){
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(0,0,-1).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(0,0,-1).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.5f, -0.25f, -0.25f).setNormal(0,0,-1).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.5f, 0.25f, -0.25f).setNormal(0,0,-1).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(0,0,1).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(0,0,1).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.5f, -0.25f, 0.25f).setNormal(0,0,1).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.5f, 0.25f, 0.25f).setNormal(0,0,1).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(0,1,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(0,1,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.5f, 0.25f, 0.25f).setNormal(0,1,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.5f, 0.25f, -0.25f).setNormal(0,1,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(0,-1,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(0,-1,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.5f, -0.25f, 0.25f).setNormal(0,-1,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.5f, -0.25f, -0.25f).setNormal(0,-1,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        }else{
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if(tile.isExtractionMode && ! tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if(tile.isExtractionMode && tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(1,0,0).setUv(u1,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(1,0,0).setUv(u0,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(1,0,0).setUv(u0,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(1,0,0).setUv(u1,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
-    void renderWestConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay){
-        if(tile.connections.get(Direction.WEST).isEnabled){
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if(tile.connections.get(Direction.WEST).isExtraction){
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(0,0,-1).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(0,0,-1).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.5f, -0.25f, -0.25f).setNormal(0,0,-1).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.5f, 0.25f, -0.25f).setNormal(0,0,-1).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(0,0,1).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(0,0,1).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.5f, -0.25f, 0.25f).setNormal(0,0,1).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.5f, 0.25f, 0.25f).setNormal(0,0,1).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(0,1,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(0,1,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.5f, 0.25f, 0.25f).setNormal(0,1,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.5f, 0.25f, -0.25f).setNormal(0,1,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(0,-1,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(0,-1,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.5f, -0.25f, 0.25f).setNormal(0,-1,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.5f, -0.25f, -0.25f).setNormal(0,-1,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        }else{
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if(tile.isExtractionMode && ! tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if(tile.isExtractionMode && tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(-1,0,0).setUv(u1,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(-1,0,0).setUv(u0,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(-1,0,0).setUv(u0,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(-1,0,0).setUv(u1,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-    void renderSouthConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay){
-        if(tile.connections.get(Direction.SOUTH).isEnabled){
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if(tile.connections.get(Direction.SOUTH).isExtraction){
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(-1,0,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(-1,0,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.5f).setNormal(-1,0,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.5f).setNormal(-1,0,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(1,0,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(1,0,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.5f).setNormal(1,0,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.5f).setNormal(1,0,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(0,1,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(0,1,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.5f).setNormal(0,1,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.5f).setNormal(0,1,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(0,-1,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(0,-1,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.5f).setNormal(0,-1,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.5f).setNormal(0,-1,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        }else{
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if(tile.isExtractionMode && ! tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if(tile.isExtractionMode && tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(),-0.25f, 0.25f, 0.25f).setNormal(0,0,1).setUv(u1,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, 0.25f).setNormal(0,0,1).setUv(u0,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, 0.25f).setNormal(0,0,1).setUv(u0,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, 0.25f).setNormal(0,0,1).setUv(u1,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-    void renderNorthConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay){
-        if(tile.connections.get(Direction.NORTH).isEnabled){
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if(tile.connections.get(Direction.NORTH).isExtraction){
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(-1,0,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(-1,0,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.5f).setNormal(-1,0,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.5f).setNormal(-1,0,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(1,0,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(1,0,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.5f).setNormal(1,0,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.5f).setNormal(1,0,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(0,1,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(0,1,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.5f).setNormal(0,1,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.5f).setNormal(0,1,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(0,-1,0).setUv(0.5f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(0,-1,0).setUv(0f,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.5f).setNormal(0,-1,0).setUv(0f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.5f).setNormal(0,-1,0).setUv(0.5f,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        }else{
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if(tile.isExtractionMode && ! tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if(tile.isExtractionMode && tile.isExtractionActive){
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(),-0.25f, 0.25f, -0.25f).setNormal(0,0,-1).setUv(u1,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, 0.25f, -0.25f).setNormal(0,0,-1).setUv(u0,v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),0.25f, -0.25f, -0.25f).setNormal(0,0,-1).setUv(u0,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(),-0.25f, -0.25f, -0.25f).setNormal(0,0,-1).setUv(u1,v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
-    void renderFluidCubeStill(
-            float x0,float x1,float z0,float z1,float y0,float y1,
-            TextureAtlasSprite fluidStill,
-            int color,
-            MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay
-    ) {
-
-        RenderType r = RenderType.create("",
+        fluidRenderData d = new fluidRenderData();
+        d.spriteFLowing = spriteFlowing;
+        d.spriteStill = spriteStill;
+        d.color = color;
+        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_"+fluidtextureStill.getPath(),
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
-                32,
+                RenderType.MEGABYTE,
                 false,
                 true,
                 RenderType.CompositeState.builder()
@@ -361,15 +55,356 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         .setLightmapState(LIGHTMAP)
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), false, true))
+                        .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
-        float u0 = fluidStill.getU0();
-        float u1 = fluidStill.getU1();
-        float v0 = fluidStill.getV0();
-        float v1 = fluidStill.getV1();
+        d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_"+fluidtextureFlowing.getPath(),
+                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
+                VertexFormat.Mode.QUADS,
+                RenderType.MEGABYTE,
+                false,
+                true,
+                RenderType.CompositeState.builder()
+                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                        .setOverlayState(OVERLAY)
+                        .setLightmapState(LIGHTMAP)
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setOutputState(ITEM_ENTITY_TARGET)
+                        .setTextureState(new TextureStateShard(spriteFlowing.atlasLocation(), false, true))
+                        .createCompositeState(false)
+        );
+        return d;
+    }
 
-        VertexConsumer v = source.getBuffer(r);
+    static float e = 0.002f;
+    static float wMin = 0.02f;
+    static float wMax = 0.25f - e;
+
+    public RenderPipe(BlockEntityRendererProvider.Context c) {
+        super();
+    }
+
+    void renderTopConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
+        if (tile.connections.get(Direction.UP).isEnabled) {
+            float v0 = 0.25f;
+            float v1 = 0.5f;
+            if (tile.connections.get(Direction.UP).isExtraction) {
+                v0 = 0f;
+                v1 = 0.25f;
+            }
+
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.5f, -0.25f).setNormal(0, 0, -1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.5f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.5f, 0.25f).setNormal(0, 0, 1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.5f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.5f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.5f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.5f, 0.25f).setNormal(1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.5f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+        } else {
+            float u0 = 0f;
+            float u1 = 0.5f;
+            float v0 = 0.5f;
+            float v1 = 1f;
+            if (tile.isExtractionMode && !tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0f;
+                v1 = 0.5f;
+            }
+            if (tile.isExtractionMode && tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0.5f;
+                v1 = 1f;
+            }
+
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+        }
+    }
+
+    void renderBottomConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
+        if (tile.connections.get(Direction.DOWN).isEnabled) {
+            float v0 = 0.25f;
+            float v1 = 0.5f;
+            if (tile.connections.get(Direction.DOWN).isExtraction) {
+                v0 = 0f;
+                v1 = 0.25f;
+            }
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.5f, -0.25f).setNormal(0, 0, -1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.5f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.5f, 0.25f).setNormal(0, 0, 1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.5f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.5f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.5f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.5f, 0.25f).setNormal(1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.5f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+        } else {
+            float u0 = 0f;
+            float u1 = 0.5f;
+            float v0 = 0.5f;
+            float v1 = 1f;
+            if (tile.isExtractionMode && !tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0f;
+                v1 = 0.5f;
+            }
+            if (tile.isExtractionMode && tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0.5f;
+                v1 = 1f;
+            }
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+        }
+    }
+
+    void renderEastConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
+        if (tile.connections.get(Direction.EAST).isEnabled) {
+            float v0 = 0.25f;
+            float v1 = 0.5f;
+            if (tile.connections.get(Direction.EAST).isExtraction) {
+                v0 = 0f;
+                v1 = 0.25f;
+            }
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.5f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.5f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.5f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.5f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.5f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.5f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.5f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.5f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+        } else {
+            float u0 = 0f;
+            float u1 = 0.5f;
+            float v0 = 0.5f;
+            float v1 = 1f;
+            if (tile.isExtractionMode && !tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0f;
+                v1 = 0.5f;
+            }
+            if (tile.isExtractionMode && tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0.5f;
+                v1 = 1f;
+            }
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(1, 0, 0).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(1, 0, 0).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(1, 0, 0).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(1, 0, 0).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+        }
+    }
+
+    void renderWestConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
+        if (tile.connections.get(Direction.WEST).isEnabled) {
+            float v0 = 0.25f;
+            float v1 = 0.5f;
+            if (tile.connections.get(Direction.WEST).isExtraction) {
+                v0 = 0f;
+                v1 = 0.25f;
+            }
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.5f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.5f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.5f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.5f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.5f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.5f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.5f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.5f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+        } else {
+            float u0 = 0f;
+            float u1 = 0.5f;
+            float v0 = 0.5f;
+            float v1 = 1f;
+            if (tile.isExtractionMode && !tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0f;
+                v1 = 0.5f;
+            }
+            if (tile.isExtractionMode && tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0.5f;
+                v1 = 1f;
+            }
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(-1, 0, 0).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(-1, 0, 0).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(-1, 0, 0).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(-1, 0, 0).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+        }
+    }
+
+    void renderSouthConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
+        if (tile.connections.get(Direction.SOUTH).isEnabled) {
+            float v0 = 0.25f;
+            float v1 = 0.5f;
+            if (tile.connections.get(Direction.SOUTH).isExtraction) {
+                v0 = 0f;
+                v1 = 0.25f;
+            }
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(-1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.5f).setNormal(-1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.5f).setNormal(-1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.5f).setNormal(1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.5f).setNormal(1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.5f).setNormal(0, 1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.5f).setNormal(0, 1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.5f).setNormal(0, -1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.5f).setNormal(0, -1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+        } else {
+            float u0 = 0f;
+            float u1 = 0.5f;
+            float v0 = 0.5f;
+            float v1 = 1f;
+            if (tile.isExtractionMode && !tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0f;
+                v1 = 0.5f;
+            }
+            if (tile.isExtractionMode && tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0.5f;
+                v1 = 1f;
+            }
+            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+        }
+    }
+
+    void renderNorthConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
+        if (tile.connections.get(Direction.NORTH).isEnabled) {
+            float v0 = 0.25f;
+            float v1 = 0.5f;
+            if (tile.connections.get(Direction.NORTH).isExtraction) {
+                v0 = 0f;
+                v1 = 0.25f;
+            }
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(-1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.5f).setNormal(-1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.5f).setNormal(-1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.5f).setNormal(1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.5f).setNormal(1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.5f).setNormal(0, 1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.5f).setNormal(0, 1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.5f).setNormal(0, -1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.5f).setNormal(0, -1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+
+        } else {
+            float u0 = 0f;
+            float u1 = 0.5f;
+            float v0 = 0.5f;
+            float v1 = 1f;
+            if (tile.isExtractionMode && !tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0f;
+                v1 = 0.5f;
+            }
+            if (tile.isExtractionMode && tile.isExtractionActive) {
+                u0 = 0.5f;
+                u1 = 1f;
+                v0 = 0.5f;
+                v1 = 1f;
+            }
+            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
+        }
+    }
+
+    void renderFluidCubeStill(
+            float x0, float x1, float z0, float z1, float y0, float y1,
+            float u0, float u1, float v0, float v1,
+            int color,
+            VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay
+    ) {
+
 
         //render up face
         v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -408,35 +443,15 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
         v.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
     }
+
     void renderFluidCubeFacebyDirection(
-            float x0,float x1,float z0,float z1,float y0,float y1,
+            float x0, float x1, float z0, float z1, float y0, float y1,
+            float u0, float u1, float v0, float v1,
             Direction d,
-            TextureAtlasSprite fluidStill,
             int color,
-            MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay
+            VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay
     ) {
 
-        RenderType r = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                32,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), false, true))
-                        .createCompositeState(false)
-        );
-        float u0 = fluidStill.getU0();
-        float u1 = fluidStill.getU1();
-        float v0 = fluidStill.getV0();
-        float v1 = fluidStill.getV1();
-
-        VertexConsumer v = source.getBuffer(r);
         if (d == Direction.UP) {
             //render up face
             v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -481,132 +496,93 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             v.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
     }
+
     void renderVerticalFluidStill(
-            float x0f,float x1f,float z0f,float z1f,float y0f,float y1f,
-            TextureAtlasSprite fluidStill,
+            float x0f, float x1f, float z0f, float z1f, float y0f, float y1f,
+            float u0, float u1, float v0, float v1,
             int color,
-            MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay
+            VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay
     ) {
 
-        RenderType r = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                32,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), false, true))
-                        .createCompositeState(false)
-        );
-
-        VertexConsumer v = source.getBuffer(r);
-
         // Render east face (x+ side)
-        v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
         // Render west face (x- side)
-        v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(-1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(-1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
         // Render south face (z+ side)#
-        v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
         // Render north face (z- side)
-        v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
     }
 
     void renderHorizontalFluidStill(
-            double x0,double x1,double z0,double z1,double y0,double y1,
-            TextureAtlasSprite fluidStill,
+            float x0f, float x1f, float z0f, float z1f, float y0f, float y1f,
+            float u0, float u1, float v0, float v1,
             int color,
-            MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay,
+            VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay,
             float y0BottomOffsetNorth,
             float y0BottomOffsetSouth,
             float y0BottomOffsetEast,
             float y0BottomOffsetWest
     ) {
-        float x0f = (float) x0;
-        float x1f = (float) x1;
-        float y0f = (float) y0;
-        float y1f = (float) y1;
-        float z0f = (float) z0;
-        float z1f = (float) z1;
 
-        RenderType r = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                RenderType.SMALL_BUFFER_SIZE,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), false, true))
-                        .createCompositeState(false)
-        );
-        VertexConsumer v = source.getBuffer(r);
 
-        y1 = Math.max(y1,y0+5*e);
+        y1f = Math.max(y1f, y0f + 5 * e);
 
 
         //render top face
-        v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 1, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 1, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 1, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 1, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
         //render bottom face
-        v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, -1, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(0, -1, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(0, -1, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(0, -1, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
         // Render east face (x+ side)
-        if (y1 - y0BottomOffsetEast > e) {
-            v.addVertex(stack.last(), x1f, y0BottomOffsetEast, z0f).setNormal(1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y0BottomOffsetEast, z1f).setNormal(1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        if (y1f - y0BottomOffsetEast > e) {
+            v.addVertex(stack.last(), x1f, y0BottomOffsetEast, z0f).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y0BottomOffsetEast, z1f).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
         // Render west face (x- side)
-        if (y1 - y0BottomOffsetWest > e) {
-            v.addVertex(stack.last(), x0f, y0BottomOffsetWest, z1f).setNormal(-1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y0BottomOffsetWest, z0f).setNormal(-1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        if (y1f - y0BottomOffsetWest > e) {
+            v.addVertex(stack.last(), x0f, y0BottomOffsetWest, z1f).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y0BottomOffsetWest, z0f).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
         // Render south face (z+ side)#
-        if (y1 - y0BottomOffsetSouth > e) {
-            v.addVertex(stack.last(), x1f, y0BottomOffsetSouth, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y0BottomOffsetSouth, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        if (y1f - y0BottomOffsetSouth > e) {
+            v.addVertex(stack.last(), x1f, y0BottomOffsetSouth, z1f).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y0BottomOffsetSouth, z1f).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
         // Render north face (z- side)
-        if (y1 - y0BottomOffsetNorth > e) {
-            v.addVertex(stack.last(), x0f, y0BottomOffsetNorth, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y0BottomOffsetNorth, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        if (y1f - y0BottomOffsetNorth > e) {
+            v.addVertex(stack.last(), x0f, y0BottomOffsetNorth, z0f).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y0BottomOffsetNorth, z0f).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
     }
     /*
@@ -764,50 +740,25 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
         );
         VertexConsumer vx2 = source.getBuffer(r2);
         if(rendery0)
-            renderHorizontalFaceCutOut(x0,x1,z0,z1,y0,xh0,xh1,zh0,zh1,fluidStill.getU0(),fluidStill.getU1(),fluidStill.getV0(),fluidStill.getV1(),stack,vx2,color,light,overlay);
+            renderHorizontalFaceCutOut(x0,x1,z0,z1,y0,xh0,xh1,zh0,zh1,u0,u1,v0,v1,stack,vx2,color,light,overlay);
         if(rendery1)
-            renderHorizontalFaceCutOutReverse(x0,x1,z0,z1,y1,xh2,xh3,zh2,zh3,fluidStill.getU0(),fluidStill.getU1(),fluidStill.getV0(),fluidStill.getV1(),stack,vx2,color,light,overlay);
+            renderHorizontalFaceCutOutReverse(x0,x1,z0,z1,y1,xh2,xh3,zh2,zh3,u0,u1,v0,v1,stack,vx2,color,light,overlay);
     }
      */
 
 
-        void renderHorizontalFluidFlowing(
+    void renderHorizontalFluidFlowing(
             float x0, float x1, float z0, float z1, float y0, float y1,
-            TextureAtlasSprite fluidFlowing,
+            float u0, float u1, float v0, float v1,
             int color, Direction flowDirection,
-            MultiBufferSource source, PoseStack stack,
+            VertexConsumer v, PoseStack stack,
             int packedLight, int packedOverlay,
             float y0BottomOffsetNorth,
             float y0BottomOffsetSouth,
             float y0BottomOffsetEast,
             float y0BottomOffsetWest
     ) {
-
-        RenderType r = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                32,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidFlowing.atlasLocation(), false, true))
-                        .createCompositeState(false)
-        );
-
-        VertexConsumer v = source.getBuffer(r);
-
-        float u0 = fluidFlowing.getU0();
-        float u1 = fluidFlowing.getU1();
-        float v0 = fluidFlowing.getV0();
-        float v1 = fluidFlowing.getV1();
-
-
-        y1 = Math.max(y1,y0+5*e);
+        y1 = Math.max(y1, y0 + 5 * e);
 
         if (flowDirection == Direction.NORTH) {
             //render top face
@@ -830,21 +781,21 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetEast, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render west face (x- side)
-            if (y1 - y0BottomOffsetWest >e) {
+            if (y1 - y0BottomOffsetWest > e) {
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetWest, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetWest, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render south face (z+ side)
-            if (y1 - y0BottomOffsetSouth >e) {
+            if (y1 - y0BottomOffsetSouth > e) {
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render north face (z- side)
-            if (y1 - y0BottomOffsetNorth >e) {
+            if (y1 - y0BottomOffsetNorth > e) {
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -866,28 +817,28 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             v.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
             // Render east face (x+ side)
-            if (y1 - y0BottomOffsetEast >e) {
+            if (y1 - y0BottomOffsetEast > e) {
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetEast, (float) z0).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetEast, (float) z1).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render west face (x- side)
-            if (y1 - y0BottomOffsetWest >e) {
+            if (y1 - y0BottomOffsetWest > e) {
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetWest, (float) z1).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetWest, (float) z0).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render south face (z+ side)
-            if (y1 - y0BottomOffsetSouth >e) {
+            if (y1 - y0BottomOffsetSouth > e) {
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render north face (z- side)
-            if (y1 - y0BottomOffsetNorth >e) {
+            if (y1 - y0BottomOffsetNorth > e) {
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -908,28 +859,28 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             v.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
             // Render east face (x+ side)
-            if (y1 - y0BottomOffsetEast >e) {
+            if (y1 - y0BottomOffsetEast > e) {
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetEast, (float) z0).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetEast, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render west face (x- side)
-            if (y1 - y0BottomOffsetWest >e) {
+            if (y1 - y0BottomOffsetWest > e) {
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetWest, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetWest, (float) z0).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render south face (z+ side)
-            if (y1 - y0BottomOffsetSouth >e) {
+            if (y1 - y0BottomOffsetSouth > e) {
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render north face (z- side)
-            if (y1 - y0BottomOffsetNorth >e) {
+            if (y1 - y0BottomOffsetNorth > e) {
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -950,28 +901,28 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             v.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
             // Render east face (x+ side)
-            if (y1 - y0BottomOffsetEast >e) {
+            if (y1 - y0BottomOffsetEast > e) {
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetEast, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetEast, (float) z1).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render west face (x- side)
-            if (y1 - y0BottomOffsetWest >e) {
+            if (y1 - y0BottomOffsetWest > e) {
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetWest, (float) z1).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetWest, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render south face (z+ side)
-            if (y1 - y0BottomOffsetSouth >e) {
+            if (y1 - y0BottomOffsetSouth > e) {
                 v.addVertex(stack.last(), (float) x1, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             }
             // Render north face (z- side)
-            if (y1 - y0BottomOffsetNorth >e) {
+            if (y1 - y0BottomOffsetNorth > e) {
                 v.addVertex(stack.last(), (float) x0, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
                 v.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -982,98 +933,60 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
 
     void renderHorizontalFluidStillCentered(
-            float x0f,float x1f,float z0f,float z1f,float y0f,float y1f,
-            TextureAtlasSprite fluidStill,
+            float x0f, float x1f, float z0f, float z1f, float y0f, float y1f,
+            float u0, float u1, float v0, float v1,
             int color,
-            MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay,
+            VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay,
             Direction direction
     ) {
 
-        RenderType r = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                RenderType.SMALL_BUFFER_SIZE,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), false, true))
-                        .createCompositeState(false)
-        );
-        VertexConsumer v = source.getBuffer(r);
-
         //render top face
-        v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 1, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 1, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 1, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 1, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
         //render bottom face
-        v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, -1, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(0, -1, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(0, -1, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(0, -1, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
-        if(direction != Direction.EAST && direction != Direction.WEST) {
+        if (direction != Direction.EAST && direction != Direction.WEST) {
             // Render east face (x+ side)
-            v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
             // Render west face (x- side)
-            v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(-1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(-1, 0, 0).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
-        if(direction != Direction.NORTH && direction != Direction.SOUTH) {
+        if (direction != Direction.NORTH && direction != Direction.SOUTH) {
             // Render south face (z+ side)#
-            v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(0, 0, 1).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y0f, z1f).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y1f, z1f).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y1f, z1f).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y0f, z1f).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
             // Render north face (z- side)
-            v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU0(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU0(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU1(), fluidStill.getV0()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y0f, z0f).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x0f, y1f, z0f).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y1f, z0f).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
     }
+
     void renderFluidFlowingCentered(
             float x0, float x1, float z0, float z1, float y0, float y1,
-            TextureAtlasSprite fluidFlowing,
+            float u0, float u1, float v0, float v1,
             int color, Direction flowDirection,
-            MultiBufferSource source, PoseStack stack,
+            VertexConsumer vx1, PoseStack stack,
             int packedLight, int packedOverlay
     ) {
-
-        RenderType r1 = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                32,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidFlowing.atlasLocation(), false, true))
-                        .createCompositeState(false)
-        );
-        float u0 = fluidFlowing.getU0();
-        float u1 = fluidFlowing.getU1();
-        float v0 = fluidFlowing.getV0();
-        float v1 = fluidFlowing.getV1();
-
-        VertexConsumer vx1 = source.getBuffer(r1);
 
         if (flowDirection == Direction.NORTH) {
             // Render east face (x+ side)
@@ -1232,7 +1145,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
         }
     }
 
-    boolean shouldRenderCentered(Fluid f){
+    boolean shouldRenderCentered(Fluid f) {
         return true;
         //return f.getFluidType().isLighterThanAir();
     }
@@ -1240,12 +1153,19 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
     void renderFluids(EntityPipe tile, MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay) {
         // render center
         if (!tile.mainTank.isEmpty()) {
-            IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(tile.mainTank.getFluid().getFluid());
-            int color = extensions.getTintColor();
-            ResourceLocation fluidtextureStill = extensions.getStillTexture();
-            TextureAtlasSprite spriteStill = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureStill);
-            ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
-            TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
+
+            float u0f = tile.renderData.spriteFLowing.getU0();
+            float u1f = tile.renderData.spriteFLowing.getU1();
+            float v0f = tile.renderData.spriteFLowing.getV0();
+            float v1f = tile.renderData.spriteFLowing.getV1();
+
+            float u0s = tile.renderData.spriteStill.getU0();
+            float u1s = tile.renderData.spriteStill.getU1();
+            float v0s = tile.renderData.spriteStill.getV0();
+            float v1s = tile.renderData.spriteStill.getV1();
+
+            int color = tile.renderData.color;
+
 
             if (
                     !tile.connections.get(Direction.NORTH).isEnabled &&
@@ -1256,8 +1176,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 // is vertical render because no horizontal connections are found
 
                 float relativeFill = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
-                float wMin = 0.05f;
-                float wMax = 0.25f - e;
+
 
                 float actualW = wMin + (wMax - wMin) * relativeFill;
                 float y0 = -0.25f;
@@ -1316,17 +1235,26 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 }
                 if (numOutputs == 1) {
                     // exactly one output is found, great! use this as flow direction
-                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, outFlow, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(
+                            x0, x1, z0, z1, y0, y1,
+                            u0f, u1f, v0f, v1f,
+                            color, outFlow, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
 
                 } else if (numInputs == 1) {
                     // exactly one input is found, great! use this as flow direction
-                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, inFlow, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(
+                            x0, x1, z0, z1, y0, y1,
+                            u0f, u1f, v0f, v1f,
+                            color, inFlow, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                 } else {
                     // do not use flowing animation
-                    renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
+                    renderVerticalFluidStill(
+                            x0, x1, z0, z1, y0, y1,
+                            u0s, u1s, v0s, v1s,
+                            color, source.getBuffer(tile.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                 }
             } else {
-                if (!shouldRenderCentered(tile.mainTank.getFluid().getFluid())){
+                if (!shouldRenderCentered(tile.mainTank.getFluid().getFluid())) {
                     // is horizontal render
                     float x0 = -0.25f + e;
                     float x1 = 0.25f - e;
@@ -1395,24 +1323,31 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                     }
                     if (numOutputs == 1) {
                         // exactly one output is found, great! use this as flow direction
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, outFlow, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, outFlow, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
 
                     } else if (numInputs == 1) {
                         // exactly one input is found, great! use this as flow direction
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, inFlow, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, inFlow, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
 
                     } else {
                         // do not use flowing animation
-                        renderHorizontalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidStill(
+                                x0, x1, z0, z1, y0, y1,
+                                u0s, u1s, v0s, v1s,
+                                color, source.getBuffer(tile.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
 
                     if (tile.connections.get(Direction.UP).isEnabled) {
                         float relativeFill = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
-                        float wMin = 0.05f;
-                        float wMax = 0.25f - e;
 
                         float actualW = wMin + (wMax - wMin) * relativeFill;
                         y0 = -0.25f + e;
@@ -1441,13 +1376,18 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         conn = tile.connections.get(Direction.UP);
                         if (conn.getsInputFromInside) {
                             //add render up animation
-                            renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
+                            renderFluidFlowingCentered(
+                                    x0, x1, z0, z1, y0, y1,
+                                    u0f, u1f, v0f, v1f,
+                                    color, Direction.UP, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                         }
                         if (conn.outputsToInside) {
                             //add render down animation
-                            renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
+                            renderFluidFlowingCentered(
+                                    x0, x1, z0, z1, y0, y1,
+                                    u0f, u1f, v0f, v1f,
+                                    color, Direction.DOWN, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                         }
-
                     }
                 } else {
                     // it is a centered horizontal render
@@ -1457,11 +1397,9 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                     int numInputs = 0;
 
                     float relativeFill = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
-                    float wMin = 0.05f;
-                    float wMax = 0.25f - e;
 
                     float actualW = wMin + (wMax - wMin) * relativeFill;
-                    for(Direction d : Direction.values()) {
+                    for (Direction d : Direction.values()) {
                         PipeConnection conn = tile.connections.get(d);
                         if (conn.isEnabled) {
                             float y0 = -actualW;
@@ -1473,39 +1411,47 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
                             if (d == Direction.UP) {
                                 y0 = actualW;
-                                y1 = 0.25f ;
+                                y1 = 0.25f;
                             }
                             if (d == Direction.DOWN) {
-                                y0 = -0.25f ;
+                                y0 = -0.25f;
                                 y1 = -actualW;
                             }
                             if (d == Direction.EAST) {
                                 x0 = actualW;
-                                x1 = 0.25f ;
+                                x1 = 0.25f;
                             }
                             if (d == Direction.WEST) {
-                                x0 = -0.25f ;
+                                x0 = -0.25f;
                                 x1 = -actualW;
                             }
                             if (d == Direction.SOUTH) {
                                 z0 = actualW;
-                                z1 = 0.25f ;
+                                z1 = 0.25f;
                             }
                             if (d == Direction.NORTH) {
-                                z0 = -0.25f ;
+                                z0 = -0.25f;
                                 z1 = -actualW;
                             }
                             if (conn.outputsToInside) {
                                 numInputs++;
                                 inFlow = d;
-                                renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, d.getOpposite(), source, stack, packedLight, packedOverlay);
-                            }
-                            else if (conn.getsInputFromInside) {
+                                renderFluidFlowingCentered(
+                                        x0, x1, z0, z1, y0, y1,
+                                        u0f, u1f, v0f, v1f,
+                                        color, d.getOpposite(), source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
+                            } else if (conn.getsInputFromInside) {
                                 numOutputs++;
                                 outFlow = d;
-                                renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, d, source, stack, packedLight, packedOverlay);
+                                renderFluidFlowingCentered(
+                                        x0, x1, z0, z1, y0, y1,
+                                        u0f, u1f, v0f, v1f
+                                        , color, d, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                             } else {
-                                renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
+                                renderVerticalFluidStill(
+                                        x0, x1, z0, z1, y0, y1,
+                                        u0s, u1s, v0s, v1s,
+                                        color, source.getBuffer(tile.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                             }
                         }
                     }
@@ -1519,22 +1465,39 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
                     if (numOutputs == 1) {
                         // exactly one output is found, great! use this as flow direction
-                        renderFluidFlowingCentered(x0,x1,z0,z1,y0,y1,spriteFlowing,color,outFlow,source,stack,packedLight,packedOverlay);
-                        if(!tile.connections.get(outFlow.getOpposite()).isEnabled||tile.connections.get(outFlow.getOpposite()).tank.isEmpty()){
-                            renderFluidCubeFacebyDirection(x0,x1,z0,z1,y0,y1,outFlow.getOpposite(),spriteStill,color,source,stack,packedLight,packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, outFlow, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
+
+                        if (!tile.connections.get(outFlow.getOpposite()).isEnabled || tile.connections.get(outFlow.getOpposite()).tank.isEmpty()) {
+                            renderFluidCubeFacebyDirection(
+                                    x0, x1, z0, z1, y0, y1,
+                                    u0s, u1s, v0s, v1s,
+                                    outFlow.getOpposite(), color, source.getBuffer(tile.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                         }
 
 
                     } else if (numInputs == 1) {
                         // exactly one input is found, great! use this as flow direction
-                        renderFluidFlowingCentered(x0,x1,z0,z1,y0,y1,spriteFlowing,color,inFlow,source,stack,packedLight,packedOverlay);
-                        if(!tile.connections.get(inFlow.getOpposite()).isEnabled||tile.connections.get(inFlow.getOpposite()).tank.isEmpty()){
-                            renderFluidCubeFacebyDirection(x0,x1,z0,z1,y0,y1,inFlow.getOpposite(),spriteStill,color,source,stack,packedLight,packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, inFlow, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
+
+                        if (!tile.connections.get(inFlow.getOpposite()).isEnabled || tile.connections.get(inFlow.getOpposite()).tank.isEmpty()) {
+                            renderFluidCubeFacebyDirection(
+                                    x0, x1, z0, z1, y0, y1,
+                                    u0s, u1s, v0s, v1s,
+                                    inFlow.getOpposite(), color, source.getBuffer(tile.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                         }
 
                     } else {
                         // do not use flowing animation
-                        renderFluidCubeStill(x0,x1,z0,z1,y0,y1,spriteStill,color,source,stack,packedLight,packedOverlay);
+                        renderFluidCubeStill(
+                                x0, x1, z0, z1, y0, y1,
+                                u0s, u1s, v0s, v1s,
+                                color, source.getBuffer(tile.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                     }
                 }
             }
@@ -1543,19 +1506,23 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
         //render connections
         if (tile.connections.get(Direction.UP).isEnabled) {
             PipeConnection conn = tile.connections.get(Direction.UP);
+
+            float u0f = conn.renderData.spriteFLowing.getU0();
+            float u1f = conn.renderData.spriteFLowing.getU1();
+            float v0f = conn.renderData.spriteFLowing.getV0();
+            float v1f = conn.renderData.spriteFLowing.getV1();
+
+            float u0s = tile.renderData.spriteStill.getU0();
+            float u1s = tile.renderData.spriteStill.getU1();
+            float v0s = tile.renderData.spriteStill.getV0();
+            float v1s = tile.renderData.spriteStill.getV1();
+
+            int color = conn.renderData.color;
+
             int fluidInTank = conn.tank.getFluidAmount();
             if (fluidInTank > 0) {
                 int max = conn.tank.getCapacity();
                 float relativeFill = (float) fluidInTank / max;
-                IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(conn.getFluidInTank(0).getFluid());
-                int color = extensions.getTintColor();
-                ResourceLocation fluidtextureStill = extensions.getStillTexture();
-                TextureAtlasSprite spriteStill = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureStill);
-                ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
-                TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
-
-                float wMin = 0.05f;
-                float wMax = 0.25f - e;
 
                 float actualW = wMin + (wMax - wMin) * relativeFill;
                 float y0 = 0.25f - e;
@@ -1567,11 +1534,20 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
 
                 if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(
+                            x0, x1, z0, z1, y0, y1,
+                            u0f, u1f, v0f, v1f,
+                            color, Direction.DOWN, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                 } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(
+                            x0, x1, z0, z1, y0, y1,
+                            u0f, u1f, v0f, v1f,
+                            color, Direction.UP, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                 } else {
-                    renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
+                    renderVerticalFluidStill(
+                            x0, x1, z0, z1, y0, y1,
+                            u0s, u1s, v0s, v1s,
+                            color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                 }
 /*
                 float relativeFillAbove = (float) tile.connections.get(Direction.UP).neighborFluidHandler.getFluidInTank(0).getAmount() / tile.connections.get(Direction.UP).neighborFluidHandler.getTankCapacity(0);
@@ -1600,19 +1576,23 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
         }
         if (tile.connections.get(Direction.DOWN).isEnabled) {
             PipeConnection conn = tile.connections.get(Direction.DOWN);
+
+            float u0f = conn.renderData.spriteFLowing.getU0();
+            float u1f = conn.renderData.spriteFLowing.getU1();
+            float v0f = conn.renderData.spriteFLowing.getV0();
+            float v1f = conn.renderData.spriteFLowing.getV1();
+
+            float u0s = tile.renderData.spriteStill.getU0();
+            float u1s = tile.renderData.spriteStill.getU1();
+            float v0s = tile.renderData.spriteStill.getV0();
+            float v1s = tile.renderData.spriteStill.getV1();
+
+            int color = conn.renderData.color;
+
             int fluidInTank = conn.tank.getFluidAmount();
             if (fluidInTank > 0) {
                 int max = conn.tank.getCapacity();
                 float relativeFill = (float) fluidInTank / max;
-                IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(conn.getFluidInTank(0).getFluid());
-                int color = extensions.getTintColor();
-                ResourceLocation fluidtextureStill = extensions.getStillTexture();
-                TextureAtlasSprite spriteStill = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureStill);
-                ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
-                TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
-
-                float wMin = 0.05f;
-                float wMax = 0.25f - e;
 
                 float actualW = wMin + (wMax - wMin) * relativeFill;
                 float y0 = -0.5f;
@@ -1624,11 +1604,20 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
 
                 if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(
+                            x0, x1, z0, z1, y0, y1,
+                            u0f, u1f, v0f, v1f,
+                            color, Direction.UP, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                 } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(
+                            x0, x1, z0, z1, y0, y1,
+                            u0f, u1f, v0f, v1f,
+                            color, Direction.DOWN, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                 } else {
-                    renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
+                    renderVerticalFluidStill(
+                            x0, x1, z0, z1, y0, y1,
+                            u0s, u1s, v0s, v1s,
+                            color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                 }
                 /*
                 float relativeFillAbove = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
@@ -1657,16 +1646,23 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
         }
         if (tile.connections.get(Direction.WEST).isEnabled) {
             PipeConnection conn = tile.connections.get(Direction.WEST);
+
+            float u0f = conn.renderData.spriteFLowing.getU0();
+            float u1f = conn.renderData.spriteFLowing.getU1();
+            float v0f = conn.renderData.spriteFLowing.getV0();
+            float v1f = conn.renderData.spriteFLowing.getV1();
+
+            float u0s = tile.renderData.spriteStill.getU0();
+            float u1s = tile.renderData.spriteStill.getU1();
+            float v0s = tile.renderData.spriteStill.getV0();
+            float v1s = tile.renderData.spriteStill.getV1();
+
+            int color = conn.renderData.color;
+
             int fluidInTank = conn.tank.getFluidAmount();
             if (fluidInTank > 0) {
                 int max = conn.tank.getCapacity();
                 float relativeFill = (float) fluidInTank / max;
-                IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(conn.getFluidInTank(0).getFluid());
-                int color = extensions.getTintColor();
-                ResourceLocation fluidtextureStill = extensions.getStillTexture();
-                TextureAtlasSprite spriteStill = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureStill);
-                ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
-                TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
 
                 if (!shouldRenderCentered(conn.tank.getFluid().getFluid())) {
                     float x0 = -0.5f;
@@ -1683,49 +1679,72 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         y0BottomOffsetWest = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.EAST, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.EAST, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.WEST, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.WEST, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
-                        renderHorizontalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidStill(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
                 } else {
-                    float wMin = 0.05f;
-                    float wMax = 0.25f - e;
 
                     float actualW = wMin + (wMax - wMin) * relativeFill;
                     float y0 = -actualW;
                     float y1 = actualW;
                     float x0 = -0.5f;
-                    float x1 = -0.25f+e;
+                    float x1 = -0.25f + e;
                     float z0 = -actualW;
                     float z1 = actualW;
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.EAST, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.EAST, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.WEST, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.WEST, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                     } else {
-                        renderHorizontalFluidStillCentered(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay, Direction.WEST);
+                        renderHorizontalFluidStillCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0s, u1s, v0s, v1s,
+                                color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay, Direction.WEST);
                     }
                 }
             }
         }
         if (tile.connections.get(Direction.EAST).isEnabled) {
             PipeConnection conn = tile.connections.get(Direction.EAST);
+
+            float u0f = conn.renderData.spriteFLowing.getU0();
+            float u1f = conn.renderData.spriteFLowing.getU1();
+            float v0f = conn.renderData.spriteFLowing.getV0();
+            float v1f = conn.renderData.spriteFLowing.getV1();
+
+            float u0s = tile.renderData.spriteStill.getU0();
+            float u1s = tile.renderData.spriteStill.getU1();
+            float v0s = tile.renderData.spriteStill.getV0();
+            float v1s = tile.renderData.spriteStill.getV1();
+
+            int color = conn.renderData.color;
+
             int fluidInTank = conn.tank.getFluidAmount();
             if (fluidInTank > 0) {
                 int max = conn.tank.getCapacity();
                 float relativeFill = (float) fluidInTank / max;
-                IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(conn.getFluidInTank(0).getFluid());
-                int color = extensions.getTintColor();
-                ResourceLocation fluidtextureStill = extensions.getStillTexture();
-                TextureAtlasSprite spriteStill = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureStill);
-                ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
-                TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
 
                 if (!shouldRenderCentered(conn.tank.getFluid().getFluid())) {
                     float x0 = 0.25f - e;
@@ -1743,49 +1762,72 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         y0BottomOffsetEast = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.WEST, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.WEST, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.EAST, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.EAST, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
-                        renderHorizontalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidStill(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
                 } else {
-                    float wMin = 0.05f;
-                    float wMax = 0.25f - e;
 
                     float actualW = wMin + (wMax - wMin) * relativeFill;
                     float y0 = -actualW;
                     float y1 = actualW;
-                    float x0 = 0.25f-e;
+                    float x0 = 0.25f - e;
                     float x1 = 0.5f;
                     float z0 = -actualW;
                     float z1 = actualW;
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.WEST, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.WEST, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.EAST, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.EAST, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                     } else {
-                        renderHorizontalFluidStillCentered(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay, Direction.EAST);
+                        renderHorizontalFluidStillCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0s, u1s, v0s, v1s,
+                                color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay, Direction.EAST);
                     }
                 }
             }
         }
         if (tile.connections.get(Direction.SOUTH).isEnabled) {
             PipeConnection conn = tile.connections.get(Direction.SOUTH);
+
+            float u0f = conn.renderData.spriteFLowing.getU0();
+            float u1f = conn.renderData.spriteFLowing.getU1();
+            float v0f = conn.renderData.spriteFLowing.getV0();
+            float v1f = conn.renderData.spriteFLowing.getV1();
+
+            float u0s = conn.renderData.spriteFLowing.getU0();
+            float u1s = conn.renderData.spriteFLowing.getU1();
+            float v0s = conn.renderData.spriteFLowing.getV0();
+            float v1s = conn.renderData.spriteFLowing.getV1();
+
+            int color = conn.renderData.color;
+
             int fluidInTank = conn.tank.getFluidAmount();
             if (fluidInTank > 0) {
                 int max = conn.tank.getCapacity();
                 float relativeFill = (float) fluidInTank / max;
-                IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(conn.getFluidInTank(0).getFluid());
-                int color = extensions.getTintColor();
-                ResourceLocation fluidtextureStill = extensions.getStillTexture();
-                TextureAtlasSprite spriteStill = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureStill);
-                ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
-                TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
 
                 if (!shouldRenderCentered(conn.tank.getFluid().getFluid())) {
                     float x0 = -0.25f + e;
@@ -1802,49 +1844,73 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         y0BottomOffsetSouth = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.NORTH, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.NORTH, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.SOUTH, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.SOUTH, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
-                        renderHorizontalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidStill(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
                 } else {
-                    float wMin = 0.05f;
-                    float wMax = 0.25f - e;
+
 
                     float actualW = wMin + (wMax - wMin) * relativeFill;
                     float y0 = -actualW;
                     float y1 = actualW;
                     float x0 = -actualW;
                     float x1 = actualW;
-                    float z0 = 0.25f-e;
+                    float z0 = 0.25f - e;
                     float z1 = 0.5f;
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.NORTH, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.NORTH, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.SOUTH, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.SOUTH, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                     } else {
-                        renderHorizontalFluidStillCentered(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay, Direction.SOUTH);
+                        renderHorizontalFluidStillCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0s, u1s, v0s, v1s,
+                                color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay, Direction.SOUTH);
                     }
                 }
             }
         }
         if (tile.connections.get(Direction.NORTH).isEnabled) {
             PipeConnection conn = tile.connections.get(Direction.NORTH);
+
+            float u0f = conn.renderData.spriteFLowing.getU0();
+            float u1f = conn.renderData.spriteFLowing.getU1();
+            float v0f = conn.renderData.spriteFLowing.getV0();
+            float v1f = conn.renderData.spriteFLowing.getV1();
+
+            float u0s = conn.renderData.spriteFLowing.getU0();
+            float u1s = conn.renderData.spriteFLowing.getU1();
+            float v0s = conn.renderData.spriteFLowing.getV0();
+            float v1s = conn.renderData.spriteFLowing.getV1();
+
+            int color = conn.renderData.color;
+
             int fluidInTank = conn.tank.getFluidAmount();
             if (fluidInTank > 0) {
                 int max = conn.tank.getCapacity();
                 float relativeFill = (float) fluidInTank / max;
-                IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(conn.getFluidInTank(0).getFluid());
-                int color = extensions.getTintColor();
-                ResourceLocation fluidtextureStill = extensions.getStillTexture();
-                TextureAtlasSprite spriteStill = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureStill);
-                ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
-                TextureAtlasSprite spriteFlowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
 
                 if (!shouldRenderCentered(conn.tank.getFluid().getFluid())) {
                     float x0 = -0.25f + e;
@@ -1862,18 +1928,26 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         y0BottomOffsetNorth = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.SOUTH, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.SOUTH, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.NORTH, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidFlowing(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.NORTH, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
-                        renderHorizontalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay,
+                        renderHorizontalFluidStill(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
                 } else {
-                    float wMin = 0.05f;
-                    float wMax = 0.25f - e;
+
 
                     float actualW = wMin + (wMax - wMin) * relativeFill;
                     float y0 = -actualW;
@@ -1881,22 +1955,32 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                     float x0 = -actualW;
                     float x1 = actualW;
                     float z0 = -0.5f;
-                    float z1 = -0.25f+e;
+                    float z1 = -0.25f + e;
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.SOUTH, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.SOUTH, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.NORTH, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0f, u1f, v0f, v1f,
+                                color, Direction.NORTH, source.getBuffer(conn.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
                     } else {
-                        renderHorizontalFluidStillCentered(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay, Direction.NORTH);
+                        renderHorizontalFluidStillCentered(
+                                x0, x1, z0, z1, y0, y1,
+                                u0s, u1s, v0s, v1s,
+                                color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay, Direction.NORTH);
                     }
                 }
             }
         }
     }
+
     @Override
     public void render(EntityPipe tile, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        stack.translate(0.5f,0.5f,0.5f);
+        stack.translate(0.5f, 0.5f, 0.5f);
         RenderType r = RenderType.create("",
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
@@ -1909,22 +1993,20 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         .setLightmapState(LIGHTMAP)
                         .setCullState(NO_CULL)
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setTextureState(new TextureStateShard(tex,false,true))
+                        .setTextureState(new TextureStateShard(tex, false, true))
                         .createCompositeState(false)
         );
 
         VertexConsumer v = bufferSource.getBuffer(r);
-        renderTopConnection(tile, v,stack,packedLight,packedOverlay);
-        renderBottomConnection(tile, v,stack,packedLight,packedOverlay);
-        renderNorthConnection(tile, v,stack,packedLight,packedOverlay);
-        renderSouthConnection(tile, v,stack,packedLight,packedOverlay);
-        renderEastConnection(tile, v,stack,packedLight,packedOverlay);
-        renderWestConnection(tile, v,stack,packedLight,packedOverlay);
+        renderTopConnection(tile, v, stack, packedLight, packedOverlay);
+        renderBottomConnection(tile, v, stack, packedLight, packedOverlay);
+        renderNorthConnection(tile, v, stack, packedLight, packedOverlay);
+        renderSouthConnection(tile, v, stack, packedLight, packedOverlay);
+        renderEastConnection(tile, v, stack, packedLight, packedOverlay);
+        renderWestConnection(tile, v, stack, packedLight, packedOverlay);
 
-
-
-        renderFluids(tile,bufferSource,stack,packedLight,packedOverlay);
-
+        renderFluids(tile, bufferSource, stack, packedLight, packedOverlay);
     }
+
 
 }
