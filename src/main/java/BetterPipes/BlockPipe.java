@@ -88,7 +88,7 @@ public class BlockPipe extends Block implements EntityBlock {
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (!level.isClientSide()) {
             BlockEntity tile = level.getBlockEntity(pos);
-
+if(tile==null)return state;
             IFluidHandler fluidHandler = tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, direction.getOpposite());
 
             if (tile instanceof EntityPipe pipe) {
