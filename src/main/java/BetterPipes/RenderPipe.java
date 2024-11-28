@@ -14,6 +14,9 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static BetterPipes.BetterPipes.MODID;
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
@@ -57,6 +60,8 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
+        d.renderTypeFlowing = d.renderTypeStill;
+        /*
         d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_" + fluidtextureFlowing.getPath() + "_" + sx,
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
@@ -72,6 +77,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteFlowing.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
+         */
         return d;
     }
 
@@ -1349,7 +1355,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         float relativeFill = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
 
                         float actualW = wMin + (wMax - wMin) * relativeFill;
-                        y0 = -0.25f + e;
+                        y0 = -0.25f - e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
                         y1 = 0.25f;
                         x0 = -actualW;
                         x1 = actualW;
@@ -1977,13 +1983,15 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         }
     }
 
+    List<Long> renderTimes = new ArrayList<>();
+
     @Override
     public void render(EntityPipe tile, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         stack.translate(0.5f, 0.5f, 0.5f);
         RenderType r = RenderType.create("",
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
-                RenderType.SMALL_BUFFER_SIZE,
+                RenderType.TRANSIENT_BUFFER_SIZE,
                 false,
                 true,
                 RenderType.CompositeState.builder()
@@ -1996,6 +2004,8 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .createCompositeState(false)
         );
 
+        long time = System.nanoTime();
+
         VertexConsumer v = bufferSource.getBuffer(r);
         renderTopConnection(tile, v, stack, packedLight, packedOverlay);
         renderBottomConnection(tile, v, stack, packedLight, packedOverlay);
@@ -2004,13 +2014,14 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         renderEastConnection(tile, v, stack, packedLight, packedOverlay);
         renderWestConnection(tile, v, stack, packedLight, packedOverlay);
 
-        //tile.renderData = makeFluidRenderType(tile.mainTank.getFluid().getFluid(), "");
-        //for (Direction i : Direction.values()) {
-        //    tile.connections.get(i).renderData = makeFluidRenderType(tile.connections.get(i).tank.getFluid().getFluid(), "");
-        //}
-
-
         renderFluids(tile, bufferSource, stack, packedLight, packedOverlay);
+
+        renderTimes.add(System.nanoTime() - time);
+        if(renderTimes.size() > 5000){
+            long averageTime = renderTimes.stream().mapToLong(Long::longValue).sum() / renderTimes.size();
+            renderTimes.clear();
+         System.out.println((float)averageTime / 1000 / 1000);
+        }
     }
 
 

@@ -101,6 +101,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+
         for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
             i.tick_start();
         }
@@ -131,7 +132,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                             toTransfer = CONNECTION_MAX_OUTPUT_RATE + (int)(transferRateMultiplier*CONNECTION_MAX_OUTPUT_RATE/10f);
                         if (toTransfer > CONNECTION_MAX_OUTPUT_RATE && !conn.lastInputWasFromAnotherPipe)
                             toTransfer = CONNECTION_MAX_OUTPUT_RATE;
-                        if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
+                        if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS/2)
                             toTransfer = 1;
 
                         FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
@@ -148,7 +149,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                                 int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
                                 if (toTransfer > CONNECTION_MAX_OUTPUT_RATE)
                                     toTransfer = CONNECTION_MAX_OUTPUT_RATE + (int)(transferRateMultiplier*CONNECTION_MAX_OUTPUT_RATE/10f);
-                                if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
+                                if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS/2)
                                     toTransfer = 1;
 
                                 FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
