@@ -3,13 +3,13 @@ package BetterPipes;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -41,12 +41,6 @@ public class BlockPipe extends Block implements EntityBlock {
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return ENTITY_PIPE.get().create(pos, state);
-    }
-    @Override
-    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
-        List<ItemStack> drops = new ArrayList<>();
-        drops.add(new ItemStack(this,1));
-        return drops;
     }
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
@@ -81,7 +75,7 @@ public class BlockPipe extends Block implements EntityBlock {
 
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess sta, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource p_374120_) {
         IFluidHandler fluidHandler = null;
 
             BlockEntity e = level.getBlockEntity(neighborPos);
@@ -111,6 +105,8 @@ public class BlockPipe extends Block implements EntityBlock {
             }
         return state;
     }
+
+
     //@Override
     //public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
     //return EntityPipe::tick;

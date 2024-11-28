@@ -67,7 +67,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
         for (Direction direction : Direction.values()) {
             BlockPos neighbor = getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
-            state.updateShape(direction, level.getBlockState(neighbor), level, getBlockPos(), neighbor);
+            state.updateShape(level,null,getBlockPos(),direction, neighbor, level.getBlockState(neighbor),null);
         }
 
         if (!level.isClientSide) {

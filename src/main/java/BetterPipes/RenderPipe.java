@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.TriState;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 
@@ -364,7 +365,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         .setLightmapState(LIGHTMAP)
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), false, true))
+                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), TriState.FALSE, true))
                         .createCompositeState(false)
         );
         VertexConsumer v = source.getBuffer(r);
@@ -423,7 +424,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         .setLightmapState(LIGHTMAP)
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), false, true))
+                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), TriState.FALSE, true))
                         .createCompositeState(false)
         );
         VertexConsumer v = source.getBuffer(r);
@@ -652,7 +653,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         .setLightmapState(LIGHTMAP)
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidFlowing.atlasLocation(), false, true))
+                        .setTextureState(new TextureStateShard(fluidFlowing.atlasLocation(), TriState.FALSE, true))
                         .createCompositeState(false)
         );
         float u0 = fluidFlowing.getU0();
@@ -739,7 +740,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         .setLightmapState(LIGHTMAP)
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidFlowing.atlasLocation(), false, true))
+                        .setTextureState(new TextureStateShard(fluidFlowing.atlasLocation(), TriState.FALSE, true))
                         .createCompositeState(false)
         );
 
@@ -1420,7 +1421,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         .setLightmapState(LIGHTMAP)
                         .setCullState(NO_CULL)
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setTextureState(new TextureStateShard(tex,false,true))
+                        .setTextureState(new TextureStateShard(tex,TriState.FALSE,true))
                         .createCompositeState(false)
         );
 
