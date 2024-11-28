@@ -99,7 +99,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Pre event) {
+    public static void onServerTick(ServerTickEvent.Post event) {
         for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
             i.tick_start();
         }

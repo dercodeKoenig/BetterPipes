@@ -31,7 +31,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             .build();
 
     public static fluidRenderData makeFluidRenderType(Fluid f, String sx) {
-        if(f== Fluids.EMPTY)f=Fluids.WATER;
+        if (f == Fluids.EMPTY) f = Fluids.WATER;
         IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(f);
         int color = extensions.getTintColor();
         ResourceLocation fluidtextureStill = extensions.getStillTexture();
@@ -43,10 +43,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         d.spriteFLowing = spriteFlowing;
         d.spriteStill = spriteStill;
         d.color = color;
-        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_"+fluidtextureStill.getPath()+"_"+sx,
+        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_" + fluidtextureStill.getPath() + "_" + sx,
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
-                RenderType.SMALL_BUFFER_SIZE,
+                RenderType.TRANSIENT_BUFFER_SIZE,
                 false,
                 true,
                 RenderType.CompositeState.builder()
@@ -58,10 +58,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
-        d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_"+fluidtextureFlowing.getPath()+"_"+sx,
+        d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_" + fluidtextureFlowing.getPath() + "_" + sx,
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
-                RenderType.SMALL_BUFFER_SIZE,
+                RenderType.TRANSIENT_BUFFER_SIZE,
                 false,
                 true,
                 RenderType.CompositeState.builder()
@@ -2004,6 +2004,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         renderSouthConnection(tile, v, stack, packedLight, packedOverlay);
         renderEastConnection(tile, v, stack, packedLight, packedOverlay);
         renderWestConnection(tile, v, stack, packedLight, packedOverlay);
+
+        //tile.renderData = makeFluidRenderType(tile.mainTank.getFluid().getFluid(), "");
+        //for (Direction i : Direction.values()) {
+        //    tile.connections.get(i).renderData = makeFluidRenderType(tile.connections.get(i).tank.getFluid().getFluid(), "");
+        //}
+
 
         renderFluids(tile, bufferSource, stack, packedLight, packedOverlay);
     }
