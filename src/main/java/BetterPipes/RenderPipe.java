@@ -1693,7 +1693,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     } else {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0s, u1s, v0s, v1s,
                                 color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
@@ -1776,7 +1776,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     } else {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0s, u1s, v0s, v1s,
                                 color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
@@ -1858,7 +1858,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     } else {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0s, u1s, v0s, v1s,
                                 color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
@@ -1942,7 +1942,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     } else {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0s, u1s, v0s, v1s,
                                 color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
