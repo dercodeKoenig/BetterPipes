@@ -629,88 +629,6 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             renderHorizontalFaceCutOutReverse(x0,x1,z0,z1,y1,xh2,xh3,zh2,zh3,fluidStill.getU0(),fluidStill.getU1(),fluidStill.getV0(),fluidStill.getV1(),stack,vx2,color,light,overlay);
     }
      */
-    void renderVerticalFluidFlowing(
-            float x0, float x1, float z0, float z1, float y0, float y1,
-            TextureAtlasSprite fluidFlowing,
-            int color, Direction flowDirection,
-            MultiBufferSource source, PoseStack stack,
-            int packedLight, int packedOverlay
-    ) {
-
-        RenderType r1 = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                32,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidFlowing.atlasLocation(), false, true))
-                        .createCompositeState(false)
-        );
-        float u0 = fluidFlowing.getU0();
-        float u1 = fluidFlowing.getU1();
-        float v0 = fluidFlowing.getV0();
-        float v1 = fluidFlowing.getV1();
-
-       VertexConsumer vx1 = source.getBuffer(r1);
-
-        if (flowDirection == Direction.UP) {
-            // Render east face (x+ side)
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-
-            // Render west face (x- side)
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-
-            // Render south face (z+ side)
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-
-            // Render north face (z- side)
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        }
-
-        if (flowDirection == Direction.DOWN) {
-            // Render east face (x+ side)
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-
-            // Render west face (x- side)
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-
-            // Render south face (z+ side)
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-
-            // Render north face (z- side)
-            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        }
-    }
 
 
         void renderHorizontalFluidFlowing(
@@ -987,7 +905,7 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             v.addVertex(stack.last(), x1f, y0f, z0f).setNormal(0, 0, -1).setUv(fluidStill.getU1(), fluidStill.getV1()).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
     }
-    void renderHorizontalFluidFlowingCentered(
+    void renderFluidFlowingCentered(
             float x0, float x1, float z0, float z1, float y0, float y1,
             TextureAtlasSprite fluidFlowing,
             int color, Direction flowDirection,
@@ -1120,11 +1038,63 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
             vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
             vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         }
+
+        if (flowDirection == Direction.UP) {
+            // Render east face (x+ side)
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+
+            // Render west face (x- side)
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+
+            // Render south face (z+ side)
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+
+            // Render north face (z- side)
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        }
+
+        if (flowDirection == Direction.DOWN) {
+            // Render east face (x+ side)
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+
+            // Render west face (x- side)
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+
+            // Render south face (z+ side)
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+
+            // Render north face (z- side)
+            vx1.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+            vx1.addVertex(stack.last(), (float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        }
     }
 
     boolean shouldRenderCentered(Fluid f){
-        return true;
-        //return f.getFluidType().isLighterThanAir();
+        //return true;
+        return f.getFluidType().isLighterThanAir();
     }
 
     void renderFluids(EntityPipe tile, MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay) {
@@ -1206,11 +1176,11 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                 }
                 if (numOutputs == 1) {
                     // exactly one output is found, great! use this as flow direction
-                    renderVerticalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, outFlow, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, outFlow, source, stack, packedLight, packedOverlay);
 
                 } else if (numInputs == 1) {
                     // exactly one input is found, great! use this as flow direction
-                    renderVerticalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, inFlow, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, inFlow, source, stack, packedLight, packedOverlay);
                 } else {
                     // do not use flowing animation
                     renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
@@ -1331,16 +1301,65 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                         conn = tile.connections.get(Direction.UP);
                         if (conn.getsInputFromInside) {
                             //add render up animation
-                            renderVerticalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
+                            renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
                         }
                         if (conn.outputsToInside) {
                             //add render down animation
-                            renderVerticalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
+                            renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
                         }
 
                     }
                 } else {
                     // it is a centered horizontal render
+                    for(Direction d : Direction.values()) {
+                        PipeConnection conn = tile.connections.get(d);
+                        if (conn.isEnabled) {
+                            float relativeFill = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
+                            float wMin = 0.05f;
+                            float wMax = 0.25f - e;
+
+                            float actualW = wMin + (wMax - wMin) * relativeFill;
+                            float y0 = -actualW;
+                            float y1 = actualW;
+                            float x0 = -actualW;
+                            float x1 = actualW;
+                            float z0 = -actualW;
+                            float z1 = actualW;
+
+                            if (d == Direction.UP) {
+                                y0 = 0f;
+                                y1 = 0.25f - e;
+                            }
+                            if (d == Direction.DOWN) {
+                                y0 = -0.25f + e;
+                                y1 = 0f;
+                            }
+                            if (d == Direction.EAST) {
+                                x0 = 0f;
+                                x1 = 0.25f - e;
+                            }
+                            if (d == Direction.WEST) {
+                                x0 = -0.25f + e;
+                                x1 = 0f;
+                            }
+                            if (d == Direction.SOUTH) {
+                                z0 = 0f;
+                                z1 = 0.25f - e;
+                            }
+                            if (d == Direction.NORTH) {
+                                z0 = -0.25f + e;
+                                z1 = 0f;
+                            }
+                            if (conn.outputsToInside) {
+                                renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, d.getOpposite(), source, stack, packedLight, packedOverlay);
+                            }
+                            if (conn.getsInputFromInside) {
+                                renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, d, source, stack, packedLight, packedOverlay);
+                            } else {
+                                renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1372,9 +1391,9 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
 
                 if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                    renderVerticalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
                 } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                    renderVerticalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
                 } else {
                     renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
                 }
@@ -1429,9 +1448,9 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
 
 
                 if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                    renderVerticalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.UP, source, stack, packedLight, packedOverlay);
                 } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                    renderVerticalFluidFlowing(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
+                    renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.DOWN, source, stack, packedLight, packedOverlay);
                 } else {
                     renderVerticalFluidStill(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay);
                 }
@@ -1510,9 +1529,9 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                     float z1 = actualW;
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.EAST, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.EAST, source, stack, packedLight, packedOverlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.WEST, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.WEST, source, stack, packedLight, packedOverlay);
                     } else {
                         renderHorizontalFluidStillCentered(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay, Direction.WEST);
                     }
@@ -1570,9 +1589,9 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                     float z1 = actualW;
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.WEST, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.WEST, source, stack, packedLight, packedOverlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.EAST, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.EAST, source, stack, packedLight, packedOverlay);
                     } else {
                         renderHorizontalFluidStillCentered(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay, Direction.EAST);
                     }
@@ -1629,9 +1648,9 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                     float z1 = 0.5f;
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.NORTH, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.NORTH, source, stack, packedLight, packedOverlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.SOUTH, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.SOUTH, source, stack, packedLight, packedOverlay);
                     } else {
                         renderHorizontalFluidStillCentered(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay, Direction.SOUTH);
                     }
@@ -1689,9 +1708,9 @@ ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID,"textures/blo
                     float z1 = -0.25f+e;
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.SOUTH, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.SOUTH, source, stack, packedLight, packedOverlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
-                        renderHorizontalFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.NORTH, source, stack, packedLight, packedOverlay);
+                        renderFluidFlowingCentered(x0, x1, z0, z1, y0, y1, spriteFlowing, color, Direction.NORTH, source, stack, packedLight, packedOverlay);
                     } else {
                         renderHorizontalFluidStillCentered(x0, x1, z0, z1, y0, y1, spriteStill, color, source, stack, packedLight, packedOverlay, Direction.NORTH);
                     }
