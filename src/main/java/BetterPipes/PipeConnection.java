@@ -38,12 +38,14 @@ public class PipeConnection implements IFluidHandler {
 
 
     fluidRenderData renderData;
+    EntityPipe parent;
 
 
     public PipeConnection(EntityPipe parent) {
         tank = new simpleBlockEntityTank(CONNECTION_CAPACITY, parent);
+        this.parent = parent;
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            renderData = makeFluidRenderType(Fluids.WATER);
+            renderData = makeFluidRenderType(Fluids.WATER, parent.getBlockPos().toString());
         }
     }
 
@@ -109,32 +111,32 @@ public class PipeConnection implements IFluidHandler {
         isEnabled = tag.getBoolean("isEnabled");
         tank.readFromNBT(registries, tag);
 
-        renderData = makeFluidRenderType(tank.getFluid().getFluid());
+        renderData = makeFluidRenderType(tank.getFluid().getFluid(), parent.getBlockPos().toString());
 
     }
 
     void update() {
-        if (lastInputFromOutside < STATE_UPDATE_TICKS+1)
+        if (lastInputFromOutside < STATE_UPDATE_TICKS + 1)
             lastInputFromOutside++;
         else if (getsInputFromOutside)
             getsInputFromOutside = false;
 
-        if (lastInputFromInside < STATE_UPDATE_TICKS+1)
+        if (lastInputFromInside < STATE_UPDATE_TICKS + 1)
             lastInputFromInside++;
         else if (getsInputFromInside)
             getsInputFromInside = false;
 
-        if (lastOutputToInside < STATE_UPDATE_TICKS+1)
+        if (lastOutputToInside < STATE_UPDATE_TICKS + 1)
             lastOutputToInside++;
         else if (outputsToInside)
             outputsToInside = false;
 
-        if (lastOutputToOutside < STATE_UPDATE_TICKS+1)
+        if (lastOutputToOutside < STATE_UPDATE_TICKS + 1)
             lastOutputToOutside++;
         else if (outputsToOutside)
             outputsToOutside = false;
 
-        if(!tank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS+1)
+        if (!tank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS + 1)
             ticksWithFluidInTank++;
         else if (tank.isEmpty()) {
             ticksWithFluidInTank = 0;

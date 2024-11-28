@@ -61,7 +61,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         connections.put(Direction.NORTH, new PipeConnection(this));
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            renderData = makeFluidRenderType(Fluids.WATER);
+            renderData = makeFluidRenderType(Fluids.WATER, getBlockPos().toString());
         }
     }
 
@@ -319,7 +319,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                 }
                 if (compoundTag.contains("mainTank")) {
                     mainTank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
-                    renderData = makeFluidRenderType(mainTank.getFluid().getFluid());
+                    renderData = makeFluidRenderType(mainTank.getFluid().getFluid(), getBlockPos().toString());
                 }
                 for (Direction direction : Direction.values()) {
                     if (compoundTag.contains(direction.getName())) {

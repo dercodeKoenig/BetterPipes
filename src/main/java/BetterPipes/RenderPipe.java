@@ -30,7 +30,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             .add("Normal", VertexFormatElement.NORMAL)
             .build();
 
-    public static fluidRenderData makeFluidRenderType(Fluid f) {
+    public static fluidRenderData makeFluidRenderType(Fluid f, String sx) {
         if(f== Fluids.EMPTY)f=Fluids.WATER;
         IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(f);
         int color = extensions.getTintColor();
@@ -43,10 +43,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         d.spriteFLowing = spriteFlowing;
         d.spriteStill = spriteStill;
         d.color = color;
-        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_"+fluidtextureStill.getPath(),
+        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_"+fluidtextureStill.getPath()+"_"+sx,
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
-                RenderType.MEGABYTE,
+                RenderType.SMALL_BUFFER_SIZE,
                 false,
                 true,
                 RenderType.CompositeState.builder()
@@ -58,10 +58,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
-        d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_"+fluidtextureFlowing.getPath(),
+        d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_"+fluidtextureFlowing.getPath()+"_"+sx,
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
-                RenderType.MEGABYTE,
+                RenderType.SMALL_BUFFER_SIZE,
                 false,
                 true,
                 RenderType.CompositeState.builder()
