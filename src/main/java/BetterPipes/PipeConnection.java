@@ -18,7 +18,6 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import static BetterPipes.EntityPipe.*;
-import static BetterPipes.RenderPipe.makeFluidRenderType;
 
 public class PipeConnection implements IFluidHandler {
     Direction myDirection;
@@ -39,7 +38,7 @@ public class PipeConnection implements IFluidHandler {
     simpleBlockEntityTank tank;
     int lastFill;
 
-    fluidRenderData renderData;
+    fluidRenderData renderData = new fluidRenderData();
     EntityPipe parent;
 
     boolean isEnabled(BlockState parent){return parent.getValue(BlockPipe.connections.get(myDirection));}
@@ -53,9 +52,6 @@ public class PipeConnection implements IFluidHandler {
         this.myDirection = myDirection;
         tank = new simpleBlockEntityTank(CONNECTION_CAPACITY, parent);
         this.parent = parent;
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            renderData = makeFluidRenderType(Fluids.WATER);
-        }
     }
 
     boolean last_getsInputFromInside;
@@ -169,7 +165,10 @@ public class PipeConnection implements IFluidHandler {
         if(time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
             tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
-            renderData = makeFluidRenderType(tank.getFluid().getFluid());
+
+            renderData.reset(tank.getFluid().getFluid());
+            if(neighborFluidHandler() instanceof PipeConnection p)
+                p.renderData.needsRecalculation = true;
         }
     }
 
@@ -181,6 +180,10 @@ public class PipeConnection implements IFluidHandler {
             if (myFluid == Fluids.EMPTY && amount > 0) myFluid = Fluids.WATER;
             if(amount <= 0) myFluid = Fluids.EMPTY;
             tank.setFluid(new FluidStack(myFluid, amount));
+
+            renderData.reset(tank.getFluid().getFluid());
+            if(neighborFluidHandler() instanceof PipeConnection p)
+                p.renderData.needsRecalculation = true;
         }
     }
 

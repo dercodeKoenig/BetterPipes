@@ -1,5 +1,9 @@
 package BetterPipes;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,7 +30,6 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import java.util.*;
 
 import static BetterPipes.Registry.ENTITY_PIPE;
-import static BetterPipes.RenderPipe.makeFluidRenderType;
 
 public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     private static final List<EntityPipe> ACTIVE_PIPES = new ArrayList<>();
@@ -48,8 +51,10 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     int lastFill;
     int ticksWithFluidInTank = 0;
 
-    fluidRenderData renderData;
-
+    fluidRenderData renderData = new fluidRenderData();
+    VertexBuffer vertexBuffer;
+    MeshData mesh;
+    ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(2048);
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
         super(ENTITY_PIPE.get(), pos, blockState);
@@ -58,7 +63,9 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         }
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            renderData = makeFluidRenderType(Fluids.WATER);
+            RenderSystem.recordRenderCall(() -> {
+                vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+            });
         }
     }
 
@@ -91,24 +98,30 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (!level.isClientSide) {
             ACTIVE_PIPES.remove(this);
         }
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            RenderSystem.recordRenderCall(() -> {
+                vertexBuffer.close();
+            });
+
+        }
         super.setRemoved();
     }
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-try {
-    for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-        i.tick_start();
-    }
-    for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-        i.tick_update_tanks();
-    }
-    for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-        i.tick_complete();
-    }
-} catch (Exception e) {
-    System.out.println(new RuntimeException(e));
-}
+            try {
+                for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+                    i.tick_start();
+                }
+                for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+                    i.tick_update_tanks();
+                }
+                for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+                    i.tick_complete();
+                }
+            } catch (Exception e) {
+                System.out.println(new RuntimeException(e));
+        }
     }
 
     public void tick_start() {
@@ -334,7 +347,7 @@ try {
         if (time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
             tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
-            renderData = makeFluidRenderType(tank.getFluid().getFluid());
+            renderData.reset(f);
         }
     }
 
@@ -347,6 +360,7 @@ try {
             if (myFluid == Fluids.EMPTY && amount > 0) myFluid = Fluids.WATER;
             if (amount <= 0) myFluid = Fluids.EMPTY;
             tank.setFluid(new FluidStack(myFluid, amount));
+            renderData.reset(myFluid);
         }
     }
 
