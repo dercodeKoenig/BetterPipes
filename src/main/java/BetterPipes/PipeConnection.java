@@ -93,7 +93,16 @@ public class PipeConnection implements IFluidHandler {
         }
         return needsUpdate;
     }
-
+    public void saveAdditional(HolderLookup.Provider registries,CompoundTag tag){
+        CompoundTag myTag = getUpdateTag(registries);
+        tank.writeToNBT(registries, myTag);
+        tag.put(myDirection.getName(), myTag);
+    }
+    public void loadAdditional(HolderLookup.Provider registries,CompoundTag tag){
+        CompoundTag myTag = tag.getCompound(myDirection.getName());
+        tank.readFromNBT(registries, myTag);
+        handleUpdateTag(myTag,registries);
+    }
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("getsInputFromInside", getsInputFromInside);
@@ -102,7 +111,6 @@ public class PipeConnection implements IFluidHandler {
         tag.putBoolean("outputsToOutside", outputsToOutside);
         tag.putBoolean("isExtraction", isExtraction);
         tag.putBoolean("isEnabled", isEnabled);
-        //tank.writeToNBT(registries, tag);
         return tag;
     }
 
@@ -113,8 +121,6 @@ public class PipeConnection implements IFluidHandler {
         outputsToOutside = tag.getBoolean("outputsToOutside");
         isExtraction = tag.getBoolean("isExtraction");
         isEnabled = tag.getBoolean("isEnabled");
-        //tank.readFromNBT(registries, tag);
-        //renderData = makeFluidRenderType(tank.getFluid().getFluid(), parent.getBlockPos().toString());
     }
 
     void update() {
