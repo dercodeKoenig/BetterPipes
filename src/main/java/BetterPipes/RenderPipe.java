@@ -60,7 +60,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
-        d.renderTypeFlowing = d.renderTypeStill;
+        d.renderTypeFlowing = d.renderTypeStill; // I just assume that they are on the same resource location and i  hope it increases render time
         /*
         d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_" + fluidtextureFlowing.getPath() + "_" + sx,
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
