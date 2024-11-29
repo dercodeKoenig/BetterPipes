@@ -21,7 +21,7 @@ import static BetterPipes.BetterPipes.MODID;
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
-    ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID, "textures/block/fluid_pipe1.png");
+    static ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID, "textures/block/fluid_pipe1.png");
 
     public static VertexFormat POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL = VertexFormat.builder()
             .add("Position", VertexFormatElement.POSITION)
@@ -80,7 +80,21 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
          */
         return d;
     }
-
+    static RenderType r = RenderType.create("",
+            POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
+            VertexFormat.Mode.QUADS,
+            RenderType.TRANSIENT_BUFFER_SIZE,
+            false,
+            true,
+            RenderType.CompositeState.builder()
+                    .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                    .setOverlayState(OVERLAY)
+                    .setLightmapState(LIGHTMAP)
+                    .setCullState(NO_CULL)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setTextureState(new TextureStateShard(tex, false, true))
+                    .createCompositeState(false)
+    );
     static float e = 0.002f;
     static float wMin = 0.02f;
     static float wMax = 0.25f - e;
@@ -1988,23 +2002,6 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     @Override
     public void render(EntityPipe tile, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         stack.translate(0.5f, 0.5f, 0.5f);
-        RenderType r = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                RenderType.TRANSIENT_BUFFER_SIZE,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setCullState(NO_CULL)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setTextureState(new TextureStateShard(tex, false, true))
-                        .createCompositeState(false)
-        );
-
-        long time = System.nanoTime();
 
         VertexConsumer v = bufferSource.getBuffer(r);
         renderTopConnection(tile, v, stack, packedLight, packedOverlay);
@@ -2014,14 +2011,8 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         renderEastConnection(tile, v, stack, packedLight, packedOverlay);
         renderWestConnection(tile, v, stack, packedLight, packedOverlay);
 
-        renderFluids(tile, bufferSource, stack, packedLight, packedOverlay);
 
-        renderTimes.add(System.nanoTime() - time);
-        if(renderTimes.size() > 5000){
-            long averageTime = renderTimes.stream().mapToLong(Long::longValue).sum() / renderTimes.size();
-            renderTimes.clear();
-         System.out.println((float)averageTime / 1000 / 1000);
-        }
+        renderFluids(tile, bufferSource, stack, packedLight, packedOverlay);
     }
 
 
