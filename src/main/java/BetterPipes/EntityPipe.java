@@ -379,7 +379,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
         for (Direction direction : Direction.values()) {
             PipeConnection conn = connections.get(direction);
-            conn.loadAdditional(level.registryAccess(), tag);
+            conn.loadAdditional(registries, tag);
         }
 
     }
@@ -390,14 +390,14 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
         tag.putBoolean("isExtractionActive", isExtractionActive);
         tag.putBoolean("isExtractionMode", isExtractionMode);
-        
+
         CompoundTag tankTag = new CompoundTag();
         tank.writeToNBT(registries, tankTag);
         tag.put("mainTank", tankTag);
 
         for (Direction direction : Direction.values()) {
             PipeConnection conn = connections.get(direction);
-            conn.saveAdditional(level.registryAccess(), tag);
+            conn.saveAdditional(registries, tag);
         }
     }
 }
