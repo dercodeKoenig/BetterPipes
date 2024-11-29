@@ -86,13 +86,16 @@ public class BlockPipe extends Block implements EntityBlock {
 
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        if (!level.isClientSide()) {
-            BlockEntity tile = level.getBlockEntity(pos);
-            if (tile == null) return state;
-            IFluidHandler fluidHandler = tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, direction.getOpposite());
 
+        BlockEntity tile = level.getBlockEntity(pos);
+        if (tile == null) return state;
+        IFluidHandler fluidHandler = tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, direction.getOpposite());
+        if (tile instanceof EntityPipe pipe) {
+            pipe.connections.get(direction).neighborFluidHandler = fluidHandler;
+        }
+
+        if (!level.isClientSide()) {
             if (tile instanceof EntityPipe pipe) {
-                pipe.connections.get(direction).neighborFluidHandler = fluidHandler;
                 if (fluidHandler != null) {
                     pipe.connections.get(direction).isEnabled = true;
                 } else {

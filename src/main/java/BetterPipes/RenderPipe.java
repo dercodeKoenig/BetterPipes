@@ -85,7 +85,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             VertexFormat.Mode.QUADS,
             RenderType.TRANSIENT_BUFFER_SIZE,
             false,
-            false,
+            true,
             RenderType.CompositeState.builder()
                     .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
                     .setOverlayState(OVERLAY)
@@ -1775,7 +1775,6 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float y0BottomOffsetNorth = y0;
                     float y0BottomOffsetSouth = y0;
                     float y0BottomOffsetWest = y0 - 2 * e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
-                    ;
                     float y0BottomOffsetEast = y0;
                     if (conn.neighborFluidHandler instanceof PipeConnection p)
                         y0BottomOffsetEast = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
