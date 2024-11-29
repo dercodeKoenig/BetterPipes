@@ -42,7 +42,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         d.spriteFLowing = spriteFlowing;
         d.spriteStill = spriteStill;
         d.color = color;
-
+/*
         d.renderTypeStill_shader = RenderType.create("fluidStillPipeRenderer_" + fluidtextureStill.getPath(),
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
@@ -73,7 +73,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteFlowing.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
-
+*/
         d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_" + fluidtextureStill.getPath(),
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
@@ -88,6 +88,8 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, false))
                         .createCompositeState(false)
         );
+        d.renderTypeFlowing = d.renderTypeStill;
+        /*
         d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_" + fluidtextureFlowing.getPath(),
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
@@ -102,7 +104,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteFlowing.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
-
+*/
         return d;
     }
    
