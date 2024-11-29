@@ -45,7 +45,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         d.spriteFLowing = spriteFlowing;
         d.spriteStill = spriteStill;
         d.color = color;
-        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_" + fluidtextureStill.getPath() + "_" + sx,
+        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_" + fluidtextureStill.getPath(),// + "_" + sx,
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
                 RenderType.TRANSIENT_BUFFER_SIZE,
@@ -57,7 +57,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setLightmapState(LIGHTMAP)
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, true))
+                        .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, false))
                         .createCompositeState(false)
         );
         d.renderTypeFlowing = d.renderTypeStill; // I just assume that they are on the same resource location and i  hope it increases render time
@@ -92,7 +92,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     .setLightmapState(LIGHTMAP)
                     .setCullState(NO_CULL)
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                    .setTextureState(new TextureStateShard(tex, false, true))
+                    .setTextureState(new TextureStateShard(tex, false, false))
                     .createCompositeState(false)
     );
     static float e = 0.002f;
@@ -1996,8 +1996,6 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             }
         }
     }
-
-    List<Long> renderTimes = new ArrayList<>();
 
     @Override
     public void render(EntityPipe tile, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
