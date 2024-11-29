@@ -1,5 +1,139 @@
 {
-    "variants": {
-        "": { "model": "minecraft:block/air" }
-    }
+    "multipart": [
+        {
+            "when": { "up": "true" , "up_extraction" :  "false"},
+            "apply": { "model": "betterpipes:block/pipe_connection_transparent" }
+        },
+        {
+            "when": { "up": "true" , "up_extraction" :  "true"},
+            "apply": { "model": "betterpipes:block/pipe_connection_solid" }
+        },
+        {
+            "when": { "up": "false" , "main_isextraction":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_transparent" }
+        },
+        {
+            "when": { "up": "false" , "main_isextraction":  "true", "main_isextractionactive":  "true"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_on" }
+        },
+        {
+            "when": { "up": "false" , "main_isextraction":  "true", "main_isextractionactive":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_off" }
+        },
+
+
+
+        {
+            "when": { "down": "true" , "down_extraction" :  "false"},
+            "apply": { "model": "betterpipes:block/pipe_connection_transparent" , "x": 180}
+        },
+        {
+            "when": { "down": "true" , "down_extraction" :  "true"},
+            "apply": { "model": "betterpipes:block/pipe_connection_solid" , "x": 180}
+        },
+        {
+            "when": { "down": "false" , "main_isextraction":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_transparent" , "x": 180}
+        },
+        {
+            "when": { "down": "false" , "main_isextraction":  "true", "main_isextractionactive":  "true"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_on" , "x": 180}
+        },
+        {
+            "when": { "down": "false" , "main_isextraction":  "true", "main_isextractionactive":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_off" , "x": 180}
+        },
+
+
+
+        {
+            "when": { "east": "true" , "east_extraction" :  "false"},
+            "apply": { "model": "betterpipes:block/pipe_connection_transparent" , "x": 90, "y": 90}
+        },
+        {
+            "when": { "east": "true" , "east_extraction" :  "true"},
+            "apply": { "model": "betterpipes:block/pipe_connection_solid" , "x": 90,"y": 90}
+        },
+        {
+            "when": { "east": "false" , "main_isextraction":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_transparent" , "x": 90,"y": 90}
+        },
+        {
+            "when": { "east": "false" , "main_isextraction":  "true", "main_isextractionactive":  "true"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_on" , "x": 90,"y": 90}
+        },
+        {
+            "when": { "east": "false" , "main_isextraction":  "true", "main_isextractionactive":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_off" , "x": 90,"y": 90}
+        },
+
+
+
+        {
+            "when": { "west": "true" , "west_extraction" :  "false"},
+            "apply": { "model": "betterpipes:block/pipe_connection_transparent" , "x": 90,"y": 270}
+        },
+        {
+            "when": { "west": "true" , "west_extraction" :  "true"},
+            "apply": { "model": "betterpipes:block/pipe_connection_solid" , "x": 90,"y": 270}
+        },
+        {
+            "when": { "west": "false" , "main_isextraction":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_transparent" , "x": 90,"y": 270}
+        },
+        {
+            "when": { "west": "false" , "main_isextraction":  "true", "main_isextractionactive":  "true"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_on" , "x": 90,"y": 270}
+        },
+        {
+            "when": { "west": "false" , "main_isextraction":  "true", "main_isextractionactive":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_off" , "x": 90,"y": 270}
+        },
+
+
+
+        {
+            "when": { "south": "true" , "south_extraction" :  "false"},
+            "apply": { "model": "betterpipes:block/pipe_connection_transparent" , "x": 90,"y": 180}
+        },
+        {
+            "when": { "south": "true" , "south_extraction" :  "true"},
+            "apply": { "model": "betterpipes:block/pipe_connection_solid" , "x": 90,"y": 180}
+        },
+        {
+            "when": { "south": "false" , "main_isextraction":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_transparent" , "x": 90,"y": 180}
+        },
+        {
+            "when": { "south": "false" , "main_isextraction":  "true", "main_isextractionactive":  "true"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_on" , "x": 90,"y": 180}
+        },
+        {
+            "when": { "south": "false" , "main_isextraction":  "true", "main_isextractionactive":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_off" , "x": 90,"y": 180}
+        },
+
+
+
+        {
+            "when": { "north": "true" , "north_extraction" :  "false"},
+            "apply": { "model": "betterpipes:block/pipe_connection_transparent" , "x": 90,"y": 0}
+        },
+        {
+            "when": { "north": "true" , "north_extraction" :  "true"},
+            "apply": { "model": "betterpipes:block/pipe_connection_solid" , "x": 90,"y": 0}
+        },
+        {
+            "when": { "north": "false" , "main_isextraction":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_transparent" , "x": 90,"y": 0}
+        },
+        {
+            "when": { "north": "false" , "main_isextraction":  "true", "main_isextractionactive":  "true"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_on" , "x": 90,"y": 0}
+        },
+        {
+            "when": { "north": "false" , "main_isextraction":  "true", "main_isextractionactive":  "false"},
+            "apply": { "model": "betterpipes:block/pipe_extraction_off" , "x": 90,"y": 0}
+        }
+    ]
 }

@@ -1,13 +1,12 @@
 package BetterPipes;
 
-import BetterPipes.networkPackets.INetworkTagReceiver;
-import BetterPipes.networkPackets.PacketBlockEntity;
-import BetterPipes.networkPackets.PacketFluidAmountUpdate;
-import BetterPipes.networkPackets.PacketFluidUpdate;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -33,6 +32,7 @@ public class BetterPipes {
 
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::loadComplete);
+        modEventBus.addListener(this::onClientSetup);
         modEventBus.addListener(this::RegisterCapabilities);
         modEventBus.addListener(this::registerEntityRenderers);
         modEventBus.addListener(this::registerNetworkStuff);
@@ -58,6 +58,9 @@ public class BetterPipes {
 
 
 
+    }
+    public void onClientSetup(FMLClientSetupEvent event) {
+        ItemBlockRenderTypes.setRenderLayer(PIPE.get(), RenderType.cutout());
     }
 
     public void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

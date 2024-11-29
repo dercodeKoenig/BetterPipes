@@ -1,20 +1,18 @@
 package BetterPipes;
 
-import BetterPipes.networkPackets.PacketFluidAmountUpdate;
-import BetterPipes.networkPackets.PacketFluidUpdate;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -24,9 +22,6 @@ import static BetterPipes.RenderPipe.makeFluidRenderType;
 
 public class PipeConnection implements IFluidHandler {
     Direction myDirection;
-
-    public boolean isEnabled;
-    public boolean isExtraction = false;
 
     public int lastInputFromInside;
     public int lastInputFromOutside;
@@ -43,19 +38,23 @@ public class PipeConnection implements IFluidHandler {
 
     simpleBlockEntityTank tank;
     int lastFill;
-    IFluidHandler neighborFluidHandler;
-
 
     fluidRenderData renderData;
     EntityPipe parent;
 
+    boolean isEnabled(BlockState parent){return parent.getValue(BlockPipe.connections.get(myDirection));}
+
+    IFluidHandler neighborFluidHandler() {
+        BlockPos neighborPos = parent.getBlockPos().relative(myDirection);
+        return parent.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, myDirection.getOpposite());
+    }
 
     public PipeConnection(EntityPipe parent, Direction myDirection) {
         this.myDirection = myDirection;
         tank = new simpleBlockEntityTank(CONNECTION_CAPACITY, parent);
         this.parent = parent;
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            renderData = makeFluidRenderType(Fluids.WATER, parent.getBlockPos().toString());
+            renderData = makeFluidRenderType(Fluids.WATER);
         }
     }
 
@@ -109,8 +108,6 @@ public class PipeConnection implements IFluidHandler {
         tag.putBoolean("getsInputFromOutside", getsInputFromOutside);
         tag.putBoolean("outputsToInside", outputsToInside);
         tag.putBoolean("outputsToOutside", outputsToOutside);
-        tag.putBoolean("isExtraction", isExtraction);
-        tag.putBoolean("isEnabled", isEnabled);
         return tag;
     }
 
@@ -119,8 +116,6 @@ public class PipeConnection implements IFluidHandler {
         getsInputFromOutside = tag.getBoolean("getsInputFromOutside");
         outputsToInside = tag.getBoolean("outputsToInside");
         outputsToOutside = tag.getBoolean("outputsToOutside");
-        isExtraction = tag.getBoolean("isExtraction");
-        isEnabled = tag.getBoolean("isEnabled");
     }
 
     void update() {
@@ -174,7 +169,7 @@ public class PipeConnection implements IFluidHandler {
         if(time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
             tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
-            renderData = makeFluidRenderType(tank.getFluid().getFluid(), parent.getBlockPos().toString());
+            renderData = makeFluidRenderType(tank.getFluid().getFluid());
         }
     }
 

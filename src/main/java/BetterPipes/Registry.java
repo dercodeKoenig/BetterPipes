@@ -1,9 +1,11 @@
 package BetterPipes;
 
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
@@ -22,7 +24,7 @@ public class Registry {
 
     public static final DeferredHolder<Block, Block> PIPE = BLOCKS.register(
             "pipe",
-            () -> new BlockPipe(BlockBehaviour.Properties.of().noOcclusion().strength(0.1f))
+            () -> new BlockPipe(BlockBehaviour.Properties.of().noOcclusion().strength(0.1f).dynamicShape())
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EntityPipe>> ENTITY_PIPE = BLOCK_ENTITIES.register(
             "entity_pipe",

@@ -1,9 +1,5 @@
 package BetterPipes;
 
-import BetterPipes.networkPackets.INetworkTagReceiver;
-import BetterPipes.networkPackets.PacketBlockEntity;
-import BetterPipes.networkPackets.PacketFluidAmountUpdate;
-import BetterPipes.networkPackets.PacketFluidUpdate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -50,8 +47,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     FluidStack last_tankFluid = FluidStack.EMPTY;
     int lastFill;
     int ticksWithFluidInTank = 0;
-    boolean isExtractionActive = false;
-    boolean isExtractionMode = false;
+
     fluidRenderData renderData;
 
 
@@ -62,7 +58,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         }
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            renderData = makeFluidRenderType(Fluids.WATER, getBlockPos().toString());
+            renderData = makeFluidRenderType(Fluids.WATER);
         }
     }
 
@@ -74,13 +70,12 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     public void onLoad() {
         super.onLoad();
         BlockState state = level.getBlockState(getBlockPos());
-
         for (Direction direction : Direction.values()) {
             BlockPos neighbor = getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
-            state.updateShape(direction, level.getBlockState(neighbor), level, getBlockPos(), neighbor);
+            state = state.updateShape(direction, level.getBlockState(neighbor), level, getBlockPos(), neighbor);
         }
-
         if (!level.isClientSide) {
+            level.setBlock(getBlockPos(), state, 3);
             ACTIVE_PIPES.add(this);
         }
         if (level.isClientSide) {
@@ -101,16 +96,19 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-
-        for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-            i.tick_start();
-        }
-        for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-            i.tick_update_tanks();
-        }
-        for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-            i.tick_complete();
-        }
+try {
+    for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+        i.tick_start();
+    }
+    for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+        i.tick_update_tanks();
+    }
+    for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
+        i.tick_complete();
+    }
+} catch (Exception e) {
+    System.out.println(new RuntimeException(e));
+}
     }
 
     public void tick_start() {
@@ -121,9 +119,11 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     public void tick_update_tanks() {
+        BlockState state =level.getBlockState(getBlockPos());
+
         for (Direction direction : Direction.allShuffled(level.random)) {
             PipeConnection conn = connections.get(direction);
-            if (conn.isEnabled) {
+            if (state.getValue(BlockPipe.connections.get(direction))) {
                 if (conn.lastFill > 0) {
                     if (!conn.getsInputFromInside) {
                         double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
@@ -143,8 +143,8 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                     }
 
                     if (!conn.getsInputFromOutside) {
-                        if (conn.neighborFluidHandler != null) {
-                            if (!conn.isExtraction) {
+                        if (conn.neighborFluidHandler() != null) {
+                            if (!state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
                                 double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
                                 int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
                                 if (toTransfer > CONNECTION_MAX_OUTPUT_RATE)
@@ -153,27 +153,32 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                                     toTransfer = 1;
 
                                 FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
-                                int filled = conn.neighborFluidHandler.fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                                int filled = conn.neighborFluidHandler().fill(drained, IFluidHandler.FluidAction.SIMULATE);
                                 toTransfer = Math.min(filled, toTransfer);
                                 //drain to outside tank
-                                if (conn.neighborFluidHandler instanceof PipeConnection pipeconn)
+                                if (conn.neighborFluidHandler() instanceof PipeConnection pipeconn)
                                     pipeconn.fillFromOtherPipe(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
                                 else
-                                    conn.neighborFluidHandler.fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                    conn.neighborFluidHandler().fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
                             }
                         }
                     }
                 }
-                if (isExtractionActive && conn.isExtraction) {
-                    FluidStack drained = conn.neighborFluidHandler.drain(CONNECTION_MAX_OUTPUT_RATE, IFluidHandler.FluidAction.SIMULATE);
-                    int filled = conn.fill(drained, IFluidHandler.FluidAction.SIMULATE);
-                    int toTransfer = Math.min(filled, drained.getAmount());
-                    drained = conn.neighborFluidHandler.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE);
-                    conn.fill(drained, IFluidHandler.FluidAction.EXECUTE);
+                if (state.getValue(BlockPipe.pipe_is_extraction_active) && state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
+                    try {
+                        FluidStack drained = conn.neighborFluidHandler().drain(CONNECTION_MAX_OUTPUT_RATE, IFluidHandler.FluidAction.SIMULATE);
+                        int filled = conn.fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                        int toTransfer = Math.min(filled, drained.getAmount());
+                        drained = conn.neighborFluidHandler().drain(toTransfer, IFluidHandler.FluidAction.EXECUTE);
+                        conn.fill(drained, IFluidHandler.FluidAction.EXECUTE);
+                    } catch (Exception e) {
+                        level.setBlock(getBlockPos(), Blocks.AIR.defaultBlockState(),3);
+                        System.out.println(new RuntimeException(e));
+                    }
                 }
 
                 if (lastFill > 0) {
-                    if (!conn.outputsToInside && !conn.isExtraction) {
+                    if (!conn.outputsToInside && !state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
                         double transferRateMultiplier = (double) lastFill / REQUIRED_FILL_FOR_MAX_OUTPUT;
                         int toTransfer = (int) (MAX_OUTPUT_RATE * transferRateMultiplier);
                         if (toTransfer > MAX_OUTPUT_RATE)
@@ -191,8 +196,10 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             }
         }
     }
-
     public void tick_complete() {
+
+        BlockState state =level.getBlockState(getBlockPos());
+
         if (!tank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS + 1)
             ticksWithFluidInTank++;
         else if (tank.isEmpty()) {
@@ -215,7 +222,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         boolean needsSendUpdate = false;
         for (Direction direction : Direction.allShuffled(level.random)) {
             PipeConnection conn = connections.get(direction);
-            if (conn.isEnabled) {
+            if (state.getValue(BlockPipe.connections.get(direction))) {
                 //System.out.println(conn.tank.getFluidAmount()+":"+direction);
                 conn.update();
                 if (conn.needsSync()) {
@@ -230,64 +237,52 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         }
     }
 
-    public void setExtractionMode(boolean mode) {
-        if (isExtractionMode != mode)
-            isExtractionActive = false;
 
-        isExtractionMode = mode;
+    public BlockState setExtractionMode(BlockState state, boolean mode) {
+        if (state.getValue(BlockPipe.pipe_is_extraction) != mode) {
+            state = state.setValue(BlockPipe.pipe_is_extraction_active, false);
+        }
+        state = state.setValue(BlockPipe.pipe_is_extraction, mode);
 
         for (Direction i : Direction.values()) {
-            if (!isExtractionMode || (connections.get(i).isEnabled && !(connections.get(i).neighborFluidHandler instanceof PipeConnection)))
-                connections.get(i).isExtraction = isExtractionMode;
+            state = state.setValue(BlockPipe.connections_isExtraction.get(i),
+                    mode && !(connections.get(i).neighborFluidHandler() instanceof PipeConnection));
         }
-
-        CompoundTag updateTag = new CompoundTag();
-        for (Direction direction : Direction.values()) {
-            PipeConnection conn = connections.get(direction);
-            updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
-        }
-        updateTag.putLong("time", System.currentTimeMillis());
-        updateTag.putBoolean("isExtractionMode", isExtractionMode);
-        updateTag.putBoolean("isExtractionActive", isExtractionActive);
-        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
-
-        setChanged();
+        return state;
     }
 
-    public void setExtractionActive(boolean mode) {
-        if (isExtractionActive != mode) {
-            isExtractionActive = mode;
-            CompoundTag updateTag = new CompoundTag();
-            updateTag.putBoolean("isExtractionActive", isExtractionActive);
-            updateTag.putLong("time", System.currentTimeMillis());
-            PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
-            setChanged();
-        }
+    public BlockState setExtractionActive(BlockState state, boolean mode) {
+        state = state.setValue(BlockPipe.pipe_is_extraction_active, mode);
+        return state;
     }
 
     public void toggleExtractionActive() {
-        setExtractionActive(!isExtractionActive);
+        BlockState state = level.getBlockState(getBlockPos());
+        state = setExtractionActive(state, !state.getValue(BlockPipe.pipe_is_extraction_active));
+        level.setBlock(getBlockPos(),state,3);
     }
 
     public void toggleExtractionMode() {
+        BlockState state = level.getBlockState(getBlockPos());
 
         boolean hasAnyConnectionsInExtractionMode = false;
         for (Direction i : Direction.values()) {
-            if (connections.get(i).isEnabled && connections.get(i).isExtraction)
+            if (state.getValue(BlockPipe.connections.get(i)) && state.getValue(BlockPipe.connections_isExtraction.get(i)))
                 hasAnyConnectionsInExtractionMode = true;
         }
         if (hasAnyConnectionsInExtractionMode) {
-            setExtractionMode(false);
+           state = setExtractionMode(state,false);
         } else {
             boolean hasAnyValidConnections = false;
             for (Direction i : Direction.values()) {
-                if (connections.get(i).isEnabled && !(connections.get(i).neighborFluidHandler instanceof PipeConnection))
+                if (state.getValue(BlockPipe.connections.get(i)) && !(connections.get(i).neighborFluidHandler() instanceof PipeConnection))
                     hasAnyValidConnections = true;
             }
             if (hasAnyValidConnections) {
-                setExtractionMode(!isExtractionActive);
+                state = setExtractionMode(state, !state.getValue(BlockPipe.pipe_is_extraction));
             }
         }
+        level.setBlock(getBlockPos(),state,3);
     }
 
     @Override
@@ -296,13 +291,10 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             UUID from = compoundTag.getUUID("client_onload");
             ServerPlayer playerFrom = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(from);
             CompoundTag updateTag = new CompoundTag();
-
-            updateTag.putBoolean("isExtractionActive", isExtractionActive);
-            updateTag.putBoolean("isExtractionMode", isExtractionMode);
-
+            BlockState state = level.getBlockState(getBlockPos());
             for (Direction direction : Direction.values()) {
                 PipeConnection conn = connections.get(direction);
-                if (conn.isEnabled) {
+                if (state.getValue(BlockPipe.connections.get(direction))) {
                     CompoundTag tag = conn.getUpdateTag(level.registryAccess());
                     updateTag.put(direction.getName(), tag);
                     conn.sendInitialTankUpdates(playerFrom);
@@ -326,16 +318,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             long updateTime = compoundTag.getLong("time");
             if (updateTime >= lastUpdate) {
                 lastUpdate = updateTime;
-                if (compoundTag.contains("isExtractionActive")) {
-                    isExtractionActive = compoundTag.getBoolean("isExtractionActive");
-                }
-                if (compoundTag.contains("isExtractionMode")) {
-                    isExtractionMode = compoundTag.getBoolean("isExtractionMode");
-                }
-                if (compoundTag.contains("mainTank")) {
-                    tank.readFromNBT(level.registryAccess(), compoundTag.getCompound("mainTank"));
-                    renderData = makeFluidRenderType(tank.getFluid().getFluid(), getBlockPos().toString());
-                }
                 for (Direction direction : Direction.values()) {
                     if (compoundTag.contains(direction.getName())) {
                         connections.get(direction).handleUpdateTag(compoundTag.getCompound(direction.getName()), level.registryAccess());
@@ -352,7 +334,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
             tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
-            renderData = makeFluidRenderType(tank.getFluid().getFluid(), getBlockPos().toString());
+            renderData = makeFluidRenderType(tank.getFluid().getFluid());
         }
     }
 
@@ -372,9 +354,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
 
-        isExtractionActive = tag.getBoolean("isExtractionActive");
-        isExtractionMode = tag.getBoolean("isExtractionMode");
-
         tank.readFromNBT(registries, tag.getCompound("mainTank"));
 
         for (Direction direction : Direction.values()) {
@@ -387,9 +366,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-
-        tag.putBoolean("isExtractionActive", isExtractionActive);
-        tag.putBoolean("isExtractionMode", isExtractionMode);
 
         CompoundTag tankTag = new CompoundTag();
         tank.writeToNBT(registries, tankTag);

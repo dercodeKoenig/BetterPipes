@@ -10,18 +10,15 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static BetterPipes.BetterPipes.MODID;
+import static BetterPipes.Registry.PIPE;
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
-    static ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(MODID, "textures/block/fluid_pipe1.png");
 
     public static VertexFormat POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL = VertexFormat.builder()
             .add("Position", VertexFormatElement.POSITION)
@@ -32,7 +29,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             .add("Normal", VertexFormatElement.NORMAL)
             .build();
 
-    public static fluidRenderData makeFluidRenderType(Fluid f, String sx) {
+    public static fluidRenderData makeFluidRenderType(Fluid f) {
         if (f == Fluids.EMPTY) f = Fluids.WATER;
         IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(f);
         int color = extensions.getTintColor();
@@ -45,7 +42,8 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         d.spriteFLowing = spriteFlowing;
         d.spriteStill = spriteStill;
         d.color = color;
-        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_" + fluidtextureStill.getPath(),// + "_" + sx,
+
+        d.renderTypeStill_shader = RenderType.create("fluidStillPipeRenderer_" + fluidtextureStill.getPath(),
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
                 RenderType.TRANSIENT_BUFFER_SIZE,
@@ -60,9 +58,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, false))
                         .createCompositeState(false)
         );
-        d.renderTypeFlowing = d.renderTypeStill; // I just assume that they are on the same resource location and i  hope it increases render time
-        /*
-        d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_" + fluidtextureFlowing.getPath() + "_" + sx,
+        d.renderTypeFlowing_shader = RenderType.create("fluidFlowingPipeRenderer_" + fluidtextureFlowing.getPath(),
                 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
                 VertexFormat.Mode.QUADS,
                 RenderType.TRANSIENT_BUFFER_SIZE,
@@ -77,24 +73,39 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         .setTextureState(new TextureStateShard(spriteFlowing.atlasLocation(), false, true))
                         .createCompositeState(false)
         );
-         */
+
+        d.renderTypeStill = RenderType.create("fluidStillPipeRenderer_" + fluidtextureStill.getPath(),
+                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
+                VertexFormat.Mode.QUADS,
+                RenderType.TRANSIENT_BUFFER_SIZE,
+                false,
+                true,
+                RenderType.CompositeState.builder()
+                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                        .setOverlayState(OVERLAY)
+                        .setLightmapState(LIGHTMAP)
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setTextureState(new TextureStateShard(spriteStill.atlasLocation(), false, false))
+                        .createCompositeState(false)
+        );
+        d.renderTypeFlowing = RenderType.create("fluidFlowingPipeRenderer_" + fluidtextureFlowing.getPath(),
+                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
+                VertexFormat.Mode.QUADS,
+                RenderType.TRANSIENT_BUFFER_SIZE,
+                false,
+                true,
+                RenderType.CompositeState.builder()
+                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+                        .setOverlayState(OVERLAY)
+                        .setLightmapState(LIGHTMAP)
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setTextureState(new TextureStateShard(spriteFlowing.atlasLocation(), false, true))
+                        .createCompositeState(false)
+        );
+
         return d;
     }
-    static RenderType r = RenderType.create("",
-            POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-            VertexFormat.Mode.QUADS,
-            RenderType.TRANSIENT_BUFFER_SIZE,
-            false,
-            true,
-            RenderType.CompositeState.builder()
-                    .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                    .setOverlayState(OVERLAY)
-                    .setLightmapState(LIGHTMAP)
-                    .setCullState(NO_CULL)
-                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                    .setTextureState(new TextureStateShard(tex, false, false))
-                    .createCompositeState(false)
-    );
+   
     static float e = 0.002f;
     static float wMin = 0.02f;
     static float wMax = 0.25f - e;
@@ -103,320 +114,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         super();
     }
 
-    void renderTopConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
-        if (tile.connections.get(Direction.UP).isEnabled) {
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if (tile.connections.get(Direction.UP).isExtraction) {
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.5f, -0.25f).setNormal(0, 0, -1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.5f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.5f, 0.25f).setNormal(0, 0, 1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.5f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.5f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.5f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.5f, 0.25f).setNormal(1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.5f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        } else {
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if (tile.isExtractionMode && !tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if (tile.isExtractionMode && tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
-    void renderBottomConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
-        if (tile.connections.get(Direction.DOWN).isEnabled) {
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if (tile.connections.get(Direction.DOWN).isExtraction) {
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.5f, -0.25f).setNormal(0, 0, -1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.5f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.5f, 0.25f).setNormal(0, 0, 1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.5f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.5f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.5f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.5f, 0.25f).setNormal(1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.5f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        } else {
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if (tile.isExtractionMode && !tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if (tile.isExtractionMode && tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
-    void renderEastConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
-        if (tile.connections.get(Direction.EAST).isEnabled) {
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if (tile.connections.get(Direction.EAST).isExtraction) {
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.5f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.5f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.5f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.5f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.5f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.5f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.5f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.5f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        } else {
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if (tile.isExtractionMode && !tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if (tile.isExtractionMode && tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(1, 0, 0).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(1, 0, 0).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(1, 0, 0).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(1, 0, 0).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
-    void renderWestConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
-        if (tile.connections.get(Direction.WEST).isEnabled) {
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if (tile.connections.get(Direction.WEST).isExtraction) {
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.5f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.5f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.5f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.5f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.5f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.5f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.5f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.5f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        } else {
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if (tile.isExtractionMode && !tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if (tile.isExtractionMode && tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(-1, 0, 0).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(-1, 0, 0).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(-1, 0, 0).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(-1, 0, 0).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
-    void renderSouthConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
-        if (tile.connections.get(Direction.SOUTH).isEnabled) {
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if (tile.connections.get(Direction.SOUTH).isExtraction) {
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(-1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(-1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.5f).setNormal(-1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.5f).setNormal(-1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.5f).setNormal(1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.5f).setNormal(1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.5f).setNormal(0, 1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.5f).setNormal(0, 1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, -1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.5f).setNormal(0, -1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.5f).setNormal(0, -1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        } else {
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if (tile.isExtractionMode && !tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if (tile.isExtractionMode && tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(), -0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, 0.25f).setNormal(0, 0, 1).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, 0.25f).setNormal(0, 0, 1).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
-    void renderNorthConnection(EntityPipe tile, VertexConsumer v, PoseStack stack, int packedLight, int packedOverlay) {
-        if (tile.connections.get(Direction.NORTH).isEnabled) {
-            float v0 = 0.25f;
-            float v1 = 0.5f;
-            if (tile.connections.get(Direction.NORTH).isExtraction) {
-                v0 = 0f;
-                v1 = 0.25f;
-            }
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(-1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(-1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.5f).setNormal(-1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.5f).setNormal(-1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(1, 0, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(1, 0, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.5f).setNormal(1, 0, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.5f).setNormal(1, 0, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.5f).setNormal(0, 1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.5f).setNormal(0, 1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0.5f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, -1, 0).setUv(0f, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.5f).setNormal(0, -1, 0).setUv(0f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.5f).setNormal(0, -1, 0).setUv(0.5f, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-
-        } else {
-            float u0 = 0f;
-            float u1 = 0.5f;
-            float v0 = 0.5f;
-            float v1 = 1f;
-            if (tile.isExtractionMode && !tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0f;
-                v1 = 0.5f;
-            }
-            if (tile.isExtractionMode && tile.isExtractionActive) {
-                u0 = 0.5f;
-                u1 = 1f;
-                v0 = 0.5f;
-                v1 = 1f;
-            }
-            v.addVertex(stack.last(), -0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(u1, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, 0.25f, -0.25f).setNormal(0, 0, -1).setUv(u0, v1).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), 0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(u0, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-            v.addVertex(stack.last(), -0.25f, -0.25f, -0.25f).setNormal(0, 0, -1).setUv(u1, v0).setOverlay(packedOverlay).setColor(0xFFFFFFFF).setLight(packedLight);
-        }
-    }
-
+    
     void renderFluidCubeStill(
             float x0, float x1, float z0, float z1, float y0, float y1,
             float u0, float u1, float v0, float v1,
@@ -426,7 +124,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
 
         //render up face
-        v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         v.addVertex(stack.last(), (float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         v.addVertex(stack.last(), (float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -447,7 +145,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         v.addVertex(stack.last(), (float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         v.addVertex(stack.last(), (float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
         v.addVertex(stack.last(), (float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
-        v.addVertex(stack.last(), (float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
+        v.addVertex(stack.last(), (float) x0, (float) y0, z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
 
         // Render south face (z+ side)
         v.addVertex(stack.last(), (float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setOverlay(packedOverlay).setLight(packedLight);
@@ -1170,6 +868,8 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     }
 
     void renderFluids(EntityPipe tile, MultiBufferSource source, PoseStack stack, int packedLight, int packedOverlay) {
+        BlockState tileState = tile.getLevel().getBlockState(tile.getBlockPos());
+        if(!(tileState.getBlock() instanceof BlockPipe))return;
         // render center
         if (!tile.tank.isEmpty()) {
 
@@ -1187,10 +887,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
 
             if (
-                    !tile.connections.get(Direction.NORTH).isEnabled &&
-                            !tile.connections.get(Direction.SOUTH).isEnabled &&
-                            !tile.connections.get(Direction.WEST).isEnabled &&
-                            !tile.connections.get(Direction.EAST).isEnabled
+                    !tile.connections.get(Direction.NORTH).isEnabled(tileState) &&
+                            !tile.connections.get(Direction.SOUTH).isEnabled(tileState) &&
+                            !tile.connections.get(Direction.WEST).isEnabled(tileState) &&
+                            !tile.connections.get(Direction.EAST).isEnabled(tileState)
             ) {
                 // is vertical render because no horizontal connections are found
 
@@ -1293,7 +993,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     int numInputs = 0;
                     PipeConnection conn;
                     conn = tile.connections.get(Direction.NORTH);
-                    if (conn.isEnabled) {
+                    if (conn.isEnabled(tileState)) {
                         y0BottomOffsetNorth = y0 - 2 * e + 0.5f * (float) conn.tank.getFluidAmount() / conn.tank.getCapacity();
                         if (conn.getsInputFromInside) {
                             numOutputs++;
@@ -1305,7 +1005,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         }
                     }
                     conn = tile.connections.get(Direction.SOUTH);
-                    if (conn.isEnabled) {
+                    if (conn.isEnabled(tileState)) {
                         y0BottomOffsetSouth = y0 - 2 * e + 0.5f * (float) conn.tank.getFluidAmount() / conn.tank.getCapacity();
                         if (conn.getsInputFromInside) {
                             numOutputs++;
@@ -1317,7 +1017,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         }
                     }
                     conn = tile.connections.get(Direction.EAST);
-                    if (conn.isEnabled) {
+                    if (conn.isEnabled(tileState)) {
                         y0BottomOffsetEast = y0 - 2 * e + 0.5f * (float) conn.tank.getFluidAmount() / conn.tank.getCapacity();
                         if (conn.getsInputFromInside) {
                             numOutputs++;
@@ -1329,7 +1029,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         }
                     }
                     conn = tile.connections.get(Direction.WEST);
-                    if (conn.isEnabled) {
+                    if (conn.isEnabled(tileState)) {
                         y0BottomOffsetWest = y0 - 2 * e + 0.5f * (float) conn.tank.getFluidAmount() / conn.tank.getCapacity();
                         if (conn.getsInputFromInside) {
                             numOutputs++;
@@ -1365,7 +1065,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
 
-                    if (tile.connections.get(Direction.UP).isEnabled) {
+                    if (tile.connections.get(Direction.UP).isEnabled(tileState)) {
                         float relativeFill = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
 
                         float actualW = wMin + (wMax - wMin) * relativeFill;
@@ -1420,7 +1120,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float actualW = wMin + (wMax - wMin) * relativeFill;
                     for (Direction d : Direction.values()) {
                         PipeConnection conn = tile.connections.get(d);
-                        if (conn.isEnabled) {
+                        if (conn.isEnabled(tileState)) {
                             float y0 = -actualW;
                             float y1 = actualW;
                             float x0 = -actualW;
@@ -1489,7 +1189,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                                 u0f, u1f, v0f, v1f,
                                 color, outFlow, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
 
-                        if (!tile.connections.get(outFlow.getOpposite()).isEnabled || tile.connections.get(outFlow.getOpposite()).tank.isEmpty()) {
+                        if (!tile.connections.get(outFlow.getOpposite()).isEnabled(tileState) || tile.connections.get(outFlow.getOpposite()).tank.isEmpty()) {
                             renderFluidCubeFacebyDirection(
                                     x0, x1, z0, z1, y0, y1,
                                     u0s, u1s, v0s, v1s,
@@ -1504,7 +1204,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                                 u0f, u1f, v0f, v1f,
                                 color, inFlow, source.getBuffer(tile.renderData.renderTypeFlowing), stack, packedLight, packedOverlay);
 
-                        if (!tile.connections.get(inFlow.getOpposite()).isEnabled || tile.connections.get(inFlow.getOpposite()).tank.isEmpty()) {
+                        if (!tile.connections.get(inFlow.getOpposite()).isEnabled(tileState) || tile.connections.get(inFlow.getOpposite()).tank.isEmpty()) {
                             renderFluidCubeFacebyDirection(
                                     x0, x1, z0, z1, y0, y1,
                                     u0s, u1s, v0s, v1s,
@@ -1523,7 +1223,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         }
 
         //render connections
-        if (tile.connections.get(Direction.UP).isEnabled) {
+        if (tile.connections.get(Direction.UP).isEnabled(tileState)) {
             PipeConnection conn = tile.connections.get(Direction.UP);
 
             float u0f = conn.renderData.spriteFLowing.getU0();
@@ -1569,7 +1269,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                             color, source.getBuffer(conn.renderData.renderTypeStill), stack, packedLight, packedOverlay);
                 }
 /*
-                float relativeFillAbove = (float) tile.connections.get(Direction.UP).neighborFluidHandler.getFluidInTank(0).getAmount() / tile.connections.get(Direction.UP).neighborFluidHandler.getTankCapacity(0);
+                float relativeFillAbove = (float) tile.connections.get(Direction.UP).neighborFluidHandler().getFluidInTank(0).getAmount() / tile.connections.get(Direction.UP).neighborFluidHandler().getTankCapacity(0);
                 float actualWAbove = wMin + (wMax - wMin) * relativeFillAbove;
                 float xh2 = -actualWAbove;
                 float xh3 = actualWAbove;
@@ -1593,7 +1293,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
  */
             }
         }
-        if (tile.connections.get(Direction.DOWN).isEnabled) {
+        if (tile.connections.get(Direction.DOWN).isEnabled(tileState)) {
             PipeConnection conn = tile.connections.get(Direction.DOWN);
 
             float u0f = conn.renderData.spriteFLowing.getU0();
@@ -1647,7 +1347,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 float zh3 = actualWAbove;
                 boolean renderAbove = actualWAbove < actualW;
 
-                float relativeFillBelow = (float) tile.connections.get(Direction.DOWN).neighborFluidHandler.getFluidInTank(0).getAmount() / tile.connections.get(Direction.DOWN).neighborFluidHandler.getTankCapacity(0);
+                float relativeFillBelow = (float) tile.connections.get(Direction.DOWN).neighborFluidHandler().getFluidInTank(0).getAmount() / tile.connections.get(Direction.DOWN).neighborFluidHandler().getTankCapacity(0);
                 float actualWBelow = wMin + (wMax - wMin) * relativeFillBelow;
                 float xh0 = -actualWBelow;
                 float xh1 = actualWBelow;
@@ -1663,7 +1363,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                  */
             }
         }
-        if (tile.connections.get(Direction.WEST).isEnabled) {
+        if (tile.connections.get(Direction.WEST).isEnabled(tileState)) {
             PipeConnection conn = tile.connections.get(Direction.WEST);
 
             float u0f = conn.renderData.spriteFLowing.getU0();
@@ -1694,7 +1394,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float y0BottomOffsetSouth = y0;
                     float y0BottomOffsetWest = y0;
                     float y0BottomOffsetEast = y0 - 2 * e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
-                    if (conn.neighborFluidHandler instanceof PipeConnection p)
+                    if (conn.neighborFluidHandler() instanceof PipeConnection p)
                         y0BottomOffsetWest = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
@@ -1745,7 +1445,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 }
             }
         }
-        if (tile.connections.get(Direction.EAST).isEnabled) {
+        if (tile.connections.get(Direction.EAST).isEnabled(tileState)) {
             PipeConnection conn = tile.connections.get(Direction.EAST);
 
             float u0f = conn.renderData.spriteFLowing.getU0();
@@ -1776,7 +1476,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float y0BottomOffsetSouth = y0;
                     float y0BottomOffsetWest = y0 - 2 * e + 0.5f * (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
                     float y0BottomOffsetEast = y0;
-                    if (conn.neighborFluidHandler instanceof PipeConnection p)
+                    if (conn.neighborFluidHandler() instanceof PipeConnection p)
                         y0BottomOffsetEast = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
@@ -1827,7 +1527,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 }
             }
         }
-        if (tile.connections.get(Direction.SOUTH).isEnabled) {
+        if (tile.connections.get(Direction.SOUTH).isEnabled(tileState)) {
             PipeConnection conn = tile.connections.get(Direction.SOUTH);
 
             float u0f = conn.renderData.spriteFLowing.getU0();
@@ -1858,7 +1558,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float y0BottomOffsetSouth = y0;
                     float y0BottomOffsetWest = y0;
                     float y0BottomOffsetEast = y0;
-                    if (conn.neighborFluidHandler instanceof PipeConnection p)
+                    if (conn.neighborFluidHandler() instanceof PipeConnection p)
                         y0BottomOffsetSouth = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
@@ -1910,7 +1610,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 }
             }
         }
-        if (tile.connections.get(Direction.NORTH).isEnabled) {
+        if (tile.connections.get(Direction.NORTH).isEnabled(tileState)) {
             PipeConnection conn = tile.connections.get(Direction.NORTH);
 
             float u0f = conn.renderData.spriteFLowing.getU0();
@@ -1942,7 +1642,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     float y0BottomOffsetWest = y0;
                     ;
                     float y0BottomOffsetEast = y0;
-                    if (conn.neighborFluidHandler instanceof PipeConnection p)
+                    if (conn.neighborFluidHandler() instanceof PipeConnection p)
                         y0BottomOffsetNorth = y0 - 2 * e + 0.5f * (float) p.tank.getFluidAmount() / p.tank.getCapacity();
 
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
@@ -1999,15 +1699,6 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     @Override
     public void render(EntityPipe tile, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         stack.translate(0.5f, 0.5f, 0.5f);
-
-        VertexConsumer v = bufferSource.getBuffer(r);
-        renderTopConnection(tile, v, stack, packedLight, packedOverlay);
-        renderBottomConnection(tile, v, stack, packedLight, packedOverlay);
-        renderNorthConnection(tile, v, stack, packedLight, packedOverlay);
-        renderSouthConnection(tile, v, stack, packedLight, packedOverlay);
-        renderEastConnection(tile, v, stack, packedLight, packedOverlay);
-        renderWestConnection(tile, v, stack, packedLight, packedOverlay);
-
 
         renderFluids(tile, bufferSource, stack, packedLight, packedOverlay);
     }
