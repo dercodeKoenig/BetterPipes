@@ -85,7 +85,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             VertexFormat.Mode.QUADS,
             RenderType.TRANSIENT_BUFFER_SIZE,
             false,
-            true,
+            false,
             RenderType.CompositeState.builder()
                     .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
                     .setOverlayState(OVERLAY)
