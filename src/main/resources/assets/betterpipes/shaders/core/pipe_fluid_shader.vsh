@@ -1,8 +1,5 @@
 #version 150
 
-#moj_import <light.glsl>
-#moj_import <fog.glsl>
-
 in vec3 Position;
 in vec4 Color;
 in vec2 UV0;
@@ -24,6 +21,28 @@ out float vertexDistance;
 out vec4 vertexColor;
 out vec4 lightMapColor;
 out vec2 texCoord0;
+
+#define MINECRAFT_LIGHT_POWER   (0.6)
+#define MINECRAFT_AMBIENT_LIGHT (0.4)
+
+vec4 minecraft_mix_light(vec3 lightDir0, vec3 lightDir1, vec3 normal, vec4 color) {
+    float light0 = max(0.0, dot(lightDir0, normal));
+    float light1 = max(0.0, dot(lightDir1, normal));
+    float lightAccum = min(1.0, (light0 + light1) * MINECRAFT_LIGHT_POWER + MINECRAFT_AMBIENT_LIGHT);
+    return vec4(color.rgb * lightAccum, color.a);
+}
+
+
+float fog_distance(vec3 pos, int shape) {
+    if (shape == 0) {
+        return length(pos);
+    } else {
+        float distXZ = length(pos.xz);
+        float distY = abs(pos.y);
+        return max(distXZ, distY);
+    }
+}
+
 
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
