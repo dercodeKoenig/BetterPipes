@@ -10,8 +10,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -53,6 +56,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     public VertexBuffer vertexBuffer;
     public MeshData mesh;
     public boolean requiresMeshUpdate = false;
+    public boolean requiresMeshUpdate2 = false;
     public ByteBufferBuilder myByteBuffer;
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
@@ -107,151 +111,170 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         }
         super.setRemoved();
     }
-
-    @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
-        try {
-            for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-                i.tick_start();
-            }
-            for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-                i.tick_update_tanks();
-            }
-            for (EntityPipe i : EntityPipe.ACTIVE_PIPES) {
-                i.tick_complete();
-            }
-        } catch (Exception e) {
-            System.out.println(new RuntimeException(e));
-        }
+    public static <T extends BlockEntity> void tick(Level level, BlockPos blockPos, BlockState blockState, T t) {
+        ((EntityPipe)t).tick();
     }
+    public void tick() {
 
-    public void tick_start() {
-        lastFill = tank.getFluidAmount();
-        for (Direction direction : Direction.values()) {
-            connections.get(direction).lastFill = connections.get(direction).tank.getFluidAmount();
+        if (level.isClientSide && requiresMeshUpdate2) {
+            requiresMeshUpdate2 = false;
+            renderData.updateSprites(tank.getFluid().getFluid());
+            for (Direction i : Direction.values())
+                connections.get(i).renderData.updateSprites(connections.get(i).tank.getFluid().getFluid());
+            requiresMeshUpdate = true;
         }
-    }
+        if (!level.isClientSide) {
+            BlockState state = level.getBlockState(getBlockPos());
+            boolean isUpdateTick = level.getGameTime() % 2 == 0;
+            if (!isUpdateTick) {
+                // store last fill data for all pipes to use in updateTick
+                lastFill = tank.getFluidAmount();
+                for (Direction direction : Direction.values()) {
+                    connections.get(direction).lastFill = connections.get(direction).tank.getFluidAmount();
+                }
 
-    public void tick_update_tanks() {
-        BlockState state = level.getBlockState(getBlockPos());
+                if (!FluidStack.isSameFluidSameComponents(last_tankFluid, tank.getFluid())) {
+                    if (!tank.getFluid().isEmpty())
+                        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getLevel(), new ChunkPos(getBlockPos()), PacketFluidUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluid().getFluid()));
+                }
+                if (last_tankFluid.getAmount() != tank.getFluidAmount()) {
+                    PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getLevel(), new ChunkPos(getBlockPos()), PacketFluidAmountUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluidAmount()));
+                }
+                last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
 
-        for (Direction direction : Direction.allShuffled(level.random)) {
-            PipeConnection conn = connections.get(direction);
-            if (state.getValue(BlockPipe.connections.get(direction))) {
-                if (conn.lastFill > 0) {
-                    if (!conn.getsInputFromInside) {
-                        double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
-                        int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
-                        if (toTransfer > CONNECTION_MAX_OUTPUT_RATE && conn.lastInputWasFromAnotherPipe)
-                            toTransfer = CONNECTION_MAX_OUTPUT_RATE + (int) (transferRateMultiplier * CONNECTION_MAX_OUTPUT_RATE / 10f);
-                        if (toTransfer > CONNECTION_MAX_OUTPUT_RATE && !conn.lastInputWasFromAnotherPipe)
-                            toTransfer = CONNECTION_MAX_OUTPUT_RATE;
-                        if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS / 2)
-                            toTransfer = 1;
+                CompoundTag updateTag = new CompoundTag();
+                boolean needsSendUpdate = false;
+                for (Direction direction : Direction.values()) {
+                    PipeConnection conn = connections.get(direction);
+                    if (state.getValue(BlockPipe.connections.get(direction))) {
+                        conn.syncTanks();
+                        if (conn.needsSync()) {
+                            updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
+                            needsSendUpdate = true;
+                        }
+                    }
+                }
+                if (needsSendUpdate) {
+                    updateTag.putLong("time", System.currentTimeMillis());
+                    PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
+                }
+            }
+            for (Direction direction : Direction.allShuffled(level.random)) {
+                PipeConnection conn = connections.get(direction);
+                if (state.getValue(BlockPipe.connections.get(direction))) {
+                    if (conn.lastFill > 0) {
+                        if (!conn.getsInputFromInside && isUpdateTick) {
+                            //drain into main tank
+                            double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                            int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * 2 * transferRateMultiplier);
+                                    int target_free =MAIN_CAPACITY - REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                    int has_free = MAIN_CAPACITY - lastFill;
+                            double speedMultiplier = Math.min(1,(float)has_free / target_free);
+                            toTransfer = (int)(CONNECTION_MAX_OUTPUT_RATE * 2 * speedMultiplier * Math.min(1,transferRateMultiplier));
 
-                        FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
-                        int filled = tank.fill(drained, IFluidHandler.FluidAction.SIMULATE);
-                        toTransfer = Math.min(filled, toTransfer);
-                        //drain into main tank
-                        tank.fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE, true), IFluidHandler.FluidAction.EXECUTE);
+                            if (toTransfer > CONNECTION_MAX_OUTPUT_RATE * 2 && !conn.lastInputWasFromAnotherPipe)
+                                toTransfer = CONNECTION_MAX_OUTPUT_RATE * 2;
+                            if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS / 2)
+                                toTransfer = 1;
+
+                            FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
+                            int filled = tank.fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                            toTransfer = Math.min(filled, toTransfer);
+                            tank.fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE, true), IFluidHandler.FluidAction.EXECUTE);
+                        }
+
+                        if (!conn.getsInputFromOutside) {
+                            if (conn.neighborFluidHandler() != null) {
+                                if (!state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
+                                    //drain to outside tank
+                                    if (conn.neighborFluidHandler() instanceof PipeConnection pipeconn) {
+                                        if(isUpdateTick) {
+                                            // for pipes use normal 2 stage tick logic
+                                            double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                            int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * 2 * transferRateMultiplier);
+                                                int target_free =CONNECTION_CAPACITY - CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                                int has_free = CONNECTION_CAPACITY - pipeconn.lastFill;
+                                            double speedMultiplier = Math.min(1,(float)has_free / target_free);
+                                            toTransfer = (int)(CONNECTION_MAX_OUTPUT_RATE * 2 * speedMultiplier* Math.min(1,transferRateMultiplier));
+
+                                            if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS / 2)
+                                                toTransfer = 1;
+
+                                            FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
+                                            int filled = conn.neighborFluidHandler().fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                                            toTransfer = Math.min(filled, toTransfer);
+                                            pipeconn.fillFromOtherPipe(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                        }
+                                    } else {
+                                        // for others, output every tick
+                                        double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                        int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
+                                        if (toTransfer > CONNECTION_MAX_OUTPUT_RATE)
+                                            toTransfer = CONNECTION_MAX_OUTPUT_RATE + (int) (transferRateMultiplier * CONNECTION_MAX_OUTPUT_RATE / 10f);
+                                        if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS / 2)
+                                            toTransfer = 1;
+
+                                        FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
+                                        int filled = conn.neighborFluidHandler().fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                                        toTransfer = Math.min(filled, toTransfer);
+                                        conn.neighborFluidHandler().fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    if (!conn.getsInputFromOutside) {
-                        if (conn.neighborFluidHandler() != null) {
-                            if (!state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
-                                double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
-                                int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * transferRateMultiplier);
-                                if (toTransfer > CONNECTION_MAX_OUTPUT_RATE)
-                                    toTransfer = CONNECTION_MAX_OUTPUT_RATE + (int) (transferRateMultiplier * CONNECTION_MAX_OUTPUT_RATE / 10f);
-                                if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS / 2)
+                    if (state.getValue(BlockPipe.pipe_is_extraction_active) && state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
+                        // extract from a neighbor fluid handler
+                        // this runs every tick
+                        try {
+                            FluidStack drained = conn.neighborFluidHandler().drain(CONNECTION_MAX_OUTPUT_RATE, IFluidHandler.FluidAction.SIMULATE);
+                            int filled = conn.fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                            int toTransfer = Math.min(filled, drained.getAmount());
+                            drained = conn.neighborFluidHandler().drain(toTransfer, IFluidHandler.FluidAction.EXECUTE);
+                            conn.fill(drained, IFluidHandler.FluidAction.EXECUTE);
+                        } catch (Exception e) {
+                            level.setBlock(getBlockPos(), Blocks.AIR.defaultBlockState(), 3);
+                            System.out.println(new RuntimeException(e));
+                        }
+                    }
+                    if (isUpdateTick) {
+                        if (lastFill > 0) {
+                            //drain main tank into connection, using 2 stage update
+                            if (!conn.outputsToInside && !state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
+                                double transferRateMultiplier = (double) lastFill / REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                int toTransfer = (int) (MAX_OUTPUT_RATE * 2 * transferRateMultiplier);
+                                    int target_free =CONNECTION_CAPACITY - CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                    int has_free = CONNECTION_CAPACITY - conn.lastFill;
+                                    double speedMultiplier = Math.min(1,(float)has_free / target_free);
+                                    toTransfer = (int)(MAX_OUTPUT_RATE * 2 * speedMultiplier* Math.min(1,transferRateMultiplier));
+
+                                if (toTransfer == 0 && ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
                                     toTransfer = 1;
 
-                                FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
-                                int filled = conn.neighborFluidHandler().fill(drained, IFluidHandler.FluidAction.SIMULATE);
+                                FluidStack drained = tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
+                                int filled = conn.tank.fill(drained, IFluidHandler.FluidAction.SIMULATE);
                                 toTransfer = Math.min(filled, toTransfer);
-                                //drain to outside tank
-                                if (conn.neighborFluidHandler() instanceof PipeConnection pipeconn)
-                                    pipeconn.fillFromOtherPipe(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-                                else
-                                    conn.neighborFluidHandler().fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                conn.fill(tank.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE, true);
                             }
                         }
                     }
                 }
-                if (state.getValue(BlockPipe.pipe_is_extraction_active) && state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
-                    try {
-                        FluidStack drained = conn.neighborFluidHandler().drain(CONNECTION_MAX_OUTPUT_RATE, IFluidHandler.FluidAction.SIMULATE);
-                        int filled = conn.fill(drained, IFluidHandler.FluidAction.SIMULATE);
-                        int toTransfer = Math.min(filled, drained.getAmount());
-                        drained = conn.neighborFluidHandler().drain(toTransfer, IFluidHandler.FluidAction.EXECUTE);
-                        conn.fill(drained, IFluidHandler.FluidAction.EXECUTE);
-                    } catch (Exception e) {
-                        level.setBlock(getBlockPos(), Blocks.AIR.defaultBlockState(), 3);
-                        System.out.println(new RuntimeException(e));
-                    }
-                }
+            }
 
-                if (lastFill > 0) {
-                    if (!conn.outputsToInside && !state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
-                        double transferRateMultiplier = (double) lastFill / REQUIRED_FILL_FOR_MAX_OUTPUT;
-                        int toTransfer = (int) (MAX_OUTPUT_RATE * transferRateMultiplier);
-                        if (toTransfer > MAX_OUTPUT_RATE)
-                            toTransfer = MAX_OUTPUT_RATE + (int) (transferRateMultiplier * CONNECTION_MAX_OUTPUT_RATE / 10f);
-                        if (toTransfer == 0 && ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
-                            toTransfer = 1;
-
-                        FluidStack drained = tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
-                        int filled = conn.tank.fill(drained, IFluidHandler.FluidAction.SIMULATE);
-                        toTransfer = Math.min(filled, toTransfer);
-                        //drain main tank into connection
-                        conn.fill(tank.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE, true);
-                    }
+            if (!tank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS + 1)
+                ticksWithFluidInTank++;
+            else if (tank.isEmpty()) {
+                ticksWithFluidInTank = 0;
+            }
+            for (Direction direction : Direction.allShuffled(level.random)) {
+                PipeConnection conn = connections.get(direction);
+                if (state.getValue(BlockPipe.connections.get(direction))) {
+                    conn.update();
                 }
             }
         }
     }
-
-    public void tick_complete() {
-
-        BlockState state = level.getBlockState(getBlockPos());
-
-        if (!tank.isEmpty() && ticksWithFluidInTank < FORCE_OUTPUT_AFTER_TICKS + 1)
-            ticksWithFluidInTank++;
-        else if (tank.isEmpty()) {
-            ticksWithFluidInTank = 0;
-        }
-        // Check if the tank fluid stack has changed
-        // this has it's own packet now for efficiency
-        // to not always send the large nbt
-        if (!FluidStack.isSameFluidSameComponents(last_tankFluid, tank.getFluid())) {
-            if (!tank.getFluid().isEmpty())
-                PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getLevel(), new ChunkPos(getBlockPos()), PacketFluidUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluid().getFluid()));
-        }
-        if (last_tankFluid.getAmount() != tank.getFluidAmount()) {
-            PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getLevel(), new ChunkPos(getBlockPos()), PacketFluidAmountUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluidAmount()));
-        }
-        last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
-
-
-        CompoundTag updateTag = new CompoundTag();
-        boolean needsSendUpdate = false;
-        for (Direction direction : Direction.allShuffled(level.random)) {
-            PipeConnection conn = connections.get(direction);
-            if (state.getValue(BlockPipe.connections.get(direction))) {
-                //System.out.println(conn.tank.getFluidAmount()+":"+direction);
-                conn.update();
-                if (conn.needsSync()) {
-                    updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
-                    needsSendUpdate = true;
-                }
-            }
-        }
-        if (needsSendUpdate) {
-            updateTag.putLong("time", System.currentTimeMillis());
-            PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
-        }
-    }
-
 
     public BlockState setExtractionMode(BlockState state, boolean mode) {
         if (state.getValue(BlockPipe.pipe_is_extraction) != mode) {
@@ -343,10 +366,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     public void setRequiresMeshUpdate(){
-        renderData.updateSprites(tank.getFluid().getFluid());
-        for(Direction i : Direction.values())
-            connections.get(i).renderData.updateSprites(connections.get(i).tank.getFluid().getFluid());
-        requiresMeshUpdate = true;
+        requiresMeshUpdate2 = true;
     }
 
     long lastFluidInTankUpdate;
@@ -396,4 +416,5 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             conn.saveAdditional(registries, tag);
         }
     }
+
 }

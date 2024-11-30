@@ -114,7 +114,19 @@ public class PipeConnection implements IFluidHandler {
         outputsToInside = tag.getBoolean("outputsToInside");
         outputsToOutside = tag.getBoolean("outputsToOutside");
     }
-
+void syncTanks(){
+    // Check if the tank fluid stack has changed
+    // this has it's own packet now for efficiency
+    // to not always send the large nbt
+    if (!FluidStack.isSameFluidSameComponents(last_tankFluid, tank.getFluid())) {
+        if(!tank.getFluid().isEmpty())
+            PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) parent.getLevel(), new ChunkPos(parent.getBlockPos()), PacketFluidUpdate.getPacketFluidUpdate(parent.getBlockPos(),myDirection,tank.getFluid().getFluid()));
+    }
+    if(last_tankFluid.getAmount() != tank.getFluidAmount()){
+        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) parent.getLevel(), new ChunkPos(parent.getBlockPos()), PacketFluidAmountUpdate.getPacketFluidUpdate(parent.getBlockPos(),myDirection,tank.getFluidAmount()));
+    }
+    last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
+}
     void update() {
         if (lastInputFromOutside < STATE_UPDATE_TICKS + 1)
             lastInputFromOutside++;
@@ -141,19 +153,6 @@ public class PipeConnection implements IFluidHandler {
         else if (tank.isEmpty()) {
             ticksWithFluidInTank = 0;
         }
-
-        // Check if the tank fluid stack has changed
-        // this has it's own packet now for efficiency
-        // to not always send the large nbt
-        if (!FluidStack.isSameFluidSameComponents(last_tankFluid, tank.getFluid())) {
-            if(!tank.getFluid().isEmpty())
-                PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) parent.getLevel(), new ChunkPos(parent.getBlockPos()), PacketFluidUpdate.getPacketFluidUpdate(parent.getBlockPos(),myDirection,tank.getFluid().getFluid()));
-        }
-        if(last_tankFluid.getAmount() != tank.getFluidAmount()){
-            PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) parent.getLevel(), new ChunkPos(parent.getBlockPos()), PacketFluidAmountUpdate.getPacketFluidUpdate(parent.getBlockPos(),myDirection,tank.getFluidAmount()));
-        }
-        last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
-
     }
     public void sendInitialTankUpdates(ServerPlayer player){
         PacketDistributor.sendToPlayer(player, PacketFluidAmountUpdate.getPacketFluidUpdate(parent.getBlockPos(),myDirection,tank.getFluidAmount()));

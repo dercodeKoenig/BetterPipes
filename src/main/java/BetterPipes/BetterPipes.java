@@ -34,7 +34,7 @@ import static BetterPipes.RenderPipe.POSITION_COLOR_TEXTURE_NORMAL;
 public class BetterPipes {
 
     public BetterPipes(IEventBus modEventBus, ModContainer modContaine) throws IOException {
-        NeoForge.EVENT_BUS.register(EntityPipe.class);
+        //NeoForge.EVENT_BUS.register(EntityPipe.class);
 
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::loadComplete);
