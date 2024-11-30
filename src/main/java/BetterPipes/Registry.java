@@ -1,7 +1,9 @@
 package BetterPipes;
 
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -11,12 +13,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
-import static BetterPipes.BetterPipes.MODID;
-
 public class Registry {
-    public static final net.neoforged.neoforge.registries.DeferredRegister<Block> BLOCKS = net.neoforged.neoforge.registries.DeferredRegister.create(BuiltInRegistries.BLOCK, MODID);
-    public static final net.neoforged.neoforge.registries.DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = net.neoforged.neoforge.registries.DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, MODID);
-    public static final net.neoforged.neoforge.registries.DeferredRegister<Item> ITEMS = net.neoforged.neoforge.registries.DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
+    public static final net.neoforged.neoforge.registries.DeferredRegister<Block> BLOCKS = net.neoforged.neoforge.registries.DeferredRegister.create(BuiltInRegistries.BLOCK, "betterpipes");
+    public static final net.neoforged.neoforge.registries.DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = net.neoforged.neoforge.registries.DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, "betterpipes");
+    public static final net.neoforged.neoforge.registries.DeferredRegister<Item> ITEMS = net.neoforged.neoforge.registries.DeferredRegister.create(BuiltInRegistries.ITEM, "betterpipes");
 
     public static void registerBlockItem(String name, DeferredHolder<Block,Block> b){
         ITEMS.register(name,() -> new BlockItem(b.get(), new Item.Properties()));
@@ -31,7 +31,7 @@ public class Registry {
             () -> BlockEntityType.Builder.of(EntityPipe::new, PIPE.get()).build(null)
     );
 
-
+    public static ShaderInstance PIPE_FLUID_SHADER;
 
     public static void register(IEventBus modBus) {
         registerBlockItem("pipe", PIPE);

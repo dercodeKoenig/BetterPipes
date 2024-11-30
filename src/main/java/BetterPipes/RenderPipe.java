@@ -26,16 +26,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static BetterPipes.Registry.PIPE;
+import static BetterPipes.Registry.PIPE_FLUID_SHADER;
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
-
+    static ShaderInstance get_PIPE_FLUID_SHADER() {
+        return PIPE_FLUID_SHADER;
+    }
+    public static ShaderStateShard PIPE_FLUID_SHADER_SHARD = new ShaderStateShard(RenderPipe::get_PIPE_FLUID_SHADER);
     public static VertexFormat POSITION_COLOR_TEXTURE_NORMAL = VertexFormat.builder()
             .add("Position", VertexFormatElement.POSITION)
             .add("Color", VertexFormatElement.COLOR)
             .add("UV0", VertexFormatElement.UV0)
-            .add("UV1", VertexFormatElement.UV1)
-            .add("UV2", VertexFormatElement.UV2)
             .add("Normal", VertexFormatElement.NORMAL)
             .build();
 
@@ -1635,7 +1637,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
             tile.vertexBuffer.bind();
 
-            RENDERTYPE_ENTITY_SOLID_SHADER.setupRenderState();
+            PIPE_FLUID_SHADER_SHARD.setupRenderState();
             LIGHTMAP.setupRenderState();
             LEQUAL_DEPTH_TEST.setupRenderState();
             CULL.setupRenderState();
@@ -1658,6 +1660,8 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 Matrix4f wtfAmIdoing2 = wtfAmIdoing.mul(stack.last().pose());
                 wtfAmIdoing2 = wtfAmIdoing2.translate(0.5f, 0.5f, 0.5f);
                 shader.setDefaultUniforms(VertexFormat.Mode.QUADS, wtfAmIdoing2, RenderSystem.getProjectionMatrix(), Minecraft.getInstance().getWindow());
+                shader.getUniform("LightMapCoords").set(packedLight & '\uffff', packedLight >> 16 & '\uffff');
+                System.out.println(shader.getUniform("LightMapCoords").getIntBuffer().array());
                 shader.apply();
                 tile.vertexBuffer.draw();
                 shader.clear();
@@ -1665,7 +1669,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
             VertexBuffer.unbind();
 
-            RENDERTYPE_ENTITY_SOLID_SHADER.clearRenderState();
+            PIPE_FLUID_SHADER_SHARD.clearRenderState();
             LIGHTMAP.clearRenderState();
             LEQUAL_DEPTH_TEST.clearRenderState();
             CULL.clearRenderState();
