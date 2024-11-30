@@ -70,11 +70,10 @@ public class ConfigManager {
     // Generate default configuration values
     private void generateDefaultConfig() {
         // Add your default values here
-        setDefault("MAIN_MAX_OUTPUT_RATE", "40");
+        setDefault("MAX_OUTPUT_RATE", "40");
         setDefault("MAIN_REQUIRED_FILL_FOR_MAX_OUTPUT", "200");
         setDefault("MAIN_CAPACITY", "400");
 
-        setDefault("CONNECTION_MAX_OUTPUT_RATE", "40");
         setDefault("CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT", "100");
         setDefault("CONNECTION_CAPACITY", "200");
 

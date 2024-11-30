@@ -51,10 +51,10 @@ public class BetterPipes {
 
         ConfigManager configManager = new ConfigManager(configDir, filename);
 
-        EntityPipe.MAX_OUTPUT_RATE = configManager.getInt("MAIN_MAX_OUTPUT_RATE", 0);
+        EntityPipe.MAX_OUTPUT_RATE = configManager.getInt("MAX_OUTPUT_RATE", 0);
         EntityPipe.REQUIRED_FILL_FOR_MAX_OUTPUT = configManager.getInt("MAIN_REQUIRED_FILL_FOR_MAX_OUTPUT", 0);
         EntityPipe.MAIN_CAPACITY = configManager.getInt("MAIN_CAPACITY", 0);
-        EntityPipe.CONNECTION_MAX_OUTPUT_RATE = configManager.getInt("CONNECTION_MAX_OUTPUT_RATE", 0);
+        EntityPipe.CONNECTION_MAX_OUTPUT_RATE = configManager.getInt("MAX_OUTPUT_RATE", 0);
         EntityPipe.CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT = configManager.getInt("CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT", 0);
         EntityPipe.CONNECTION_CAPACITY = configManager.getInt("CONNECTION_CAPACITY", 0);
         EntityPipe.STATE_UPDATE_TICKS = configManager.getInt("Z_STATE_UPDATE_TICKS", 0);
