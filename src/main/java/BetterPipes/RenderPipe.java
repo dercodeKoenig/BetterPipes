@@ -1,5 +1,6 @@
 package BetterPipes;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -15,30 +16,36 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static BetterPipes.Registry.PIPE_FLUID_SHADER;
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
-     static final RenderStateShard LIGHTMAP = new RenderStateShard.LightmapStateShard(true);
-     static final RenderStateShard LEQUAL_DEPTH_TEST = new RenderStateShard.DepthTestStateShard("<=", 515);
-     static final RenderStateShard CULL = new RenderStateShard.CullStateShard(true);
+    static final RenderStateShard LIGHTMAP = new RenderStateShard.LightmapStateShard(true);
+    static final RenderStateShard LEQUAL_DEPTH_TEST = new RenderStateShard.DepthTestStateShard("<=", 515);
+    static final RenderStateShard CULL = new RenderStateShard.CullStateShard(true);
     static final RenderStateShard.WriteMaskStateShard COLOR_DEPTH_WRITE = new RenderStateShard.WriteMaskStateShard(true, true);
-     static final RenderStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
-             "translucent_transparency",
-             () -> {
-                 RenderSystem.enableBlend();
-                 RenderSystem.blendFuncSeparate(
-                         GlStateManager.SourceFactor.SRC_ALPHA,
-                         GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                         GlStateManager.SourceFactor.ONE,
-                         GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
-                 );
-             },
-             () -> {
-                 RenderSystem.disableBlend();
-                 RenderSystem.defaultBlendFunc();
-             }
-     );;
+    static final RenderStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
+            "translucent_transparency",
+            () -> {
+                RenderSystem.enableBlend();
+                RenderSystem.blendFuncSeparate(
+                        GlStateManager.SourceFactor.SRC_ALPHA,
+                        GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                        GlStateManager.SourceFactor.ONE,
+                        GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
+                );
+            },
+            () -> {
+                RenderSystem.disableBlend();
+                RenderSystem.defaultBlendFunc();
+            }
+    );
+    ;
     static final RenderStateShard.TextureStateShard BLOCK_SHEET_MIPPED = new RenderStateShard.TextureStateShard(
             TextureAtlas.LOCATION_BLOCKS, false, true
     );
@@ -46,8 +53,14 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     static ShaderInstance get_PIPE_FLUID_SHADER() {
         return PIPE_FLUID_SHADER;
     }
+
     public static ShaderStateShard PIPE_FLUID_SHADER_SHARD = new ShaderStateShard(RenderPipe::get_PIPE_FLUID_SHADER);
-    public static VertexFormat POSITION_COLOR_TEXTURE_NORMAL = new VertexFormat();
+    static VertexFormatElement Position = new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.POSITION, 3);
+    static VertexFormatElement Color = new VertexFormatElement(0, VertexFormatElement.Type.UBYTE, VertexFormatElement.Usage.COLOR, 4);
+    static VertexFormatElement UV = new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.UV, 2);
+    static VertexFormatElement Normal = new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.NORMAL, 3);
+    static ImmutableMap<String, VertexFormatElement> vertexElements =ImmutableMap.copyOf(Map.of("Position", Position, "color", Color, "UV", UV, "Normal", Normal));
+    public static VertexFormat POSITION_COLOR_TEXTURE_NORMAL = new VertexFormat(vertexElements);
 
 
     static float e = 0.001f;
@@ -1657,6 +1670,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             if (tile.requiresMeshUpdate) {
                 tile.requiresMeshUpdate = false;
                 BufferBuilder bufferBuilder = new BufferBuilder(2048);//, VertexFormat.Mode.QUADS, RenderPipe.POSITION_COLOR_TEXTURE_NORMAL);
+                bufferBuilder.begin(VertexFormat.Mode.QUADS,POSITION_COLOR_TEXTURE_NORMAL);
                 RenderPipe.renderFluids(tile, bufferBuilder);
                 tile.mesh = bufferBuilder.end();
                 if (tile.mesh != null)
@@ -1668,8 +1682,19 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 Matrix4f wtfAmIdoing = new Matrix4f(RenderSystem.getModelViewMatrix());
                 Matrix4f wtfAmIdoing2 = wtfAmIdoing.mul(stack.last().pose());
                 wtfAmIdoing2 = wtfAmIdoing2.translate(0.5f, 0.5f, 0.5f);
-                shader.setDefaultUniforms(VertexFormat.Mode.QUADS, wtfAmIdoing2, RenderSystem.getProjectionMatrix(), Minecraft.getInstance().getWindow());
+
+                shader.getUniform("ModelViewMat").set(wtfAmIdoing2);
+                shader.getUniform("ProjMat").set(RenderSystem.getProjectionMatrix());
+                shader.setSampler("Sampler0", RenderSystem.getShaderTexture(0));
+                shader.setSampler("Sampler2", RenderSystem.getShaderTexture(2));
                 shader.getUniform("LightMapCoords").set(packedLight & '\uffff', packedLight >> 16 & '\uffff');
+                shader.getUniform("ColorModulator").set(RenderSystem.getShaderColor());
+                shader.getUniform("FogStart").set(RenderSystem.getShaderFogStart());
+                shader.getUniform("FogEnd").set(RenderSystem.getShaderFogEnd());
+                    shader.getUniform("FogColor").set(RenderSystem.getShaderFogColor());
+                    shader.getUniform("FogShape").set(RenderSystem.getShaderFogShape().getIndex());
+                RenderSystem.setupShaderLights(shader);
+
                 shader.apply();
                 tile.vertexBuffer.draw();
                 shader.clear();

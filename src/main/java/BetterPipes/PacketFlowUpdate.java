@@ -1,28 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package BetterPipes;
 
 import io.netty.buffer.ByteBuf;
@@ -48,21 +23,23 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.nio.charset.Charset;
 
-public class PacketFluidAmountUpdate implements CustomPacketPayload {
+public class PacketFlowUpdate implements CustomPacketPayload {
 
 
-    public static final ResourceLocation ID = new ResourceLocation("betterpipes", "packet_fluid_amount_update");
+    public static final ResourceLocation ID = new ResourceLocation("betterpipes", "packet_flow_update");
 
 
-    public PacketFluidAmountUpdate(BlockPos pos, int direction, int amount, long time) {
+    public PacketFlowUpdate(BlockPos pos, int direction, boolean inFromOut, boolean inFromIn, boolean outToOut, boolean outToIn, long time) {
         this.pos = pos;
         this.direction = direction;
-        this.amount = amount;
+        this.inFromOut = inFromOut;
+        this.inFromIn = inFromIn;
+        this.outToOut = outToOut;
+        this.outToIn = outToIn;
         this.time = time;
     }
-
-    int amount;
-    long time;
+long time;
+    boolean inFromOut, inFromIn, outToOut, outToIn;
     BlockPos pos;
     int direction;
 
@@ -70,7 +47,10 @@ public class PacketFluidAmountUpdate implements CustomPacketPayload {
     public void write(FriendlyByteBuf buf) {
         buf.writeBlockPos(pos);
         buf.writeInt(direction);
-        buf.writeInt(amount);
+        buf.writeBoolean(inFromOut);
+        buf.writeBoolean(inFromIn);
+        buf.writeBoolean(outToOut);
+        buf.writeBoolean(outToIn);
         buf.writeLong(time);
     }
 
@@ -79,19 +59,16 @@ public class PacketFluidAmountUpdate implements CustomPacketPayload {
         return ID;
     }
 
-    public static PacketFluidAmountUpdate read(FriendlyByteBuf buf) {
-        return new PacketFluidAmountUpdate(buf.readBlockPos(), buf.readInt(), buf.readInt(), buf.readLong());
+    public static PacketFlowUpdate read(FriendlyByteBuf buf) {
+        return new PacketFlowUpdate(buf.readBlockPos(), buf.readInt(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readLong());
     }
 
     public void handle(PlayPayloadContext ctx) {
+        // use the current Dimension, the client does not need to find the dimension by String
         Level world = Minecraft.getInstance().level;
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof EntityPipe pipe) {
-            if (direction == -1) {
-                pipe.setFluidAmountInTank(amount, time);
-            } else {
-                pipe.connections.get(Direction.values()[direction]).setFluidAmountInTank(amount, time);
-            }
+            pipe.connections.get(Direction.values()[direction]).setFlow(inFromIn,inFromOut,outToIn, outToOut,time);
         }
     }
 }

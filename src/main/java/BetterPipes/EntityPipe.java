@@ -2,28 +2,23 @@ package BetterPipes;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.sun.tools.jconsole.JConsoleContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
@@ -33,9 +28,8 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import java.util.*;
 
 import static BetterPipes.Registry.ENTITY_PIPE;
-import static net.minecraft.client.renderer.RenderType.TRANSIENT_BUFFER_SIZE;
 
-public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
+public class EntityPipe extends BlockEntity implements PacketRequestInitialData.clientOnload {
     private static final List<EntityPipe> ACTIVE_PIPES = new ArrayList<>();
 
     public static int MAX_OUTPUT_RATE = 40;
@@ -84,11 +78,8 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             ACTIVE_PIPES.add(this);
         }
         if (level.isClientSide) {
-            UUID from = Minecraft.getInstance().player.getUUID();
-            CompoundTag tag = new CompoundTag();
-            tag.putUUID("client_onload", from);
-            PacketDistributor.sendToServer(PacketBlockEntity.getBlockEntityPacket(this, tag));
-            setRequiresMeshUpdate();
+            ResourceKey<Level> key = level.dimension();
+            BetterPipes.sendToServer(new PacketRequestInitialData(key.location(), getBlockPos()));
         }
     }
 
@@ -133,31 +124,24 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                     connections.get(direction).lastFill = connections.get(direction).tank.getFluidAmount();
                 }
 
-                if (!FluidStack.isSameFluidSameComponents(last_tankFluid, tank.getFluid())) {
-                    if (!tank.getFluid().isEmpty())
-                        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getLevel(), new ChunkPos(getBlockPos()), PacketFluidUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluid().getFluid()));
+                if (!FluidStack.areFluidStackTagsEqual(last_tankFluid, tank.getFluid())) {
+                    if(!tank.getFluid().isEmpty()) {
+                        BetterPipes.sendToPlayersTrackingBE(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(),System.currentTimeMillis()), this);
+                    }
                 }
-                if (last_tankFluid.getAmount() != tank.getFluidAmount()) {
-                    PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) getLevel(), new ChunkPos(getBlockPos()), PacketFluidAmountUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluidAmount()));
+                if(last_tankFluid.getAmount() != tank.getFluidAmount()){
+                    BetterPipes.sendToPlayersTrackingBE(new PacketFluidAmountUpdate(getBlockPos(), -1, tank.getFluidAmount(),System.currentTimeMillis()), this);
                 }
                 last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
 
-                CompoundTag updateTag = new CompoundTag();
-                boolean needsSendUpdate = false;
+
                 for (Direction direction : Direction.values()) {
                     PipeConnection conn = connections.get(direction);
                     if (state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.CONNECTED || state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.EXTRACTION) {
-                        conn.syncTanks();
-                        if (conn.needsSync()) {
-                            updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
-                            needsSendUpdate = true;
-                        }
+                        conn.sync();
                     }
                 }
-                if (needsSendUpdate) {
-                    updateTag.putLong("time", System.currentTimeMillis());
-                    PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(getBlockPos()), PacketBlockEntity.getBlockEntityPacket(this, updateTag));
-                }
+
             }
             for (Direction direction : Direction.allShuffled(level.random)) {
                 PipeConnection conn = connections.get(direction);
@@ -328,47 +312,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         level.setBlock(getBlockPos(), state, 3);
     }
 
-    @Override
-    public void readServer(CompoundTag compoundTag) {
-        if (compoundTag.contains("client_onload")) {
-            UUID from = compoundTag.getUUID("client_onload");
-            ServerPlayer playerFrom = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(from);
-            CompoundTag updateTag = new CompoundTag();
-            BlockState state = level.getBlockState(getBlockPos());
-            for (Direction direction : Direction.values()) {
-                PipeConnection conn = connections.get(direction);
-                CompoundTag tag = conn.getUpdateTag(level.registryAccess());
-                updateTag.put(direction.getName(), tag);
-                conn.sendInitialTankUpdates(playerFrom);
-            }
-            updateTag.putLong("time", System.currentTimeMillis());
-            PacketDistributor.sendToPlayer(playerFrom, PacketBlockEntity.getBlockEntityPacket(this, updateTag));
-
-            PacketDistributor.sendToPlayer(playerFrom, PacketFluidAmountUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluidAmount()));
-            if (!tank.getFluid().isEmpty())
-                PacketDistributor.sendToPlayer(playerFrom, PacketFluidUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluid().getFluid()));
-
-        }
-    }
-
-    long lastUpdate = 0;
-
-    @Override
-    public void readClient(CompoundTag compoundTag) {
-        if (compoundTag.contains(("time"))) {
-            long updateTime = compoundTag.getLong("time");
-            if (updateTime >= lastUpdate) {
-                lastUpdate = updateTime;
-                for (Direction direction : Direction.values()) {
-                    if (compoundTag.contains(direction.getName())) {
-                        connections.get(direction).handleUpdateTag(compoundTag.getCompound(direction.getName()), level.registryAccess());
-                    }
-                }
-                setRequiresMeshUpdate();
-            }
-        }
-    }
-
     public void setRequiresMeshUpdate() {
         requiresMeshUpdate2 = true;
     }
@@ -397,29 +340,34 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) {
+        super.load(tag);
 
-        tank.readFromNBT(registries, tag.getCompound("mainTank"));
+        tank.readFromNBT(tag.getCompound("mainTank"));
 
         for (Direction direction : Direction.values()) {
             PipeConnection conn = connections.get(direction);
-            conn.loadAdditional(registries, tag);
+            conn.loadAdditional(tag);
         }
 
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    public void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
 
         CompoundTag tankTag = new CompoundTag();
-        tank.writeToNBT(registries, tankTag);
+        tank.writeToNBT(tankTag);
         tag.put("mainTank", tankTag);
 
         for (Direction direction : Direction.values()) {
             PipeConnection conn = connections.get(direction);
-            conn.saveAdditional(registries, tag);
+            conn.saveAdditional(tag);
         }
+    }
+
+    @Override
+    public void clientOnload(ServerPlayer player) {
+
     }
 }
