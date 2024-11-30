@@ -41,7 +41,9 @@ public class PipeConnection implements IFluidHandler {
     fluidRenderData renderData;
     EntityPipe parent;
 
-    boolean isEnabled(BlockState parent){return parent.getValue(BlockPipe.connections.get(myDirection));}
+    boolean isEnabled(BlockState parent) {
+        return parent.getValue(BlockPipe.connections.get(myDirection)) == BlockPipe.ConnectionState.EXTRACTION || parent.getValue(BlockPipe.connections.get(myDirection)) == BlockPipe.ConnectionState.CONNECTED;
+    }
 
     IFluidHandler neighborFluidHandler() {
         BlockPos neighborPos = parent.getBlockPos().relative(myDirection);

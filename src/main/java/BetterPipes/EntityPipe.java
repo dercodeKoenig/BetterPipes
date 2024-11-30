@@ -2,6 +2,7 @@ package BetterPipes;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.sun.tools.jconsole.JConsoleContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -68,7 +69,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
                 vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-                 myByteBuffer = new ByteBufferBuilder(TRANSIENT_BUFFER_SIZE);
+                myByteBuffer = new ByteBufferBuilder(TRANSIENT_BUFFER_SIZE);
             });
         }
     }
@@ -80,13 +81,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     @Override
     public void onLoad() {
         super.onLoad();
-        BlockState state = level.getBlockState(getBlockPos());
-        for (Direction direction : Direction.values()) {
-            BlockPos neighbor = getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
-            state = state.updateShape(direction, level.getBlockState(neighbor), level, getBlockPos(), neighbor);
-        }
         if (!level.isClientSide) {
-            level.setBlock(getBlockPos(), state, 3);
             ACTIVE_PIPES.add(this);
         }
         if (level.isClientSide) {
@@ -112,9 +107,11 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         }
         super.setRemoved();
     }
+
     public static <T extends BlockEntity> void tick(Level level, BlockPos blockPos, BlockState blockState, T t) {
-        ((EntityPipe)t).tick();
+        ((EntityPipe) t).tick();
     }
+
     public void tick() {
 
         if (FMLEnvironment.dist == Dist.CLIENT && requiresMeshUpdate2) {
@@ -151,7 +148,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                 boolean needsSendUpdate = false;
                 for (Direction direction : Direction.values()) {
                     PipeConnection conn = connections.get(direction);
-                    if (state.getValue(BlockPipe.connections.get(direction))) {
+                    if (state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.CONNECTED || state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.EXTRACTION) {
                         conn.syncTanks();
                         if (conn.needsSync()) {
                             updateTag.put(direction.getName(), conn.getUpdateTag(level.registryAccess()));
@@ -166,7 +163,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             }
             for (Direction direction : Direction.allShuffled(level.random)) {
                 PipeConnection conn = connections.get(direction);
-                if (state.getValue(BlockPipe.connections.get(direction))) {
+                if (state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.CONNECTED || state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.EXTRACTION) {
                     if (conn.lastFill > 0) {
                         if (!conn.getsInputFromInside && isUpdateTick) {
                             //drain into main tank
@@ -190,7 +187,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
                         if (!conn.getsInputFromOutside) {
                             if (conn.neighborFluidHandler() != null) {
-                                if (!state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
+                                if (state.getValue(BlockPipe.connections.get(direction)) != BlockPipe.ConnectionState.EXTRACTION) {
                                     //drain to outside tank
                                     if (conn.neighborFluidHandler() instanceof PipeConnection pipeconn) {
                                         if (isUpdateTick) {
@@ -229,7 +226,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                         }
                     }
 
-                    if (state.getValue(BlockPipe.pipe_is_extraction_active) && state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
+                    if (state.getValue(BlockPipe.pipe_is_extraction_active) && state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.EXTRACTION) {
                         // extract from a neighbor fluid handler
                         // this runs every tick
                         try {
@@ -246,7 +243,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                     if (isUpdateTick) {
                         if (lastFill > 0) {
                             //drain main tank into connection, using 2 stage update
-                            if (!conn.outputsToInside && !state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
+                            if (!conn.outputsToInside && state.getValue(BlockPipe.connections.get(direction)) != BlockPipe.ConnectionState.EXTRACTION) {
                                 double transferRateMultiplier = (double) lastFill / REQUIRED_FILL_FOR_MAX_OUTPUT;
                                 int toTransfer = (int) (MAX_OUTPUT_RATE * 2 * transferRateMultiplier);
                                 int target_free = CONNECTION_CAPACITY - CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
@@ -274,7 +271,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             }
             for (Direction direction : Direction.allShuffled(level.random)) {
                 PipeConnection conn = connections.get(direction);
-                if (state.getValue(BlockPipe.connections.get(direction))) {
+                if (state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.CONNECTED || state.getValue(BlockPipe.connections.get(direction)) == BlockPipe.ConnectionState.EXTRACTION) {
                     conn.update();
                 }
             }
@@ -288,8 +285,13 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         state = state.setValue(BlockPipe.pipe_is_extraction, mode);
 
         for (Direction i : Direction.values()) {
-            state = state.setValue(BlockPipe.connections_isExtraction.get(i),
-                    mode && !(connections.get(i).neighborFluidHandler() instanceof PipeConnection));
+            if((state.getValue(BlockPipe.connections.get(i)) == BlockPipe.ConnectionState.CONNECTED || state.getValue(BlockPipe.connections.get(i)) == BlockPipe.ConnectionState.EXTRACTION)) {
+                boolean shouldBeExtraction = mode && !(connections.get(i).neighborFluidHandler() instanceof PipeConnection);
+                if (shouldBeExtraction)
+                    state = state.setValue(BlockPipe.connections.get(i), BlockPipe.ConnectionState.EXTRACTION);
+                else
+                    state = state.setValue(BlockPipe.connections.get(i), BlockPipe.ConnectionState.CONNECTED);
+            }
         }
         return state;
     }
@@ -310,7 +312,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
         boolean hasAnyConnectionsInExtractionMode = false;
         for (Direction i : Direction.values()) {
-            if (state.getValue(BlockPipe.connections.get(i)) && state.getValue(BlockPipe.connections_isExtraction.get(i)))
+            if (state.getValue(BlockPipe.connections.get(i)) == BlockPipe.ConnectionState.EXTRACTION)
                 hasAnyConnectionsInExtractionMode = true;
         }
         if (hasAnyConnectionsInExtractionMode) {
@@ -318,7 +320,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         } else {
             boolean hasAnyValidConnections = false;
             for (Direction i : Direction.values()) {
-                if (state.getValue(BlockPipe.connections.get(i)) && !(connections.get(i).neighborFluidHandler() instanceof PipeConnection))
+                if ((state.getValue(BlockPipe.connections.get(i)) == BlockPipe.ConnectionState.CONNECTED || state.getValue(BlockPipe.connections.get(i)) == BlockPipe.ConnectionState.EXTRACTION) && !(connections.get(i).neighborFluidHandler() instanceof PipeConnection))
                     hasAnyValidConnections = true;
             }
             if (hasAnyValidConnections) {
@@ -337,11 +339,9 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             BlockState state = level.getBlockState(getBlockPos());
             for (Direction direction : Direction.values()) {
                 PipeConnection conn = connections.get(direction);
-                if (state.getValue(BlockPipe.connections.get(direction))) {
-                    CompoundTag tag = conn.getUpdateTag(level.registryAccess());
-                    updateTag.put(direction.getName(), tag);
-                    conn.sendInitialTankUpdates(playerFrom);
-                }
+                CompoundTag tag = conn.getUpdateTag(level.registryAccess());
+                updateTag.put(direction.getName(), tag);
+                conn.sendInitialTankUpdates(playerFrom);
             }
             updateTag.putLong("time", System.currentTimeMillis());
             PacketDistributor.sendToPlayer(playerFrom, PacketBlockEntity.getBlockEntityPacket(this, updateTag));
@@ -371,11 +371,12 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         }
     }
 
-    public void setRequiresMeshUpdate(){
+    public void setRequiresMeshUpdate() {
         requiresMeshUpdate2 = true;
     }
 
     long lastFluidInTankUpdate;
+
     public void setFluidInTank(Fluid f, long time) {
         if (time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
@@ -385,6 +386,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
 
     long lastFluidAmountUpdate;
+
     public void setFluidAmountInTank(int amount, long time) {
         if (time > lastFluidAmountUpdate) {
             lastFluidAmountUpdate = time;
@@ -422,5 +424,4 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             conn.saveAdditional(registries, tag);
         }
     }
-
 }
