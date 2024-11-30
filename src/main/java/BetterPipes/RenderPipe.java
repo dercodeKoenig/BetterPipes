@@ -1661,7 +1661,6 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 wtfAmIdoing2 = wtfAmIdoing2.translate(0.5f, 0.5f, 0.5f);
                 shader.setDefaultUniforms(VertexFormat.Mode.QUADS, wtfAmIdoing2, RenderSystem.getProjectionMatrix(), Minecraft.getInstance().getWindow());
                 shader.getUniform("LightMapCoords").set(packedLight & '\uffff', packedLight >> 16 & '\uffff');
-                System.out.println(shader.getUniform("LightMapCoords").getIntBuffer().array());
                 shader.apply();
                 tile.vertexBuffer.draw();
                 shader.clear();
