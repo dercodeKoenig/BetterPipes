@@ -30,7 +30,7 @@ import java.nio.charset.Charset;
 public class PacketFluidUpdate implements CustomPacketPayload {
 
 
-    public static final ResourceLocation ID = new ResourceLocation("betterpipes", "packet_fluid_amount_update");
+    public static final ResourceLocation ID = new ResourceLocation("betterpipes", "packet_fluid_update");
 
 
     public PacketFluidUpdate(BlockPos pos, int direction, Fluid fluid, long time) {

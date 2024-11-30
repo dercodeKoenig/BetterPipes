@@ -22,7 +22,7 @@ public class PacketRequestInitialData implements CustomPacketPayload {
     }
 
 
-    public static final ResourceLocation ID = new ResourceLocation("betterpipes", "packet_flow_update");
+    public static final ResourceLocation ID = new ResourceLocation("betterpipes", "packet_request_initial_data");
 
 
     public PacketRequestInitialData(ResourceLocation dimension, BlockPos pos) {
