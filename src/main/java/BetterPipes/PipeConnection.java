@@ -38,7 +38,7 @@ public class PipeConnection implements IFluidHandler {
     simpleBlockEntityTank tank;
     int lastFill;
 
-    fluidRenderData renderData = new fluidRenderData();
+    fluidRenderData renderData;
     EntityPipe parent;
 
     boolean isEnabled(BlockState parent){return parent.getValue(BlockPipe.connections.get(myDirection));}
@@ -52,6 +52,7 @@ public class PipeConnection implements IFluidHandler {
         this.myDirection = myDirection;
         tank = new simpleBlockEntityTank(CONNECTION_CAPACITY, parent);
         this.parent = parent;
+        renderData = new fluidRenderData();
     }
 
     boolean last_getsInputFromInside;
@@ -166,9 +167,9 @@ public class PipeConnection implements IFluidHandler {
             lastFluidInTankUpdate = time;
             tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
 
-            renderData.reset(tank.getFluid().getFluid());
+            parent.setRequiresMeshUpdate();
             if(neighborFluidHandler() instanceof PipeConnection p)
-                p.renderData.needsRecalculation = true;
+                p.parent.setRequiresMeshUpdate();
         }
     }
 
@@ -181,9 +182,9 @@ public class PipeConnection implements IFluidHandler {
             if(amount <= 0) myFluid = Fluids.EMPTY;
             tank.setFluid(new FluidStack(myFluid, amount));
 
-            renderData.reset(tank.getFluid().getFluid());
+            parent.setRequiresMeshUpdate();
             if(neighborFluidHandler() instanceof PipeConnection p)
-                p.renderData.needsRecalculation = true;
+                p.parent.setRequiresMeshUpdate();
         }
     }
 

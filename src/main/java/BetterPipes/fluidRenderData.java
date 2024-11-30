@@ -20,12 +20,11 @@ public class fluidRenderData {
     TextureAtlasSprite spriteStill;
     int color;
 
-    boolean needsRecalculation = true;
-public fluidRenderData(){
-    reset(Fluids.WATER);
-}
-    public void reset(Fluid f) {
-        needsRecalculation = true;
+    public fluidRenderData() {
+        updateSprites(Fluids.WATER);
+    }
+
+    public void updateSprites(Fluid f) {
         if (f == Fluids.EMPTY) f = Fluids.WATER;
         IClientFluidTypeExtensions extensions = IClientFluidTypeExtensions.of(f);
         color = extensions.getTintColor();
@@ -34,8 +33,6 @@ public fluidRenderData(){
         ResourceLocation fluidtextureFlowing = extensions.getFlowingTexture();
         spriteFLowing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidtextureFlowing);
     }
-
-
 }
 
 
