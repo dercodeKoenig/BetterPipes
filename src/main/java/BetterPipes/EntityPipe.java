@@ -31,6 +31,7 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import java.util.*;
 
 import static BetterPipes.Registry.ENTITY_PIPE;
+import static net.minecraft.client.renderer.RenderType.TRANSIENT_BUFFER_SIZE;
 
 public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     private static final List<EntityPipe> ACTIVE_PIPES = new ArrayList<>();
@@ -67,7 +68,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
                 vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-                 myByteBuffer = new ByteBufferBuilder(2048);
+                 myByteBuffer = new ByteBufferBuilder(TRANSIENT_BUFFER_SIZE);
             });
         }
     }
@@ -116,17 +117,21 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     }
     public void tick() {
 
-        if (level.isClientSide && requiresMeshUpdate2) {
+        if (FMLEnvironment.dist == Dist.CLIENT && requiresMeshUpdate2) {
             requiresMeshUpdate2 = false;
             renderData.updateSprites(tank.getFluid().getFluid());
             for (Direction i : Direction.values())
                 connections.get(i).renderData.updateSprites(connections.get(i).tank.getFluid().getFluid());
             requiresMeshUpdate = true;
         }
+
+        int update_after_ticks = 2;
+
         if (!level.isClientSide) {
             BlockState state = level.getBlockState(getBlockPos());
-            boolean isUpdateTick = level.getGameTime() % 2 == 0;
-            if (!isUpdateTick) {
+            boolean isUpdateTick = level.getGameTime() % update_after_ticks == 1;
+            boolean isSyncTick = level.getGameTime() % update_after_ticks == 0;
+            if (isSyncTick) {
                 // store last fill data for all pipes to use in updateTick
                 lastFill = tank.getFluidAmount();
                 for (Direction direction : Direction.values()) {
@@ -166,14 +171,14 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                         if (!conn.getsInputFromInside && isUpdateTick) {
                             //drain into main tank
                             double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
-                            int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * 2 * transferRateMultiplier);
-                                    int target_free =MAIN_CAPACITY - REQUIRED_FILL_FOR_MAX_OUTPUT;
-                                    int has_free = MAIN_CAPACITY - lastFill;
-                            double speedMultiplier = Math.min(1,(float)has_free / target_free);
-                            toTransfer = (int)(CONNECTION_MAX_OUTPUT_RATE * 2 * speedMultiplier * Math.min(1,transferRateMultiplier));
+                            int toTransfer;
+                            int target_free = MAIN_CAPACITY - REQUIRED_FILL_FOR_MAX_OUTPUT;
+                            int has_free = MAIN_CAPACITY - lastFill;
+                            double speedMultiplier = Math.min(1, (float) has_free / target_free);
+                            toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * update_after_ticks * speedMultiplier * Math.min(1, transferRateMultiplier));
 
-                            if (toTransfer > CONNECTION_MAX_OUTPUT_RATE * 2 && !conn.lastInputWasFromAnotherPipe)
-                                toTransfer = CONNECTION_MAX_OUTPUT_RATE * 2;
+                            if (toTransfer > CONNECTION_MAX_OUTPUT_RATE * update_after_ticks && !conn.lastInputWasFromAnotherPipe)
+                                toTransfer = CONNECTION_MAX_OUTPUT_RATE * update_after_ticks;
                             if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS / 2)
                                 toTransfer = 1;
 
@@ -188,14 +193,14 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                                 if (!state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
                                     //drain to outside tank
                                     if (conn.neighborFluidHandler() instanceof PipeConnection pipeconn) {
-                                        if(isUpdateTick) {
+                                        if (isUpdateTick) {
                                             // for pipes use normal 2 stage tick logic
                                             double transferRateMultiplier = (double) conn.lastFill / CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
-                                            int toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * 2 * transferRateMultiplier);
-                                                int target_free =CONNECTION_CAPACITY - CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
-                                                int has_free = CONNECTION_CAPACITY - pipeconn.lastFill;
-                                            double speedMultiplier = Math.min(1,(float)has_free / target_free);
-                                            toTransfer = (int)(CONNECTION_MAX_OUTPUT_RATE * 2 * speedMultiplier* Math.min(1,transferRateMultiplier));
+                                            int toTransfer;
+                                            int target_free = CONNECTION_CAPACITY - CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                            int has_free = CONNECTION_CAPACITY - pipeconn.lastFill;
+                                            double speedMultiplier = Math.min(1, (float) has_free / target_free);
+                                            toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * update_after_ticks * speedMultiplier * Math.min(1, transferRateMultiplier));
 
                                             if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS / 2)
                                                 toTransfer = 1;
@@ -244,10 +249,10 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                             if (!conn.outputsToInside && !state.getValue(BlockPipe.connections_isExtraction.get(direction))) {
                                 double transferRateMultiplier = (double) lastFill / REQUIRED_FILL_FOR_MAX_OUTPUT;
                                 int toTransfer = (int) (MAX_OUTPUT_RATE * 2 * transferRateMultiplier);
-                                    int target_free =CONNECTION_CAPACITY - CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
-                                    int has_free = CONNECTION_CAPACITY - conn.lastFill;
-                                    double speedMultiplier = Math.min(1,(float)has_free / target_free);
-                                    toTransfer = (int)(MAX_OUTPUT_RATE * 2 * speedMultiplier* Math.min(1,transferRateMultiplier));
+                                int target_free = CONNECTION_CAPACITY - CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT;
+                                int has_free = CONNECTION_CAPACITY - conn.lastFill;
+                                double speedMultiplier = Math.min(1, (float) has_free / target_free);
+                                toTransfer = (int) (MAX_OUTPUT_RATE * update_after_ticks * speedMultiplier * Math.min(1, transferRateMultiplier));
 
                                 if (toTransfer == 0 && ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS)
                                     toTransfer = 1;

@@ -77,7 +77,7 @@ public class ConfigManager {
         setDefault("CONNECTION_REQUIRED_FILL_FOR_MAX_OUTPUT", "100");
         setDefault("CONNECTION_CAPACITY", "200");
 
-        setDefault("Z_STATE_UPDATE_TICKS", "30");
+        setDefault("Z_STATE_UPDATE_TICKS", "20");
         setDefault("Z_FORCE_OUTPUT_AFTER_TICKS", "10");
     }
 
