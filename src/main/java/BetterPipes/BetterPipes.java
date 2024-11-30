@@ -18,8 +18,8 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
+import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -71,8 +71,8 @@ public class BetterPipes {
         event.registerBlockEntityRenderer(ENTITY_PIPE.get(), RenderPipe::new);
     }
 
-    public void registerNetworkStuff(RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("1");
+    public void registerNetworkStuff(RegisterPayloadHandlerEvent event) {
+        IPayloadRegistrar registrar = event.registrar("1");
         PacketBlockEntity.register(registrar);
         PacketFluidUpdate.register(registrar);
         PacketFluidAmountUpdate.register(registrar);

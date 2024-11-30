@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.sun.tools.jconsole.JConsoleContext;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -56,10 +57,9 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
     public fluidRenderData renderData = new fluidRenderData();
     public VertexBuffer vertexBuffer;
-    public MeshData mesh;
+    public BufferBuilder.RenderedBuffer mesh;
     public boolean requiresMeshUpdate = false;
     public boolean requiresMeshUpdate2 = false;
-    public ByteBufferBuilder myByteBuffer;
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
         super(ENTITY_PIPE.get(), pos, blockState);
@@ -69,7 +69,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
                 vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-                myByteBuffer = new ByteBufferBuilder(TRANSIENT_BUFFER_SIZE);
             });
         }
     }
@@ -101,7 +100,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
                 vertexBuffer.close();
-                myByteBuffer.close();
             });
 
         }

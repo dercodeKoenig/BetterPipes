@@ -4,17 +4,15 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
 
 public class PacketBlockEntity implements CustomPacketPayload {
 
@@ -84,7 +82,7 @@ public class PacketBlockEntity implements CustomPacketPayload {
         return TYPE;
     }
 
-    public static void register(PayloadRegistrar registrar) {
+    public static void register(IPayloadRegistrar registrar) {
         registrar.playBidirectional(
                 PacketBlockEntity.TYPE,
                 PacketBlockEntity.STREAM_CODEC,
@@ -109,4 +107,13 @@ public class PacketBlockEntity implements CustomPacketPayload {
         );
     }
 
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        buf.
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return null;
+    }
 }
