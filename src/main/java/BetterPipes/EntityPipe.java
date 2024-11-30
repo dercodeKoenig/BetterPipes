@@ -366,6 +366,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
                         connections.get(direction).handleUpdateTag(compoundTag.getCompound(direction.getName()), level.registryAccess());
                     }
                 }
+                setRequiresMeshUpdate();
             }
         }
     }
