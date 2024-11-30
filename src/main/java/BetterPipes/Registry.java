@@ -24,7 +24,7 @@ public class Registry {
 
     public static final DeferredHolder<Block, Block> PIPE = BLOCKS.register(
             "pipe",
-            () -> new BlockPipe(BlockBehaviour.Properties.of().noOcclusion().strength(0.1f).dynamicShape())
+            () -> new BlockPipe(BlockBehaviour.Properties.of().noOcclusion().strength(0.1f))
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EntityPipe>> ENTITY_PIPE = BLOCK_ENTITIES.register(
             "entity_pipe",
