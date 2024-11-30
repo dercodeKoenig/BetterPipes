@@ -53,7 +53,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     public VertexBuffer vertexBuffer;
     public MeshData mesh;
     public boolean requiresMeshUpdate = false;
-    public ByteBufferBuilder myByteBuffer = new ByteBufferBuilder(2048);
+    public ByteBufferBuilder myByteBuffer;
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
         super(ENTITY_PIPE.get(), pos, blockState);
@@ -63,6 +63,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
                 vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+                 myByteBuffer = new ByteBufferBuilder(2048);
             });
         }
     }
@@ -100,6 +101,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
                 vertexBuffer.close();
+                myByteBuffer.close();
             });
 
         }

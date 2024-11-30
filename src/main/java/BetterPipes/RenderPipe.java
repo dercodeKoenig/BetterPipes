@@ -1626,19 +1626,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             }
         }
     }
-
-    List<Long> renderTimes = new ArrayList<>();
-
-
     @Override
     public void render(EntityPipe tile, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
 
 
         if (tile.mesh != null || tile.requiresMeshUpdate) {
-
-            long time = System.nanoTime();
-
 
             tile.vertexBuffer.bind();
 
@@ -1680,13 +1673,6 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             TRANSLUCENT_TRANSPARENCY.clearRenderState();
             BLOCK_SHEET_MIPPED.clearRenderState();
 
-
-            renderTimes.add(System.nanoTime() - time);
-            if (renderTimes.size() > 5000) {
-                long averageTime = renderTimes.stream().mapToLong(Long::longValue).sum() / renderTimes.size();
-                renderTimes.clear();
-                System.out.println((float) averageTime / 1000 / 1000);
-            }
         }
     }
 }
