@@ -77,7 +77,9 @@ public class PacketFlowUpdate implements CustomPacketPayload {
     }
 
     public void handle(PlayPayloadContext ctx) {
-        _handle(ctx);
+        ctx.workHandler().submitAsync(() -> {
+            _handle(ctx);
+        });
     }
 }
 

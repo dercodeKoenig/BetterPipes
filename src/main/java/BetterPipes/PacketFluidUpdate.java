@@ -36,11 +36,11 @@ public class PacketFluidUpdate implements CustomPacketPayload {
     public PacketFluidUpdate(BlockPos pos, int direction, Fluid fluid, long time) {
         this.pos = pos;
         this.direction = direction;
-        this.fluid = fluid;
+        this.fluid = BuiltInRegistries.FLUID.getKey(fluid);
         this.time = time;
     }
 
-    Fluid fluid;
+    ResourceLocation fluid;
     long time;
     BlockPos pos;
     int direction;
@@ -49,7 +49,7 @@ public class PacketFluidUpdate implements CustomPacketPayload {
     public void write(FriendlyByteBuf buf) {
         buf.writeBlockPos(pos);
         buf.writeInt(direction);
-buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(fluid));
+        buf.writeResourceLocation(fluid);
         buf.writeLong(time);
     }
 
@@ -62,20 +62,23 @@ buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(fluid));
         return new PacketFluidUpdate(buf.readBlockPos(), buf.readInt(), BuiltInRegistries.FLUID.get(buf.readResourceLocation()), buf.readLong());
     }
 
-@OnlyIn(Dist.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void _handle(PlayPayloadContext ctx) {
         Level world = Minecraft.getInstance().level;
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof EntityPipe pipe) {
             if (direction == -1) {
-                pipe.setFluidInTank(fluid, time);
+                pipe.setFluidInTank(BuiltInRegistries.FLUID.get(fluid), time);
             } else {
-                pipe.connections.get(Direction.values()[direction]).setFluidInTank(fluid, time);
+                pipe.connections.get(Direction.values()[direction]).setFluidInTank(BuiltInRegistries.FLUID.get(fluid), time);
             }
         }
     }
+
     public void handle(PlayPayloadContext ctx) {
-        _handle(ctx);
+        ctx.workHandler().submitAsync(() -> {
+            _handle(ctx);
+        });
     }
 }
 

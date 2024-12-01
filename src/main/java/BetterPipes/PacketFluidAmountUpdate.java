@@ -29,6 +29,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -95,7 +96,9 @@ public class PacketFluidAmountUpdate implements CustomPacketPayload {
         }
     }
     public void handle(PlayPayloadContext ctx) {
-        _handle(ctx);
+        ctx.workHandler().submitAsync(() -> {
+            _handle(ctx);
+        });
     }
 }
 

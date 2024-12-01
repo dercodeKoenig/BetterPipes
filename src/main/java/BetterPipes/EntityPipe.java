@@ -123,8 +123,7 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
                 for (Direction direction : Direction.values()) {
                     connections.get(direction).lastFill = connections.get(direction).tank.getFluidAmount();
                 }
-
-                if (!FluidStack.areFluidStackTagsEqual(last_tankFluid, tank.getFluid())) {
+                if (!FluidStack.areFluidStackTagsEqual(last_tankFluid, tank.getFluid()) || !last_tankFluid.getFluid().isSame(tank.getFluid().getFluid())) {
                     if(!tank.getFluid().isEmpty()) {
                         BetterPipes.sendToPlayersTrackingBE(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(),System.currentTimeMillis()), this);
                     }
@@ -316,7 +315,6 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
     }
 
     long lastFluidInTankUpdate;
-
     public void setFluidInTank(Fluid f, long time) {
         if (time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
@@ -367,6 +365,10 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
 
     @Override
     public void clientOnload(ServerPlayer player) {
-
+            if(!tank.getFluid().isEmpty())
+                BetterPipes.sendToPlayer(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(),System.currentTimeMillis()), player);
+            BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(getBlockPos(), -1, tank.getFluidAmount(),System.currentTimeMillis()), player);
+            for (Direction i : Direction.values())
+                connections.get(i).sendInitialTankUpdates(player);
     }
 }

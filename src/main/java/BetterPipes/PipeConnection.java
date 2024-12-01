@@ -89,7 +89,7 @@ void sync(){
     // Check if the tank fluid stack has changed
     // this has it's own packet now for efficiency
     // to not always send the large nbt
-    if (!FluidStack.areFluidStackTagsEqual(last_tankFluid, tank.getFluid())) {
+    if (!FluidStack.areFluidStackTagsEqual(last_tankFluid, tank.getFluid()) || !last_tankFluid.getFluid().isSame(tank.getFluid().getFluid())) {
         if(!tank.getFluid().isEmpty()) {
             BetterPipes.sendToPlayersTrackingBE(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(),System.currentTimeMillis()), parent);
         }
@@ -160,8 +160,8 @@ void sync(){
     }
     public void sendInitialTankUpdates(ServerPlayer player) {
         if (!tank.getFluid().isEmpty())
-            BetterPipes.sendToPlayersTrackingBE(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(), System.currentTimeMillis()), parent);
-        BetterPipes.sendToPlayersTrackingBE(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(), System.currentTimeMillis()), parent);
+            BetterPipes.sendToPlayer(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(), System.currentTimeMillis()), player);
+        BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(), System.currentTimeMillis()), player);
     }
 
     long lastFlowUpdate;

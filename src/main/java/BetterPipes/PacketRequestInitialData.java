@@ -49,11 +49,13 @@ public class PacketRequestInitialData implements CustomPacketPayload {
     }
 
     public void handle(PlayPayloadContext ctx) {
-        Level l = ServerLifecycleHooks.getCurrentServer().getLevel(ResourceKey.create(Registries.DIMENSION, dimension));
-        BlockEntity be = l.getBlockEntity(pos);
-        if(be instanceof clientOnload c){
-            c.clientOnload((ServerPlayer)ctx.player().get());
-        }
+        ctx.workHandler().submitAsync(() -> {
+            Level l = ServerLifecycleHooks.getCurrentServer().getLevel(ResourceKey.create(Registries.DIMENSION, dimension));
+            BlockEntity be = l.getBlockEntity(pos);
+            if (be instanceof clientOnload c) {
+                c.clientOnload((ServerPlayer) ctx.player().get());
+            }
+        });
     }
 }
 
