@@ -1,14 +1,11 @@
 package BetterPipes;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -19,17 +16,18 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
-import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
 
 import static BetterPipes.Registry.*;
+import static BetterPipes.RenderPipe.PIPE_FLUID_SHADER_SHARD;
 import static BetterPipes.RenderPipe.POSITION_COLOR_TEXTURE_NORMAL;
 
 @Mod("betterpipes")
@@ -73,19 +71,11 @@ public class BetterPipes {
         event.registerBlockEntityRenderer(ENTITY_PIPE.get(), RenderPipe::new);
     }
 
-    public void registerNetworkStuff(RegisterPayloadHandlerEvent event) {
-        final IPayloadRegistrar registrar = event.registrar("betterpipes")
-                .versioned("1.0")
-                .optional();
-
-
-        registrar.play(PacketFlowUpdate.ID, PacketFlowUpdate::read, handler -> handler.client(PacketFlowUpdate::handle));
-
-        registrar.play(PacketFluidUpdate.ID, PacketFluidUpdate::read, handler -> handler.client(PacketFluidUpdate::handle));
-
-        registrar.play(PacketFluidAmountUpdate.ID, PacketFluidAmountUpdate::read, handler -> handler.client(PacketFluidAmountUpdate::handle));
-
-        registrar.play(PacketRequestInitialData.ID, PacketRequestInitialData::read, handler -> handler.server(PacketRequestInitialData::handle));
+    public void registerNetworkStuff(RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar("1");
+        PacketBlockEntity.register(registrar);
+        PacketFluidUpdate.register(registrar);
+        PacketFluidAmountUpdate.register(registrar);
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent e) {
@@ -112,32 +102,4 @@ public class BetterPipes {
             throw (new RuntimeException(e));
         }
     }
-
-    public static <MSG extends CustomPacketPayload> void sendToPlayersTrackingBE(MSG message, BlockEntity be) {
-        if (be == null || be.getLevel() == null || be.getLevel().isClientSide()) {
-            return; // Ensure we're on the server and the BlockEntity is valid.
-        }
-
-        // Get the world and position of the BlockEntity
-        var level = be.getLevel();
-        var pos = be.getBlockPos();
-
-        // Loop through all players on the server
-        for (ServerPlayer player : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
-            // Check if the player is tracking the block entity's chunk
-            if (player.level() == level && player.getChunkTrackingView().contains(new ChunkPos(pos))) {
-                // Send the packet to the player
-                PacketDistributor.PLAYER.with(player).send(message);
-            }
-        }
-    }
-
-    public static <MSG extends CustomPacketPayload> void sendToPlayer(MSG message, ServerPlayer player) {
-        PacketDistributor.PLAYER.with(player).send(message);
-    }
-    public static <MSG extends CustomPacketPayload> void sendToServer(MSG message) {
-        PacketDistributor.SERVER.noArg().send(message);
-    }
-
-
 }
