@@ -370,10 +370,12 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
 
     @Override
     public void clientOnload(ServerPlayer player) {
-            if(!tank.getFluid().isEmpty())
-                BetterPipes.sendToPlayer(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(),System.currentTimeMillis()), player);
-            BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(getBlockPos(), -1, tank.getFluidAmount(),System.currentTimeMillis()), player);
-            for (Direction i : Direction.values())
-                connections.get(i).sendInitialTankUpdates(player);
+            if(!last_tankFluid.isEmpty()) {
+                BetterPipes.sendToPlayer(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(), System.currentTimeMillis()), player);
+                BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(getBlockPos(), -1, tank.getFluidAmount(), System.currentTimeMillis()), player);
+            }
+                for (Direction i : Direction.values())
+                    connections.get(i).sendInitialTankUpdates(player);
+
     }
 }

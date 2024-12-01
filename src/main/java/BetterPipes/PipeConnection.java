@@ -161,9 +161,10 @@ void sync(){
         }
     }
     public void sendInitialTankUpdates(ServerPlayer player) {
-        if (!tank.getFluid().isEmpty())
+        if (!last_tankFluid.isEmpty()) {
             BetterPipes.sendToPlayer(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(), System.currentTimeMillis()), player);
-        BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(), System.currentTimeMillis()), player);
+            BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(), System.currentTimeMillis()), player);
+        }
     }
 
     long lastFlowUpdate;
