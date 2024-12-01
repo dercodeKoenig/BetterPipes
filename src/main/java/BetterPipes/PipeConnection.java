@@ -182,7 +182,7 @@ void sync(){
     public void setFluidInTank(ResourceLocation f, long time){
         if(time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
-            tank.setFluid(new FluidStack(BuiltInRegistries.FLUID.get(f), tank.getFluidAmount()));
+            tank.setFluid(new FluidStack(BuiltInRegistries.FLUID.get(f), Math.min(1,tank.getFluidAmount())));
 
             parent.setRequiresMeshUpdate();
             if(neighborFluidHandler() instanceof PipeConnection p)
