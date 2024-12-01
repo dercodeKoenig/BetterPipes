@@ -1174,12 +1174,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
-                            u0f, u1f, v0f, v1f,
+                            u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                             color, Direction.DOWN, v);
                 } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
-                            u0f, u1f, v0f, v1f,
+                            u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                             color, Direction.UP, v);
                 } else {
                     renderVerticalFluidStill(
@@ -1244,12 +1244,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
-                            u0f, u1f, v0f, v1f,
+                            u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                             color, Direction.UP, v);
                 } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
-                            u0f, u1f, v0f, v1f,
+                            u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                             color, Direction.DOWN, v);
                 } else {
                     renderVerticalFluidStill(
@@ -1319,13 +1319,13 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                                 color, Direction.EAST, v,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                                 color, Direction.WEST, v,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
@@ -1348,12 +1348,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                                 color, Direction.EAST, v);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                                 color, Direction.WEST, v);
                     } else {
                         renderHorizontalFluidStillCentered(
@@ -1401,13 +1401,13 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                                 color, Direction.WEST, v,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                                 color, Direction.EAST, v,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
@@ -1430,12 +1430,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                                 color, Direction.WEST, v);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                                 color, Direction.EAST, v);
                     } else {
                         renderHorizontalFluidStillCentered(
@@ -1483,13 +1483,13 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                                 color, Direction.NORTH, v,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                                 color, Direction.SOUTH, v,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
@@ -1513,12 +1513,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                                 color, Direction.NORTH, v);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                                 color, Direction.SOUTH, v);
                     } else {
                         renderHorizontalFluidStillCentered(
@@ -1567,13 +1567,13 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                                 color, Direction.SOUTH, v,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                                 color, Direction.NORTH, v,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
@@ -1597,12 +1597,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     if (conn.getsInputFromOutside && !conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f+0.5f*(v1f-v0f), v1f,
                                 color, Direction.SOUTH, v);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
+                                u0f, u1f, v0f, v1f-0.5f*(v1f-v0f),
                                 color, Direction.NORTH, v);
                     } else {
                         renderHorizontalFluidStillCentered(

@@ -150,6 +150,9 @@ public class BlockPipe extends Block implements EntityBlock {
             }
 
             pipe.connections.get(direction).tank.setFluid(FluidStack.EMPTY);
+            pipe.connections.get(direction).update();
+            pipe.connections.get(direction).syncTanks();
+
             boolean hasAnyExtraction = false;
             for (Direction i : Direction.values()) {
                 if ((state.getValue(connections.get(i)) == ConnectionState.CONNECTED || state.getValue(connections.get(i)) == ConnectionState.EXTRACTION) && !(pipe.connections.get(i).neighborFluidHandler() instanceof PipeConnection))

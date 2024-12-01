@@ -157,16 +157,17 @@ void syncTanks(){
         }
     }
     public void sendInitialTankUpdates(ServerPlayer player){
-        PacketDistributor.sendToPlayer(player, PacketFluidAmountUpdate.getPacketFluidUpdate(parent.getBlockPos(),myDirection,tank.getFluidAmount()));
-        if(!tank.getFluid().isEmpty())
+        if(!tank.getFluid().isEmpty()){
             PacketDistributor.sendToPlayer(player, PacketFluidUpdate.getPacketFluidUpdate(parent.getBlockPos(),myDirection,tank.getFluid().getFluid()));
+            PacketDistributor.sendToPlayer(player, PacketFluidAmountUpdate.getPacketFluidUpdate(parent.getBlockPos(),myDirection,tank.getFluidAmount()));
+        }
     }
 
     long lastFluidInTankUpdate;
     public void setFluidInTank(Fluid f, long time){
         if(time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
-            tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
+            tank.setFluid(new FluidStack(f, Math.max(1,tank.getFluidAmount())));
 
             parent.setRequiresMeshUpdate();
             if(neighborFluidHandler() instanceof PipeConnection p)

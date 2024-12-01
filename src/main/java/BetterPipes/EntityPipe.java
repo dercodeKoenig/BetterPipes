@@ -336,7 +336,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             UUID from = compoundTag.getUUID("client_onload");
             ServerPlayer playerFrom = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(from);
             CompoundTag updateTag = new CompoundTag();
-            BlockState state = level.getBlockState(getBlockPos());
             for (Direction direction : Direction.values()) {
                 PipeConnection conn = connections.get(direction);
                 CompoundTag tag = conn.getUpdateTag(level.registryAccess());
@@ -345,10 +344,10 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             }
             updateTag.putLong("time", System.currentTimeMillis());
             PacketDistributor.sendToPlayer(playerFrom, PacketBlockEntity.getBlockEntityPacket(this, updateTag));
-
-            PacketDistributor.sendToPlayer(playerFrom, PacketFluidAmountUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluidAmount()));
-            if (!tank.getFluid().isEmpty())
+            if (!tank.getFluid().isEmpty()) {
                 PacketDistributor.sendToPlayer(playerFrom, PacketFluidUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluid().getFluid()));
+                PacketDistributor.sendToPlayer(playerFrom, PacketFluidAmountUpdate.getPacketFluidUpdate(getBlockPos(), null, tank.getFluidAmount()));
+            }
 
         }
     }
@@ -380,7 +379,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     public void setFluidInTank(Fluid f, long time) {
         if (time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
-            tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
+            tank.setFluid(new FluidStack(f, Math.max(1,tank.getFluidAmount())));
             setRequiresMeshUpdate();
         }
     }
