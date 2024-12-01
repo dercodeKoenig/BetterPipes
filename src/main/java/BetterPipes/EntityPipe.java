@@ -20,14 +20,16 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static BetterPipes.Registry.ENTITY_PIPE;
@@ -70,10 +72,6 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
         }
     }
 
-    public IFluidHandler getFluidHandler(Direction side) {
-        return connections.get(side);
-    }
-
     @Override
     public void onLoad() {
         super.onLoad();
@@ -82,7 +80,7 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
         }
         if (level.isClientSide) {
             ResourceKey<Level> key = level.dimension();
-            BetterPipes.sendToServer(new PacketRequestInitialData(key.location(), getBlockPos()));
+            Channel.sendToServer(new PacketRequestInitialData(key.location(), getBlockPos()));
         }
     }
 
@@ -129,11 +127,11 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
                 }
                 if (!FluidStack.areFluidStackTagsEqual(last_tankFluid, tank.getFluid()) || !last_tankFluid.getFluid().isSame(tank.getFluid().getFluid())) {
                     if(!tank.getFluid().isEmpty()) {
-                        BetterPipes.sendToPlayersTrackingBE(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(),System.currentTimeMillis()), this);
+                        Channel.sendToPlayersTrackingBE(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(),System.currentTimeMillis()), this);
                     }
                 }
                 if(last_tankFluid.getAmount() != tank.getFluidAmount()){
-                    BetterPipes.sendToPlayersTrackingBE(new PacketFluidAmountUpdate(getBlockPos(), -1, tank.getFluidAmount(),System.currentTimeMillis()), this);
+                    Channel.sendToPlayersTrackingBE(new PacketFluidAmountUpdate(getBlockPos(), -1, tank.getFluidAmount(),System.currentTimeMillis()), this);
                 }
                 last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
 
@@ -371,11 +369,28 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
     @Override
     public void clientOnload(ServerPlayer player) {
             if(!last_tankFluid.isEmpty()) {
-                BetterPipes.sendToPlayer(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(), System.currentTimeMillis()), player);
-                BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(getBlockPos(), -1, tank.getFluidAmount(), System.currentTimeMillis()), player);
+                Channel.sendToPlayer(new PacketFluidUpdate(getBlockPos(), -1, tank.getFluid().getFluid(), System.currentTimeMillis()), player);
+                Channel.sendToPlayer(new PacketFluidAmountUpdate(getBlockPos(), -1, tank.getFluidAmount(), System.currentTimeMillis()), player);
             }
                 for (Direction i : Direction.values())
                     connections.get(i).sendInitialTankUpdates(player);
+    }
 
+
+    @Override
+    public void invalidateCaps() {
+        super.invalidateCaps();
+        for (Direction i : Direction.values()){
+            connections.get(i).fluidHandlerOptional.invalidate();
+        }
+    }
+
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+        if (cap == ForgeCapabilities.FLUID_HANDLER) {
+            PipeConnection c = connections.get(side);
+            if(c!=null) return c.fluidHandlerOptional.cast();
+        }
+        return super.getCapability(cap, side);
     }
 }

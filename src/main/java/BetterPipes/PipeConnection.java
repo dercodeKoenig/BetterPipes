@@ -1,5 +1,6 @@
 package BetterPipes;
 
+import com.sun.jdi.connect.spi.TransportService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -9,15 +10,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static BetterPipes.EntityPipe.*;
 
@@ -39,6 +42,8 @@ public class PipeConnection implements IFluidHandler {
 
     simpleBlockEntityTank tank;
     int lastFill;
+    public final LazyOptional<IFluidHandler> fluidHandlerOptional = LazyOptional.of(() -> this);
+
 
     fluidRenderData renderData;
     EntityPipe parent;
@@ -49,7 +54,12 @@ public class PipeConnection implements IFluidHandler {
 
     IFluidHandler neighborFluidHandler() {
         BlockPos neighborPos = parent.getBlockPos().relative(myDirection);
-        return parent.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, neighborPos, myDirection.getOpposite());
+        BlockEntity be = parent.getLevel().getBlockEntity(neighborPos);
+        if(be==null)return null;
+        LazyOptional<IFluidHandler> fluidHandlerOptional = be.getCapability(ForgeCapabilities.FLUID_HANDLER,myDirection.getOpposite());
+        AtomicReference<IFluidHandler> result = new AtomicReference<>(null);
+        fluidHandlerOptional.ifPresent(result::set);
+        return result.get();
     }
 
     public PipeConnection(EntityPipe parent, Direction myDirection) {
@@ -93,11 +103,11 @@ void sync(){
     // to not always send the large nbt
     if (!FluidStack.areFluidStackTagsEqual(last_tankFluid, tank.getFluid()) || !last_tankFluid.getFluid().isSame(tank.getFluid().getFluid())) {
         if(!tank.getFluid().isEmpty()) {
-            BetterPipes.sendToPlayersTrackingBE(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(),System.currentTimeMillis()), parent);
+            Channel.sendToPlayersTrackingBE(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(),System.currentTimeMillis()), parent);
         }
     }
     if(last_tankFluid.getAmount() != tank.getFluidAmount()){
-            BetterPipes.sendToPlayersTrackingBE(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(),System.currentTimeMillis()), parent);
+        Channel.sendToPlayersTrackingBE(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(),System.currentTimeMillis()), parent);
     }
     last_tankFluid = tank.getFluid().copy(); // Update the last known tank fluid
 
@@ -130,7 +140,7 @@ void sync(){
     }
 
     if(needsUpdate){
-        BetterPipes.sendToPlayersTrackingBE(new PacketFlowUpdate(parent.getBlockPos(), myDirection.ordinal(), getsInputFromOutside,getsInputFromInside, outputsToOutside, outputsToInside,System.currentTimeMillis()), parent);
+        Channel.sendToPlayersTrackingBE(new PacketFlowUpdate(parent.getBlockPos(), myDirection.ordinal(), getsInputFromOutside,getsInputFromInside, outputsToOutside, outputsToInside,System.currentTimeMillis()), parent);
     }
 }
     void update() {
@@ -162,8 +172,8 @@ void sync(){
     }
     public void sendInitialTankUpdates(ServerPlayer player) {
         if (!last_tankFluid.isEmpty()) {
-            BetterPipes.sendToPlayer(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(), System.currentTimeMillis()), player);
-            BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(), System.currentTimeMillis()), player);
+            Channel.sendToPlayer(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(), System.currentTimeMillis()), player);
+            Channel.sendToPlayer(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(), System.currentTimeMillis()), player);
         }
     }
 
