@@ -1027,6 +1027,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     }
 
                     if (tile.connections.get(Direction.UP).isEnabled(tileState)) {
+
                         float relativeFill = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
 
                         float actualW = wMin + (wMax - wMin) * relativeFill;
@@ -1036,6 +1037,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         x1 = actualW;
                         z0 = -actualW;
                         z1 = actualW;
+
 /*
                     float relativeFillAbove = (float) tile.connections.get(Direction.UP).tank.getFluidAmount() / tile.connections.get(Direction.UP).tank.getCapacity();
                     float actualWAbove = wMin + (wMax - wMin) * relativeFillAbove;

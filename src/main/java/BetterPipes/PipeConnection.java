@@ -130,7 +130,7 @@ void sync(){
     }
 
     if(needsUpdate){
-        BetterPipes.sendToPlayersTrackingBE(new PacketFlowUpdate(parent.getBlockPos(), myDirection.ordinal(), getsInputFromOutside,getsInputFromOutside, outputsToOutside, outputsToInside,System.currentTimeMillis()), parent);
+        BetterPipes.sendToPlayersTrackingBE(new PacketFlowUpdate(parent.getBlockPos(), myDirection.ordinal(), getsInputFromOutside,getsInputFromInside, outputsToOutside, outputsToInside,System.currentTimeMillis()), parent);
     }
 }
     void update() {
@@ -182,7 +182,7 @@ void sync(){
     public void setFluidInTank(ResourceLocation f, long time){
         if(time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
-            tank.setFluid(new FluidStack(BuiltInRegistries.FLUID.get(f), Math.min(1,tank.getFluidAmount())));
+            tank.setFluid(new FluidStack(BuiltInRegistries.FLUID.get(f), Math.max(1,tank.getFluidAmount())));
 
             parent.setRequiresMeshUpdate();
             if(neighborFluidHandler() instanceof PipeConnection p)
