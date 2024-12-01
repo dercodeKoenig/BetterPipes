@@ -68,9 +68,9 @@ public class PacketFluidUpdate implements CustomPacketPayload {
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof EntityPipe pipe) {
             if (direction == -1) {
-                pipe.setFluidInTank(BuiltInRegistries.FLUID.get(fluid), time);
+                pipe.setFluidInTank(fluid, time);
             } else {
-                pipe.connections.get(Direction.values()[direction]).setFluidInTank(BuiltInRegistries.FLUID.get(fluid), time);
+                pipe.connections.get(Direction.values()[direction]).setFluidInTank(fluid, time);
             }
         }
     }

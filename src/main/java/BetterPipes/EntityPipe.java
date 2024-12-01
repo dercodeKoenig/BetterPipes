@@ -2,12 +2,15 @@ package BetterPipes;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
@@ -102,6 +105,7 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
     }
 
     public void tick() {
+
 
         if (FMLEnvironment.dist == Dist.CLIENT && requiresMeshUpdate2) {
             requiresMeshUpdate2 = false;
@@ -315,10 +319,11 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
     }
 
     long lastFluidInTankUpdate;
-    public void setFluidInTank(Fluid f, long time) {
+    public void setFluidInTank(ResourceLocation f, long time) {
         if (time > lastFluidInTankUpdate) {
+            Fluid fluid = BuiltInRegistries.FLUID.get(f);
             lastFluidInTankUpdate = time;
-            tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
+            tank.setFluid(new FluidStack(fluid, Math.max(1,tank.getFluidAmount())));
             setRequiresMeshUpdate();
         }
     }

@@ -3,7 +3,9 @@ package BetterPipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
@@ -177,10 +179,10 @@ void sync(){
     }
 
     long lastFluidInTankUpdate;
-    public void setFluidInTank(Fluid f, long time){
+    public void setFluidInTank(ResourceLocation f, long time){
         if(time > lastFluidInTankUpdate) {
             lastFluidInTankUpdate = time;
-            tank.setFluid(new FluidStack(f, tank.getFluidAmount()));
+            tank.setFluid(new FluidStack(BuiltInRegistries.FLUID.get(f), tank.getFluidAmount()));
 
             parent.setRequiresMeshUpdate();
             if(neighborFluidHandler() instanceof PipeConnection p)
