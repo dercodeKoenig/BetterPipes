@@ -1617,8 +1617,6 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     @Override
     public void render(EntityPipe tile, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
-
-
         if (tile.mesh != null || tile.requiresMeshUpdate) {
 
             tile.vertexBuffer.bind();
@@ -1642,10 +1640,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
             if(tile.mesh != null) {
                 ShaderInstance shader = RenderSystem.getShader();
-                Matrix4f wtfAmIdoing = new Matrix4f(RenderSystem.getModelViewMatrix());
-                Matrix4f wtfAmIdoing2 = wtfAmIdoing.mul(stack.last().pose());
-                wtfAmIdoing2 = wtfAmIdoing2.translate(0.5f, 0.5f, 0.5f);
-                shader.setDefaultUniforms(VertexFormat.Mode.QUADS, wtfAmIdoing2, RenderSystem.getProjectionMatrix(), Minecraft.getInstance().getWindow());
+                Matrix4f m1 = new Matrix4f(RenderSystem.getModelViewMatrix());
+                Matrix4f m2 = m1.mul(stack.last().pose());
+                m2 = m2.translate(0.5f, 0.5f, 0.5f);
+                shader.setDefaultUniforms(VertexFormat.Mode.QUADS, m2, RenderSystem.getProjectionMatrix(), Minecraft.getInstance().getWindow());
                 shader.getUniform("LightMapCoords").set(packedLight & '\uffff', packedLight >> 16 & '\uffff');
                 shader.apply();
                 tile.vertexBuffer.draw();
