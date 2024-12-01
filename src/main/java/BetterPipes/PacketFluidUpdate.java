@@ -62,7 +62,8 @@ buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(fluid));
         return new PacketFluidUpdate(buf.readBlockPos(), buf.readInt(), BuiltInRegistries.FLUID.get(buf.readResourceLocation()), buf.readLong());
     }
 
-    public void handle(PlayPayloadContext ctx) {
+@OnlyIn(Dist.CLIENT)
+    public void _handle(PlayPayloadContext ctx) {
         Level world = Minecraft.getInstance().level;
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof EntityPipe pipe) {
@@ -72,6 +73,9 @@ buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(fluid));
                 pipe.connections.get(Direction.values()[direction]).setFluidInTank(fluid, time);
             }
         }
+    }
+    public void handle(PlayPayloadContext ctx) {
+        _handle(ctx);
     }
 }
 

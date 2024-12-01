@@ -1,9 +1,20 @@
 {
   "vertex": "betterpipes:pipe_fluid_shader",
   "fragment": "betterpipes:pipe_fluid_shader",
+  "blend": {
+    "func": "add",
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
+  },
   "samplers": [
     { "name": "Sampler0" },
     { "name": "Sampler2" }
+  ],
+  "attributes": [
+    "Position",
+    "Color",
+    "UV0",
+    "Normal"
   ],
   "uniforms": [
     { "name": "LightMapCoords", "type": "int", "count": 2, "values": [ 0, 0 ] },

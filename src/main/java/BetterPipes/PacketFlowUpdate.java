@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlerEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -38,7 +39,8 @@ public class PacketFlowUpdate implements CustomPacketPayload {
         this.outToIn = outToIn;
         this.time = time;
     }
-long time;
+
+    long time;
     boolean inFromOut, inFromIn, outToOut, outToIn;
     BlockPos pos;
     int direction;
@@ -63,13 +65,19 @@ long time;
         return new PacketFlowUpdate(buf.readBlockPos(), buf.readInt(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readLong());
     }
 
-    public void handle(PlayPayloadContext ctx) {
+
+    @OnlyIn(Dist.CLIENT)
+    public void _handle(PlayPayloadContext ctx) {
         // use the current Dimension, the client does not need to find the dimension by String
         Level world = Minecraft.getInstance().level;
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof EntityPipe pipe) {
-            pipe.connections.get(Direction.values()[direction]).setFlow(inFromIn,inFromOut,outToIn, outToOut,time);
+            pipe.connections.get(Direction.values()[direction]).setFlow(inFromIn, inFromOut, outToIn, outToOut, time);
         }
+    }
+
+    public void handle(PlayPayloadContext ctx) {
+        _handle(ctx);
     }
 }
 

@@ -35,8 +35,8 @@ public class PacketRequestInitialData implements CustomPacketPayload {
 
     @Override
     public void write(FriendlyByteBuf buf) {
-        buf.writeBlockPos(pos);
         buf.writeResourceLocation(dimension);
+        buf.writeBlockPos(pos);
     }
 
     @Override

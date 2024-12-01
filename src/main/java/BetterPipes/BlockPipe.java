@@ -99,22 +99,21 @@ public class BlockPipe extends Block implements EntityBlock {
     }
 
 
-    @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand p_60507_, BlockHitResult hitResult) {
-        if (!level.isClientSide && player.getMainHandItem().isEmpty()) {
-            BlockEntity tile = level.getBlockEntity(pos);
-            if (tile instanceof EntityPipe pipe) {
-                if (player.isShiftKeyDown()) {
-                    pipe.toggleExtractionMode();
-                } else {
-                    pipe.toggleExtractionActive();
+        @Override
+        public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+            if (!level.isClientSide && player.getMainHandItem().isEmpty() && hand == InteractionHand.MAIN_HAND) {
+                BlockEntity tile = level.getBlockEntity(pos);
+                if (tile instanceof EntityPipe pipe) {
+                    if (player.isShiftKeyDown()) {
+                        pipe.toggleExtractionMode();
+                    } else {
+                        pipe.toggleExtractionActive();
+                    }
+                    return InteractionResult.SUCCESS;
                 }
-                return InteractionResult.PASS;
             }
+            return InteractionResult.PASS;
         }
-
-        return InteractionResult.PASS;
-    }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {

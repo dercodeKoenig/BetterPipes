@@ -26,9 +26,6 @@ vec4 linear_fog(vec4 inColor, float vertexDistance, float fogStart, float fogEnd
 
 void main() {
     vec4 color = texture(Sampler0, texCoord0);
-    if (color.a < 0.1) {
-        discard;
-    }
     color *= vertexColor * ColorModulator;
     color *= lightMapColor;
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);

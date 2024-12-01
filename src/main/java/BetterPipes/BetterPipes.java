@@ -78,6 +78,7 @@ public class BetterPipes {
                 .versioned("1.0")
                 .optional();
 
+
         registrar.play(PacketFlowUpdate.ID, PacketFlowUpdate::read, handler -> handler.client(PacketFlowUpdate::handle));
 
         registrar.play(PacketFluidUpdate.ID, PacketFluidUpdate::read, handler -> handler.client(PacketFluidUpdate::handle));

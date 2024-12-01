@@ -16,10 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import org.joml.Matrix4f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static BetterPipes.Registry.PIPE_FLUID_SHADER;
 import static net.minecraft.client.renderer.RenderStateShard.*;
@@ -58,10 +55,19 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     static VertexFormatElement Position = new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.POSITION, 3);
     static VertexFormatElement Color = new VertexFormatElement(0, VertexFormatElement.Type.UBYTE, VertexFormatElement.Usage.COLOR, 4);
     static VertexFormatElement UV = new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.UV, 2);
-    static VertexFormatElement Normal = new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.NORMAL, 3);
-    static ImmutableMap<String, VertexFormatElement> vertexElements =ImmutableMap.copyOf(Map.of("Position", Position, "color", Color, "UV", UV, "Normal", Normal));
-    public static VertexFormat POSITION_COLOR_TEXTURE_NORMAL = new VertexFormat(vertexElements);
+    static VertexFormatElement Normal = new VertexFormatElement(0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.NORMAL, 3);
+    static Map<String, VertexFormatElement> linkedMap = new LinkedHashMap<>();
 
+    static {
+        linkedMap.put("Position", Position);
+        linkedMap.put("Normal", Normal);
+        linkedMap.put("UV0", UV);
+        linkedMap.put("Color", Color);
+    }
+
+    static ImmutableMap<String, VertexFormatElement> vertexElements =
+            ImmutableMap.copyOf(linkedMap);
+    public static VertexFormat POSITION_COLOR_TEXTURE_NORMAL = new VertexFormat(vertexElements);
 
     static float e = 0.001f;
     static float wMin = 0.02f;
@@ -81,40 +87,40 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
 
         //render up face
-        v.vertex((float)x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color);
-        v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color);
-        v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color);
-        v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color);
+        v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+        v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+        v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+        v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
 
         //render bottom face
-        v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color);
-        v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color);
-        v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color);
-        v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color);
+        v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+        v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+        v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
+        v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
 
         // Render east face (x+ side)
-        v.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color);
-        v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color);
-        v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color);
-        v.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color);
+        v.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+        v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
+        v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+        v.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
 
         // Render west face (x- side)
-        v.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color);
-        v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color);
-        v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color);
-        v.vertex((float) x0, (float) y0, z0).normal(-1, 0, 0).uv(u1, v1).color(color);
+        v.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+        v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+        v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
+        v.vertex((float) x0, (float) y0, z0).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
 
         // Render south face (z+ side)
-        v.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
-        v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
-        v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
-        v.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
+        v.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+        v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
+        v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+        v.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
 
         // Render north face (z- side)
-        v.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
-        v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
-        v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
-        v.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
+        v.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
+        v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+        v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+        v.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
 
     }
 
@@ -128,46 +134,46 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
         if (d == Direction.UP) {
             //render up face
-            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color);
-            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color);
-            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color);
-            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color);
+            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
         }
         if (d == Direction.DOWN) {
             //render bottom face
-            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color);
-            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color);
-            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color);
-            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color);
+            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
         }
 
         if (d == Direction.EAST) {
             // Render east face (x+ side)
-            v.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color);
-            v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color);
-            v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color);
-            v.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color);
+            v.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
         }
         if (d == Direction.WEST) {
             // Render west face (x- side)
-            v.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color);
-            v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color);
-            v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color);
-            v.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color);
+            v.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
         }
         if (d == Direction.SOUTH) {
             // Render south face (z+ side)
-            v.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
-            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
-            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
-            v.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
+            v.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
         }
         if (d == Direction.NORTH) {
             // Render north face (z- side)
-            v.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
-            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
-            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
-            v.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
+            v.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
         }
     }
 
@@ -179,28 +185,28 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     ) {
 
         // Render east face (x+ side)
-        v.vertex(x1f, y0f, z0f).normal(1, 0, 0).uv(u0, v1).color(color);
-        v.vertex(x1f, y1f, z0f).normal(1, 0, 0).uv(u0, v0).color(color);
-        v.vertex(x1f, y1f, z1f).normal(1, 0, 0).uv(u1, v0).color(color);
-        v.vertex(x1f, y0f, z1f).normal(1, 0, 0).uv(u1, v1).color(color);
+        v.vertex(x1f, y0f, z0f).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+        v.vertex(x1f, y1f, z0f).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+        v.vertex(x1f, y1f, z1f).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+        v.vertex(x1f, y0f, z1f).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
 
         // Render west face (x- side)
-        v.vertex(x0f, y0f, z1f).normal(-1, 0, 0).uv(u1, v1).color(color);
-        v.vertex(x0f, y1f, z1f).normal(-1, 0, 0).uv(u1, v0).color(color);
-        v.vertex(x0f, y1f, z0f).normal(-1, 0, 0).uv(u0, v0).color(color);
-        v.vertex(x0f, y0f, z0f).normal(-1, 0, 0).uv(u0, v1).color(color);
+        v.vertex(x0f, y0f, z1f).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+        v.vertex(x0f, y1f, z1f).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+        v.vertex(x0f, y1f, z0f).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+        v.vertex(x0f, y0f, z0f).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
 
         // Render south face (z+ side)#
-        v.vertex(x1f, y0f, z1f).normal(0, 0, 1).uv(u1, v1).color(color);
-        v.vertex(x1f, y1f, z1f).normal(0, 0, 1).uv(u1, v0).color(color);
-        v.vertex(x0f, y1f, z1f).normal(0, 0, 1).uv(u0, v0).color(color);
-        v.vertex(x0f, y0f, z1f).normal(0, 0, 1).uv(u0, v1).color(color);
+        v.vertex(x1f, y0f, z1f).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+        v.vertex(x1f, y1f, z1f).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+        v.vertex(x0f, y1f, z1f).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+        v.vertex(x0f, y0f, z1f).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
 
         // Render north face (z- side)
-        v.vertex(x0f, y0f, z0f).normal(0, 0, -1).uv(u0, v1).color(color);
-        v.vertex(x0f, y1f, z0f).normal(0, 0, -1).uv(u0, v0).color(color);
-        v.vertex(x1f, y1f, z0f).normal(0, 0, -1).uv(u1, v0).color(color);
-        v.vertex(x1f, y0f, z0f).normal(0, 0, -1).uv(u1, v1).color(color);
+        v.vertex(x0f, y0f, z0f).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+        v.vertex(x0f, y1f, z0f).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+        v.vertex(x1f, y1f, z0f).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+        v.vertex(x1f, y0f, z0f).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
     }
 
     public static void renderHorizontalFluidStill(
@@ -219,44 +225,44 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
 
         //render top face
-        v.vertex(x0f, y1f, z0f).normal(0, 1, 0).uv(u0, v0).color(color);
-        v.vertex(x0f, y1f, z1f).normal(0, 1, 0).uv(u0, v1).color(color);
-        v.vertex(x1f, y1f, z1f).normal(0, 1, 0).uv(u1, v1).color(color);
-        v.vertex(x1f, y1f, z0f).normal(0, 1, 0).uv(u1, v0).color(color);
+        v.vertex(x0f, y1f, z0f).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+        v.vertex(x0f, y1f, z1f).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+        v.vertex(x1f, y1f, z1f).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+        v.vertex(x1f, y1f, z0f).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
 
         //render bottom face
-        v.vertex(x1f, y0f, z0f).normal(0, -1, 0).uv(u1, v0).color(color);
-        v.vertex(x1f, y0f, z1f).normal(0, -1, 0).uv(u1, v1).color(color);
-        v.vertex(x0f, y0f, z1f).normal(0, -1, 0).uv(u0, v1).color(color);
-        v.vertex(x0f, y0f, z0f).normal(0, -1, 0).uv(u0, v0).color(color);
+        v.vertex(x1f, y0f, z0f).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+        v.vertex(x1f, y0f, z1f).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+        v.vertex(x0f, y0f, z1f).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
+        v.vertex(x0f, y0f, z0f).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
 
         // Render east face (x+ side)
         if (y1f - y0BottomOffsetEast > e) {
-            v.vertex(x1f, y0BottomOffsetEast, z0f).normal(1, 0, 0).uv(u0, v1).color(color);
-            v.vertex(x1f, y1f, z0f).normal(1, 0, 0).uv(u0, v0).color(color);
-            v.vertex(x1f, y1f, z1f).normal(1, 0, 0).uv(u1, v0).color(color);
-            v.vertex(x1f, y0BottomOffsetEast, z1f).normal(1, 0, 0).uv(u1, v1).color(color);
+            v.vertex(x1f, y0BottomOffsetEast, z0f).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex(x1f, y1f, z0f).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex(x1f, y1f, z1f).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex(x1f, y0BottomOffsetEast, z1f).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
         }
         // Render west face (x- side)
         if (y1f - y0BottomOffsetWest > e) {
-            v.vertex(x0f, y0BottomOffsetWest, z1f).normal(-1, 0, 0).uv(u1, v1).color(color);
-            v.vertex(x0f, y1f, z1f).normal(-1, 0, 0).uv(u1, v0).color(color);
-            v.vertex(x0f, y1f, z0f).normal(-1, 0, 0).uv(u0, v0).color(color);
-            v.vertex(x0f, y0BottomOffsetWest, z0f).normal(-1, 0, 0).uv(u0, v1).color(color);
+            v.vertex(x0f, y0BottomOffsetWest, z1f).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex(x0f, y1f, z1f).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex(x0f, y1f, z0f).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex(x0f, y0BottomOffsetWest, z0f).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
         }
         // Render south face (z+ side)#
         if (y1f - y0BottomOffsetSouth > e) {
-            v.vertex(x1f, y0BottomOffsetSouth, z1f).normal(0, 0, 1).uv(u1, v1).color(color);
-            v.vertex(x1f, y1f, z1f).normal(0, 0, 1).uv(u1, v0).color(color);
-            v.vertex(x0f, y1f, z1f).normal(0, 0, 1).uv(u0, v0).color(color);
-            v.vertex(x0f, y0BottomOffsetSouth, z1f).normal(0, 0, 1).uv(u0, v1).color(color);
+            v.vertex(x1f, y0BottomOffsetSouth, z1f).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+            v.vertex(x1f, y1f, z1f).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+            v.vertex(x0f, y1f, z1f).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+            v.vertex(x0f, y0BottomOffsetSouth, z1f).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
         }
         // Render north face (z- side)
         if (y1f - y0BottomOffsetNorth > e) {
-            v.vertex(x0f, y0BottomOffsetNorth, z0f).normal(0, 0, -1).uv(u0, v1).color(color);
-            v.vertex(x0f, y1f, z0f).normal(0, 0, -1).uv(u0, v0).color(color);
-            v.vertex(x1f, y1f, z0f).normal(0, 0, -1).uv(u1, v0).color(color);
-            v.vertex(x1f, y0BottomOffsetNorth, z0f).normal(0, 0, -1).uv(u1, v1).color(color);
+            v.vertex(x0f, y0BottomOffsetNorth, z0f).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+            v.vertex(x0f, y1f, z0f).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+            v.vertex(x1f, y1f, z0f).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+            v.vertex(x1f, y0BottomOffsetNorth, z0f).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
         }
     }
     /*
@@ -279,52 +285,52 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
 // Render the 8 surrounding quads
 // Quad 1: Top-left
-        vx2.vertex( x0, y1, z0).normal(0, 1, 0).uv(u0, v0).color(color);
-        vx2.vertex( xh0, y1, z0).normal(0, 1, 0).uv(uh0, v0).color(color);
-        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color);
-        vx2.vertex( x0, y1, zh0).normal(0, 1, 0).uv(u0, vh0).color(color);
+        vx2.vertex( x0, y1, z0).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+        vx2.vertex( xh0, y1, z0).normal(0, 1, 0).uv(uh0, v0).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color).endVertex();
+        vx2.vertex( x0, y1, zh0).normal(0, 1, 0).uv(u0, vh0).color(color).endVertex();
 
 // Quad 2: Top
-        vx2.vertex( xh0, y1, z0).normal(0, 1, 0).uv(uh0, v0).color(color);
-        vx2.vertex( xh1, y1, z0).normal(0, 1, 0).uv(uh1, v0).color(color);
-        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color);
-        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color);
+        vx2.vertex( xh0, y1, z0).normal(0, 1, 0).uv(uh0, v0).color(color).endVertex();
+        vx2.vertex( xh1, y1, z0).normal(0, 1, 0).uv(uh1, v0).color(color).endVertex();
+        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color).endVertex();
 
 // Quad 3: Top-right
-        vx2.vertex( xh1, y1, z0).normal(0, 1, 0).uv(uh1, v0).color(color);
-        vx2.vertex( x1, y1, z0).normal(0, 1, 0).uv(u1, v0).color(color);
-        vx2.vertex( x1, y1, zh0).normal(0, 1, 0).uv(u1, vh0).color(color);
-        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color);
+        vx2.vertex( xh1, y1, z0).normal(0, 1, 0).uv(uh1, v0).color(color).endVertex();
+        vx2.vertex( x1, y1, z0).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+        vx2.vertex( x1, y1, zh0).normal(0, 1, 0).uv(u1, vh0).color(color).endVertex();
+        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color).endVertex();
 
 // Quad 4: Right
-        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color);
-        vx2.vertex( x1, y1, zh0).normal(0, 1, 0).uv(u1, vh0).color(color);
-        vx2.vertex( x1, y1, zh1).normal(0, 1, 0).uv(u1, vh1).color(color);
-        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color);
+        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color).endVertex();
+        vx2.vertex( x1, y1, zh0).normal(0, 1, 0).uv(u1, vh0).color(color).endVertex();
+        vx2.vertex( x1, y1, zh1).normal(0, 1, 0).uv(u1, vh1).color(color).endVertex();
+        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color).endVertex();
 
 // Quad 5: Bottom-right
-        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color);
-        vx2.vertex( x1, y1, zh1).normal(0, 1, 0).uv(u1, vh1).color(color);
-        vx2.vertex( x1, y1, z1).normal(0, 1, 0).uv(u1, v1).color(color);
-        vx2.vertex( xh1, y1, z1).normal(0, 1, 0).uv(uh1, v1).color(color);
+        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color).endVertex();
+        vx2.vertex( x1, y1, zh1).normal(0, 1, 0).uv(u1, vh1).color(color).endVertex();
+        vx2.vertex( x1, y1, z1).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+        vx2.vertex( xh1, y1, z1).normal(0, 1, 0).uv(uh1, v1).color(color).endVertex();
 
 // Quad 6: Bottom
-        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color);
-        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color);
-        vx2.vertex( xh1, y1, z1).normal(0, 1, 0).uv(uh1, v1).color(color);
-        vx2.vertex( xh0, y1, z1).normal(0, 1, 0).uv(uh0, v1).color(color);
+        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color).endVertex();
+        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color).endVertex();
+        vx2.vertex( xh1, y1, z1).normal(0, 1, 0).uv(uh1, v1).color(color).endVertex();
+        vx2.vertex( xh0, y1, z1).normal(0, 1, 0).uv(uh0, v1).color(color).endVertex();
 
 // Quad 7: Bottom-left
-        vx2.vertex( x0, y1, zh1).normal(0, 1, 0).uv(u0, vh1).color(color);
-        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color);
-        vx2.vertex( xh0, y1, z1).normal(0, 1, 0).uv(uh0, v1).color(color);
-        vx2.vertex( x0, y1, z1).normal(0, 1, 0).uv(u0, v1).color(color);
+        vx2.vertex( x0, y1, zh1).normal(0, 1, 0).uv(u0, vh1).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color).endVertex();
+        vx2.vertex( xh0, y1, z1).normal(0, 1, 0).uv(uh0, v1).color(color).endVertex();
+        vx2.vertex( x0, y1, z1).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
 
 // Quad 8: Left
-        vx2.vertex( x0, y1, zh0).normal(0, 1, 0).uv(u0, vh0).color(color);
-        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color);
-        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color);
-        vx2.vertex( x0, y1, zh1).normal(0, 1, 0).uv(u0, vh1).color(color);
+        vx2.vertex( x0, y1, zh0).normal(0, 1, 0).uv(u0, vh0).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color).endVertex();
+        vx2.vertex( x0, y1, zh1).normal(0, 1, 0).uv(u0, vh1).color(color).endVertex();
 
     }
     void renderHorizontalFaceCutOutReverse(
@@ -342,52 +348,52 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
 // Render the 8 surrounding quads
 // Quad 1: Top-left
-        vx2.vertex( x0, y1, zh0).normal(0, 1, 0).uv(u0, vh0).color(color);
-        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color);
-        vx2.vertex( xh0, y1, z0).normal(0, 1, 0).uv(uh0, v0).color(color);
-        vx2.vertex( x0, y1, z0).normal(0, 1, 0).uv(u0, v0).color(color);
+        vx2.vertex( x0, y1, zh0).normal(0, 1, 0).uv(u0, vh0).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color).endVertex();
+        vx2.vertex( xh0, y1, z0).normal(0, 1, 0).uv(uh0, v0).color(color).endVertex();
+        vx2.vertex( x0, y1, z0).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
 
 // Quad 2: Top
-        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color);
-        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color);
-        vx2.vertex( xh1, y1, z0).normal(0, 1, 0).uv(uh1, v0).color(color);
-        vx2.vertex( xh0, y1, z0).normal(0, 1, 0).uv(uh0, v0).color(color);
+        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color).endVertex();
+        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color).endVertex();
+        vx2.vertex( xh1, y1, z0).normal(0, 1, 0).uv(uh1, v0).color(color).endVertex();
+        vx2.vertex( xh0, y1, z0).normal(0, 1, 0).uv(uh0, v0).color(color).endVertex();
 
 // Quad 3: Top-right
-        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color);
-        vx2.vertex( x1, y1, zh0).normal(0, 1, 0).uv(u1, vh0).color(color);
-        vx2.vertex( x1, y1, z0).normal(0, 1, 0).uv(u1, v0).color(color);
-        vx2.vertex( xh1, y1, z0).normal(0, 1, 0).uv(uh1, v0).color(color);
+        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color).endVertex();
+        vx2.vertex( x1, y1, zh0).normal(0, 1, 0).uv(u1, vh0).color(color).endVertex();
+        vx2.vertex( x1, y1, z0).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+        vx2.vertex( xh1, y1, z0).normal(0, 1, 0).uv(uh1, v0).color(color).endVertex();
 
 // Quad 4: Right
-        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color);
-        vx2.vertex( x1, y1, zh1).normal(0, 1, 0).uv(u1, vh1).color(color);
-        vx2.vertex( x1, y1, zh0).normal(0, 1, 0).uv(u1, vh0).color(color);
-        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color);
+        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color).endVertex();
+        vx2.vertex( x1, y1, zh1).normal(0, 1, 0).uv(u1, vh1).color(color).endVertex();
+        vx2.vertex( x1, y1, zh0).normal(0, 1, 0).uv(u1, vh0).color(color).endVertex();
+        vx2.vertex( xh1, y1, zh0).normal(0, 1, 0).uv(uh1, vh0).color(color).endVertex();
 
 // Quad 5: Bottom-right
-        vx2.vertex( xh1, y1, z1).normal(0, 1, 0).uv(uh1, v1).color(color);
-        vx2.vertex( x1, y1, z1).normal(0, 1, 0).uv(u1, v1).color(color);
-        vx2.vertex( x1, y1, zh1).normal(0, 1, 0).uv(u1, vh1).color(color);
-        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color);
+        vx2.vertex( xh1, y1, z1).normal(0, 1, 0).uv(uh1, v1).color(color).endVertex();
+        vx2.vertex( x1, y1, z1).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+        vx2.vertex( x1, y1, zh1).normal(0, 1, 0).uv(u1, vh1).color(color).endVertex();
+        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color).endVertex();
 
 // Quad 6: Bottom
-        vx2.vertex( xh0, y1, z1).normal(0, 1, 0).uv(uh0, v1).color(color);
-        vx2.vertex( xh1, y1, z1).normal(0, 1, 0).uv(uh1, v1).color(color);
-        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color);
-        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color);
+        vx2.vertex( xh0, y1, z1).normal(0, 1, 0).uv(uh0, v1).color(color).endVertex();
+        vx2.vertex( xh1, y1, z1).normal(0, 1, 0).uv(uh1, v1).color(color).endVertex();
+        vx2.vertex( xh1, y1, zh1).normal(0, 1, 0).uv(uh1, vh1).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color).endVertex();
 
 // Quad 7: Bottom-left
-        vx2.vertex( x0, y1, z1).normal(0, 1, 0).uv(u0, v1).color(color);
-        vx2.vertex( xh0, y1, z1).normal(0, 1, 0).uv(uh0, v1).color(color);
-        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color);
-        vx2.vertex( x0, y1, zh1).normal(0, 1, 0).uv(u0, vh1).color(color);
+        vx2.vertex( x0, y1, z1).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+        vx2.vertex( xh0, y1, z1).normal(0, 1, 0).uv(uh0, v1).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color).endVertex();
+        vx2.vertex( x0, y1, zh1).normal(0, 1, 0).uv(u0, vh1).color(color).endVertex();
 
 // Quad 8: Left
-        vx2.vertex( x0, y1, zh1).normal(0, 1, 0).uv(u0, vh1).color(color);
-        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color);
-        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color);
-        vx2.vertex( x0, y1, zh0).normal(0, 1, 0).uv(u0, vh0).color(color);
+        vx2.vertex( x0, y1, zh1).normal(0, 1, 0).uv(u0, vh1).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh1).normal(0, 1, 0).uv(uh0, vh1).color(color).endVertex();
+        vx2.vertex( xh0, y1, zh0).normal(0, 1, 0).uv(uh0, vh0).color(color).endVertex();
+        vx2.vertex( x0, y1, zh0).normal(0, 1, 0).uv(u0, vh0).color(color).endVertex();
 
     }
     void renderVerticalFluidCutOutTopDownFace(
@@ -435,171 +441,171 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
         if (flowDirection == Direction.NORTH) {
             //render top face
-            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color);
-            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color);
-            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color);
-            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color);
+            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
 
             //render bottom face
-            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color);
-            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color);
-            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color);
-            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color);
+            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
 
             // Render east face (x+ side)
             if (y1 - y0BottomOffsetEast > e) {
-                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color);
-                v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color);
-                v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color);
-                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color);
+                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
             }
             // Render west face (x- side)
             if (y1 - y0BottomOffsetWest > e) {
-                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color);
-                v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color);
-                v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color);
-                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color);
+                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
             }
             // Render south face (z+ side)
             if (y1 - y0BottomOffsetSouth > e) {
-                v.vertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
-                v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
-                v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
-                v.vertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
+                v.vertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
             }
             // Render north face (z- side)
             if (y1 - y0BottomOffsetNorth > e) {
-                v.vertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
-                v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
-                v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
-                v.vertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
+                v.vertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
             }
         }
 
         if (flowDirection == Direction.SOUTH) {
             //render top face
-            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v0).color(color);
-            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v1).color(color);
-            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v1).color(color);
-            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v0).color(color);
+            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
 
             //render bottom face
-            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v0).color(color);
-            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v1).color(color);
-            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v1).color(color);
-            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v0).color(color);
+            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
 
             // Render east face (x+ side)
             if (y1 - y0BottomOffsetEast > e) {
-                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z0).normal(1, 0, 0).uv(u1, v0).color(color);
-                v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u0, v0).color(color);
-                v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u0, v1).color(color);
-                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z1).normal(1, 0, 0).uv(u1, v1).color(color);
+                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z0).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z1).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
             }
             // Render west face (x- side)
             if (y1 - y0BottomOffsetWest > e) {
-                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z1).normal(-1, 0, 0).uv(u0, v1).color(color);
-                v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u1, v1).color(color);
-                v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u1, v0).color(color);
-                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z0).normal(-1, 0, 0).uv(u0, v0).color(color);
+                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z1).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z0).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
             }
             // Render south face (z+ side)
             if (y1 - y0BottomOffsetSouth > e) {
-                v.vertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
-                v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
-                v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
-                v.vertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
+                v.vertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
             }
             // Render north face (z- side)
             if (y1 - y0BottomOffsetNorth > e) {
-                v.vertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
-                v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
-                v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
-                v.vertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
+                v.vertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
             }
         }
         if (flowDirection == Direction.EAST) {
             //render top face
-            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v0).color(color);
-            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color);
-            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v1).color(color);
-            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color);
+            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
 
             //render bottom face
-            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color);
-            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v1).color(color);
-            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color);
-            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v0).color(color);
+            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
 
             // Render east face (x+ side)
             if (y1 - y0BottomOffsetEast > e) {
-                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z0).normal(1, 0, 0).uv(u0, v0).color(color);
-                v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color);
-                v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v1).color(color);
-                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color);
+                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z0).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
             }
             // Render west face (x- side)
             if (y1 - y0BottomOffsetWest > e) {
-                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color);
-                v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v1).color(color);
-                v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color);
-                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z0).normal(-1, 0, 0).uv(u1, v0).color(color);
+                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z0).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
             }
             // Render south face (z+ side)
             if (y1 - y0BottomOffsetSouth > e) {
-                v.vertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
-                v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
-                v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
-                v.vertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
+                v.vertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
             }
             // Render north face (z- side)
             if (y1 - y0BottomOffsetNorth > e) {
-                v.vertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
-                v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
-                v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
-                v.vertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
+                v.vertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
             }
         }
         if (flowDirection == Direction.WEST) {
             //render top face
-            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color);
-            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v1).color(color);
-            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color);
-            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v0).color(color);
+            v.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
 
             //render bottom face
-            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v0).color(color);
-            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color);
-            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v1).color(color);
-            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color);
+            v.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
 
             // Render east face (x+ side)
             if (y1 - y0BottomOffsetEast > e) {
-                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color);
-                v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v0).color(color);
-                v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color);
-                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z1).normal(1, 0, 0).uv(u0, v1).color(color);
+                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y0BottomOffsetEast, (float) z1).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
             }
             // Render west face (x- side)
             if (y1 - y0BottomOffsetWest > e) {
-                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z1).normal(-1, 0, 0).uv(u1, v1).color(color);
-                v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color);
-                v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v0).color(color);
-                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color);
+                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z1).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y0BottomOffsetWest, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
             }
             // Render south face (z+ side)
             if (y1 - y0BottomOffsetSouth > e) {
-                v.vertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
-                v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
-                v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
-                v.vertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
+                v.vertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
             }
             // Render north face (z- side)
             if (y1 - y0BottomOffsetNorth > e) {
-                v.vertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
-                v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
-                v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
-                v.vertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
+                v.vertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+                v.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
+                v.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+                v.vertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
             }
         }
     }
@@ -614,42 +620,42 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     ) {
 
         //render top face
-        v.vertex(x0f, y1f, z0f).normal(0, 1, 0).uv(u0, v0).color(color);
-        v.vertex(x0f, y1f, z1f).normal(0, 1, 0).uv(u0, v1).color(color);
-        v.vertex(x1f, y1f, z1f).normal(0, 1, 0).uv(u1, v1).color(color);
-        v.vertex(x1f, y1f, z0f).normal(0, 1, 0).uv(u1, v0).color(color);
+        v.vertex(x0f, y1f, z0f).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+        v.vertex(x0f, y1f, z1f).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+        v.vertex(x1f, y1f, z1f).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+        v.vertex(x1f, y1f, z0f).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
 
         //render bottom face
-        v.vertex(x1f, y0f, z0f).normal(0, -1, 0).uv(u1, v0).color(color);
-        v.vertex(x1f, y0f, z1f).normal(0, -1, 0).uv(u1, v1).color(color);
-        v.vertex(x0f, y0f, z1f).normal(0, -1, 0).uv(u0, v1).color(color);
-        v.vertex(x0f, y0f, z0f).normal(0, -1, 0).uv(u0, v0).color(color);
+        v.vertex(x1f, y0f, z0f).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+        v.vertex(x1f, y0f, z1f).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+        v.vertex(x0f, y0f, z1f).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
+        v.vertex(x0f, y0f, z0f).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
 
         if (direction != Direction.EAST && direction != Direction.WEST) {
             // Render east face (x+ side)
-            v.vertex(x1f, y0f, z0f).normal(1, 0, 0).uv(u0, v1).color(color);
-            v.vertex(x1f, y1f, z0f).normal(1, 0, 0).uv(u0, v0).color(color);
-            v.vertex(x1f, y1f, z1f).normal(1, 0, 0).uv(u1, v0).color(color);
-            v.vertex(x1f, y0f, z1f).normal(1, 0, 0).uv(u1, v1).color(color);
+            v.vertex(x1f, y0f, z0f).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+            v.vertex(x1f, y1f, z0f).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex(x1f, y1f, z1f).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex(x1f, y0f, z1f).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
 
             // Render west face (x- side)
-            v.vertex(x0f, y0f, z1f).normal(-1, 0, 0).uv(u1, v1).color(color);
-            v.vertex(x0f, y1f, z1f).normal(-1, 0, 0).uv(u1, v0).color(color);
-            v.vertex(x0f, y1f, z0f).normal(-1, 0, 0).uv(u0, v0).color(color);
-            v.vertex(x0f, y0f, z0f).normal(-1, 0, 0).uv(u0, v1).color(color);
+            v.vertex(x0f, y0f, z1f).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+            v.vertex(x0f, y1f, z1f).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+            v.vertex(x0f, y1f, z0f).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+            v.vertex(x0f, y0f, z0f).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
         }
         if (direction != Direction.NORTH && direction != Direction.SOUTH) {
             // Render south face (z+ side)#
-            v.vertex(x1f, y0f, z1f).normal(0, 0, 1).uv(u1, v1).color(color);
-            v.vertex(x1f, y1f, z1f).normal(0, 0, 1).uv(u1, v0).color(color);
-            v.vertex(x0f, y1f, z1f).normal(0, 0, 1).uv(u0, v0).color(color);
-            v.vertex(x0f, y0f, z1f).normal(0, 0, 1).uv(u0, v1).color(color);
+            v.vertex(x1f, y0f, z1f).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+            v.vertex(x1f, y1f, z1f).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+            v.vertex(x0f, y1f, z1f).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+            v.vertex(x0f, y0f, z1f).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
 
             // Render north face (z- side)
-            v.vertex(x0f, y0f, z0f).normal(0, 0, -1).uv(u0, v1).color(color);
-            v.vertex(x0f, y1f, z0f).normal(0, 0, -1).uv(u0, v0).color(color);
-            v.vertex(x1f, y1f, z0f).normal(0, 0, -1).uv(u1, v0).color(color);
-            v.vertex(x1f, y0f, z0f).normal(0, 0, -1).uv(u1, v1).color(color);
+            v.vertex(x0f, y0f, z0f).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+            v.vertex(x0f, y1f, z0f).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+            v.vertex(x1f, y1f, z0f).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+            v.vertex(x1f, y0f, z0f).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
         }
     }
 
@@ -662,158 +668,158 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
         if (flowDirection == Direction.NORTH) {
             // Render east face (x+ side)
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
 
             // Render west face (x- side)
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color);
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
 
             // Render up  face (y+ side)
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color);
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
 
             // Render down face (y- side)
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
         }
 
         if (flowDirection == Direction.SOUTH) {
             // Render east face (x+ side)
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u1, v1).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
 
             // Render west face (x- side)
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u0, v0).color(color);
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
 
             // Render up  face (y+ side)
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v0).color(color);
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
 
             // Render down face (y- side)
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v0).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
         }
 
         if (flowDirection == Direction.EAST) {
             // Render south face (z+ side)
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
 
             // Render north face (z- side)
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
 
             // Render up  face (y+ side)
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color);
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
 
             // Render down face (y- side)
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v0).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
         }
 
         if (flowDirection == Direction.WEST) {
             // Render south face (z+ side)
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
 
             // Render north face (z- side)
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
 
             // Render up  face (y+ side)
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v0).color(color);
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 1, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 1, 0).uv(u0, v0).color(color).endVertex();
 
             // Render down face (y- side)
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, -1, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, -1, 0).uv(u1, v1).color(color).endVertex();
         }
 
         if (flowDirection == Direction.UP) {
             // Render east face (x+ side)
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
 
             // Render west face (x- side)
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u1, v0).color(color);
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
 
             // Render south face (z+ side)
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
 
             // Render north face (z- side)
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
         }
 
         if (flowDirection == Direction.DOWN) {
             // Render east face (x+ side)
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u0, v1).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(1, 0, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(1, 0, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(1, 0, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(1, 0, 0).uv(u0, v1).color(color).endVertex();
 
             // Render west face (x- side)
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color);
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(-1, 0, 0).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(-1, 0, 0).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(-1, 0, 0).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(-1, 0, 0).uv(u0, v1).color(color).endVertex();
 
             // Render south face (z+ side)
-            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color);
-            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color);
+            vx1.vertex((float) x1, (float) y0, (float) z1).normal(0, 0, 1).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z1).normal(0, 0, 1).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z1).normal(0, 0, 1).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y0, (float) z1).normal(0, 0, 1).uv(u0, v1).color(color).endVertex();
 
             // Render north face (z- side)
-            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color);
-            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color);
-            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color);
-            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color);
+            vx1.vertex((float) x0, (float) y0, (float) z0).normal(0, 0, -1).uv(u1, v1).color(color).endVertex();
+            vx1.vertex((float) x0, (float) y1, (float) z0).normal(0, 0, -1).uv(u1, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y1, (float) z0).normal(0, 0, -1).uv(u0, v0).color(color).endVertex();
+            vx1.vertex((float) x1, (float) y0, (float) z0).normal(0, 0, -1).uv(u0, v1).color(color).endVertex();
         }
     }
 
@@ -1650,6 +1656,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             }
         }
     }
+
     @Override
     public void render(EntityPipe tile, float partialTick, PoseStack stack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
@@ -1670,29 +1677,30 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             if (tile.requiresMeshUpdate) {
                 tile.requiresMeshUpdate = false;
                 BufferBuilder bufferBuilder = new BufferBuilder(2048);//, VertexFormat.Mode.QUADS, RenderPipe.POSITION_COLOR_TEXTURE_NORMAL);
-                bufferBuilder.begin(VertexFormat.Mode.QUADS,POSITION_COLOR_TEXTURE_NORMAL);
+                bufferBuilder.begin(VertexFormat.Mode.QUADS, POSITION_COLOR_TEXTURE_NORMAL);
                 RenderPipe.renderFluids(tile, bufferBuilder);
                 tile.mesh = bufferBuilder.end();
                 if (tile.mesh != null)
                     tile.vertexBuffer.upload(tile.mesh);
             }
 
-            if(tile.mesh != null) {
+            if (tile.mesh != null) {
                 ShaderInstance shader = RenderSystem.getShader();
                 Matrix4f wtfAmIdoing = new Matrix4f(RenderSystem.getModelViewMatrix());
                 Matrix4f wtfAmIdoing2 = wtfAmIdoing.mul(stack.last().pose());
                 wtfAmIdoing2 = wtfAmIdoing2.translate(0.5f, 0.5f, 0.5f);
 
+
+                shader.setSampler("Sampler0" , RenderSystem.getShaderTexture(0));
+                shader.setSampler("Sampler2" , RenderSystem.getShaderTexture(2));
                 shader.getUniform("ModelViewMat").set(wtfAmIdoing2);
                 shader.getUniform("ProjMat").set(RenderSystem.getProjectionMatrix());
-                shader.setSampler("Sampler0", RenderSystem.getShaderTexture(0));
-                shader.setSampler("Sampler2", RenderSystem.getShaderTexture(2));
                 shader.getUniform("LightMapCoords").set(packedLight & '\uffff', packedLight >> 16 & '\uffff');
                 shader.getUniform("ColorModulator").set(RenderSystem.getShaderColor());
                 shader.getUniform("FogStart").set(RenderSystem.getShaderFogStart());
                 shader.getUniform("FogEnd").set(RenderSystem.getShaderFogEnd());
-                    shader.getUniform("FogColor").set(RenderSystem.getShaderFogColor());
-                    shader.getUniform("FogShape").set(RenderSystem.getShaderFogShape().getIndex());
+                shader.getUniform("FogColor").set(RenderSystem.getShaderFogColor());
+                shader.getUniform("FogShape").set(RenderSystem.getShaderFogShape().getIndex());
                 RenderSystem.setupShaderLights(shader);
 
                 shader.apply();

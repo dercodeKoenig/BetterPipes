@@ -291,7 +291,6 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
 
     public void toggleExtractionMode() {
         BlockState state = level.getBlockState(getBlockPos());
-
         boolean hasAnyConnectionsInExtractionMode = false;
         for (Direction i : Direction.values()) {
             if (state.getValue(BlockPipe.connections.get(i)) == BlockPipe.ConnectionState.EXTRACTION)

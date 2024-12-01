@@ -82,8 +82,8 @@ public class PacketFluidAmountUpdate implements CustomPacketPayload {
     public static PacketFluidAmountUpdate read(FriendlyByteBuf buf) {
         return new PacketFluidAmountUpdate(buf.readBlockPos(), buf.readInt(), buf.readInt(), buf.readLong());
     }
-
-    public void handle(PlayPayloadContext ctx) {
+    @OnlyIn(Dist.CLIENT)
+    public void _handle(PlayPayloadContext ctx) {
         Level world = Minecraft.getInstance().level;
         BlockEntity tile = world.getBlockEntity(pos);
         if (tile instanceof EntityPipe pipe) {
@@ -93,6 +93,9 @@ public class PacketFluidAmountUpdate implements CustomPacketPayload {
                 pipe.connections.get(Direction.values()[direction]).setFluidAmountInTank(amount, time);
             }
         }
+    }
+    public void handle(PlayPayloadContext ctx) {
+        _handle(ctx);
     }
 }
 

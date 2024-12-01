@@ -7,7 +7,6 @@ in vec3 Normal;
 
 uniform ivec2 LightMapCoords;
 
-uniform sampler2D Sampler1;
 uniform sampler2D Sampler2;
 
 uniform mat4 ModelViewMat;
