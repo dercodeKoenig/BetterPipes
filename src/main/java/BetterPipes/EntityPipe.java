@@ -127,6 +127,8 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
             requiresMeshUpdate = true;
         }
 
+        // 2 stage ticking, you can set it to 3 to do the stages every 3 ticks
+        // but the tank needs to have enough capacity to fill / drain x times the tick flowrate during the update tick
         int update_after_ticks = 2;
 
         if (!level.isClientSide) {
