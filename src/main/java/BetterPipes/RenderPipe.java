@@ -1646,8 +1646,15 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             // this should be in the block atlas but shaders change shit around so
             // I just use the still texture and if the flowing texture is not in the same location
             // you are just fucked
-            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
-            //BLOCK_SHEET.setupRenderState();
+            RenderSystem.setShaderTexture(0, tile.renderData.spriteFLowing.atlasLocation());
+            //BLOCK_SHEET_MIPPED.setupRenderState();
+
+
+            // this is because for some reason minecraft stops updating the sprite
+            tile.renderData.updateSprites(tile.tank.getFluid().getFluid());
+            for (Direction i : Direction.values())
+                tile.connections.get(i).renderData.updateSprites(tile.connections.get(i).tank.getFluid().getFluid());
+
 
             if (tile.requiresMeshUpdate || packedLight != tile.lastLight) {
                 tile.lastLight = packedLight;
