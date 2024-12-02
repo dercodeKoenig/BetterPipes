@@ -60,6 +60,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     public boolean requiresMeshUpdate = false;
     public boolean requiresMeshUpdate2 = false;
     public ByteBufferBuilder myByteBuffer;
+    public int lastLight;
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
         super(ENTITY_PIPE.get(), pos, blockState);
