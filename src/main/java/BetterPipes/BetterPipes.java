@@ -30,7 +30,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static BetterPipes.Registry.*;
-import static BetterPipes.RenderPipe.POSITION_COLOR_TEXTURE_NORMAL;
 
 @Mod("betterpipes")
 public class BetterPipes {
@@ -44,7 +43,6 @@ public class BetterPipes {
         modEventBus.addListener(this::RegisterCapabilities);
         modEventBus.addListener(this::registerEntityRenderers);
         modEventBus.addListener(this::registerNetworkStuff);
-        modEventBus.addListener(this::onShaderRegistry);
         Registry.register(modEventBus);
 
 
@@ -102,16 +100,6 @@ public class BetterPipes {
 
     }
 
-    public void onShaderRegistry(RegisterShadersEvent event) {
-        try {
-            ResourceLocation shaderLocation = new ResourceLocation("betterpipes", "pipe_fluid_shader");
-            event.registerShader(new ShaderInstance(event.getResourceProvider(), shaderLocation, POSITION_COLOR_TEXTURE_NORMAL), loadedShader ->
-                    PIPE_FLUID_SHADER = loadedShader
-            );
-        } catch (IOException e) {
-            throw (new RuntimeException(e));
-        }
-    }
 
     public static <MSG extends CustomPacketPayload> void sendToPlayersTrackingBE(MSG message, BlockEntity be) {
         if (be == null || be.getLevel() == null || be.getLevel().isClientSide()) {

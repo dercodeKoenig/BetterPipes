@@ -55,8 +55,10 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
     public fluidRenderData renderData = new fluidRenderData();
     public VertexBuffer vertexBuffer;
     public BufferBuilder.RenderedBuffer mesh;
-    public boolean requiresMeshUpdate = false;
-    public boolean requiresMeshUpdate2 = false;
+    public boolean requiresMeshUpdate = true;
+    public boolean requiresMeshUpdate2 = true;
+    int lastlight;
+
 
     public EntityPipe(BlockPos pos, BlockState blockState) {
         super(ENTITY_PIPE.get(), pos, blockState);
@@ -106,12 +108,15 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
 
     public void tick() {
 
+        // this is because for some reason minecraft stops updating the sprite
+        // so i do it every tick
+        renderData.updateSprites(tank.getFluid().getFluid());
+        for (Direction i : Direction.values())
+            connections.get(i).renderData.updateSprites(connections.get(i).tank.getFluid().getFluid());
 
+        // to not re-mesh on every packet, re-mesh only once per tick at max
         if (FMLEnvironment.dist == Dist.CLIENT && requiresMeshUpdate2) {
             requiresMeshUpdate2 = false;
-            renderData.updateSprites(tank.getFluid().getFluid());
-            for (Direction i : Direction.values())
-                connections.get(i).renderData.updateSprites(connections.get(i).tank.getFluid().getFluid());
             requiresMeshUpdate = true;
         }
 

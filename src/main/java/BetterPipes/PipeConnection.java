@@ -164,6 +164,7 @@ void sync(){
         if (!last_tankFluid.isEmpty()) {
             BetterPipes.sendToPlayer(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(), System.currentTimeMillis()), player);
             BetterPipes.sendToPlayer(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(), System.currentTimeMillis()), player);
+            BetterPipes.sendToPlayer(new PacketFlowUpdate(parent.getBlockPos(), myDirection.ordinal(), getsInputFromOutside,getsInputFromInside, outputsToOutside, outputsToInside,System.currentTimeMillis()), player);
         }
     }
 
