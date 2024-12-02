@@ -1,6 +1,7 @@
 {
   "textures": {
-    "pipe": "betterpipes:block/fluid_pipe1"
+    "pipe1": "betterpipes:block/fluid_pipe1_onoff",
+    "pipe2": "betterpipes:block/fluid_pipe1_structure"
   },
 
   "elements": [
@@ -8,8 +9,8 @@
       "from": [4, 12, 4],
       "to": [12, 12, 12],
       "faces": {
-        "up": {"uv": [ 8, 8, 16, 16 ],  "texture": "#pipe"},
-        "down": {"uv": [ 8, 8, 16, 16 ],  "texture": "#pipe"}
+        "up": {"uv": [ 0, 8, 16, 16 ],  "texture": "#pipe1"},
+        "down": {"uv": [ 8, 8, 16, 16 ],  "texture": "#pipe2"}
       }
     }
   ]
