@@ -115,11 +115,15 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
     public void tick() {
 
+        // this is because for some reason minecraft stops updating the sprite
+        // so i do it every tick
+        renderData.updateSprites(tank.getFluid().getFluid());
+        for (Direction i : Direction.values())
+            connections.get(i).renderData.updateSprites(connections.get(i).tank.getFluid().getFluid());
+
+        // to not re-mesh on every packet, re-mesh only once per tick at max
         if (FMLEnvironment.dist == Dist.CLIENT && requiresMeshUpdate2) {
             requiresMeshUpdate2 = false;
-            renderData.updateSprites(tank.getFluid().getFluid());
-            for (Direction i : Direction.values())
-                connections.get(i).renderData.updateSprites(connections.get(i).tank.getFluid().getFluid());
             requiresMeshUpdate = true;
         }
 
