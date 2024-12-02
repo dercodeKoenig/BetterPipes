@@ -1632,11 +1632,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
             tile.vertexBuffer.bind();
 
+            // I comment out what should be already set
             RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER.setupRenderState();
             LIGHTMAP.setupRenderState();
             LEQUAL_DEPTH_TEST.setupRenderState();
-            CULL.setupRenderState();
-            COLOR_DEPTH_WRITE.setupRenderState();
+            //CULL.setupRenderState();
+            //COLOR_DEPTH_WRITE.setupRenderState();
             TRANSLUCENT_TRANSPARENCY.setupRenderState();
             // this should be in the block atlas but shaders change shit around so
             // I just use the flowing texture and if the still texture is not in the same location
@@ -1671,10 +1672,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER.clearRenderState();
             LIGHTMAP.clearRenderState();
             LEQUAL_DEPTH_TEST.clearRenderState();
-            CULL.clearRenderState();
-            COLOR_DEPTH_WRITE.clearRenderState();
+            //CULL.clearRenderState();
+            //COLOR_DEPTH_WRITE.clearRenderState();
             TRANSLUCENT_TRANSPARENCY.clearRenderState();
-            BLOCK_SHEET.clearRenderState();
+            //BLOCK_SHEET.clearRenderState();
 
         }
     }
