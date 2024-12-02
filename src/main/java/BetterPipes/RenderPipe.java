@@ -25,7 +25,6 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     // the order in that you define it is very important!
     // unlike older versions, the order is not linked to .addvertex(...) but has to be like this
     // I dont know why but this is the only way it works
-    // I use position.normal.uv0.color.uv2.uv1 in the mesh construction but it does not care. It wants this order
     private static  VertexFormat        POSITION_COLOR_TEXTURE_NORMAL_LIGHT =
             VertexFormat.builder()
                     .add("Position", VertexFormatElement.POSITION)
@@ -46,49 +45,50 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
     }
 
 
+
     public static void renderFluidCubeStill(
             float x0, float x1, float z0, float z1, float y0, float y1,
             float u0, float u1, float v0, float v1,
             int color,
-            VertexConsumer v, int light
+            VertexConsumer v, int light, int overlay
     ) {
 
 
         //render up face
-        v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
         //render bottom face
-        v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
 
         // Render east face (x+ side)
-        v.addVertex((float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+        v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+        v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+        v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
 
         // Render west face (x- side)
-        v.addVertex((float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y0, z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex((float) x0, (float) y0, z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
 
         // Render south face (z+ side)
-        v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+        v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+        v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+        v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
 
         // Render north face (z- side)
-        v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+        v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+        v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+        v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
 
     }
 
@@ -97,51 +97,51 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float u0, float u1, float v0, float v1,
             Direction d,
             int color,
-            VertexConsumer v, int light
+            VertexConsumer v, int light, int overlay
     ) {
 
         if (d == Direction.UP) {
             //render up face
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
         }
         if (d == Direction.DOWN) {
             //render bottom face
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
         }
 
         if (d == Direction.EAST) {
             // Render east face (x+ side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
         }
         if (d == Direction.WEST) {
             // Render west face (x- side)
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
         }
         if (d == Direction.SOUTH) {
             // Render south face (z+ side)
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
         }
         if (d == Direction.NORTH) {
             // Render north face (z- side)
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
         }
     }
 
@@ -149,39 +149,39 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float x0f, float x1f, float z0f, float z1f, float y0f, float y1f,
             float u0, float u1, float v0, float v1,
             int color,
-            VertexConsumer v, int light
+            VertexConsumer v, int light, int overlay
     ) {
 
         // Render east face (x+ side)
-        v.addVertex(x1f, y0f, z0f).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y1f, z0f).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y1f, z1f).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y0f, z1f).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex(x1f, y0f, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1f, y0f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
 
         // Render west face (x- side)
-        v.addVertex(x0f, y0f, z1f).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y0f, z0f).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex(x0f, y0f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0f, y0f, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
 
         // Render south face (z+ side)#
-        v.addVertex(x1f, y0f, z1f).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y1f, z1f).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y1f, z1f).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y0f, z1f).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex(x1f, y0f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x1f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x0f, y1f, z1f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x0f, y0f, z1f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
 
         // Render north face (z- side)
-        v.addVertex(x0f, y0f, z0f).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y1f, z0f).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y1f, z0f).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y0f, z0f).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex(x0f, y0f, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x0f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x1f, y1f, z0f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x1f, y0f, z0f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
     }
 
     public static void renderHorizontalFluidStill(
             float x0f, float x1f, float z0f, float z1f, float y0f, float y1f,
             float u0, float u1, float v0, float v1,
             int color,
-            VertexConsumer v, int light,
+            VertexConsumer v, int light, int overlay,
             float y0BottomOffsetNorth,
             float y0BottomOffsetSouth,
             float y0BottomOffsetEast,
@@ -193,213 +193,53 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
 
         //render top face
-        v.addVertex(x0f, y1f, z0f).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y1f, z1f).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y1f, z1f).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y1f, z0f).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex(x0f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex(x0f, y1f, z1f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex(x1f, y1f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex(x1f, y1f, z0f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
         //render bottom face
-        v.addVertex(x1f, y0f, z0f).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y0f, z1f).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y0f, z1f).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y0f, z0f).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex(x1f, y0f, z0f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex(x1f, y0f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex(x0f, y0f, z1f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex(x0f, y0f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
 
         // Render east face (x+ side)
         if (y1f - y0BottomOffsetEast > e) {
-            v.addVertex(x1f, y0BottomOffsetEast, z0f).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y1f, z0f).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y1f, z1f).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y0BottomOffsetEast, z1f).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex(x1f, y0BottomOffsetEast, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex(x1f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex(x1f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex(x1f, y0BottomOffsetEast, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
         }
         // Render west face (x- side)
         if (y1f - y0BottomOffsetWest > e) {
-            v.addVertex(x0f, y0BottomOffsetWest, z1f).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y0BottomOffsetWest, z0f).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex(x0f, y0BottomOffsetWest, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex(x0f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex(x0f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex(x0f, y0BottomOffsetWest, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
         }
         // Render south face (z+ side)#
         if (y1f - y0BottomOffsetSouth > e) {
-            v.addVertex(x1f, y0BottomOffsetSouth, z1f).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y1f, z1f).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y1f, z1f).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y0BottomOffsetSouth, z1f).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex(x1f, y0BottomOffsetSouth, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex(x1f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex(x0f, y1f, z1f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex(x0f, y0BottomOffsetSouth, z1f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
         }
         // Render north face (z- side)
         if (y1f - y0BottomOffsetNorth > e) {
-            v.addVertex(x0f, y0BottomOffsetNorth, z0f).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y1f, z0f).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y1f, z0f).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y0BottomOffsetNorth, z0f).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex(x0f, y0BottomOffsetNorth, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex(x0f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex(x1f, y1f, z0f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex(x1f, y0BottomOffsetNorth, z0f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
         }
     }
-    /*
-    // Helper to interpolate UV coordinates
-    float interpolate(float outerStart, float outerEnd, float innerStart, float innerEnd, float value) {
-        return ((value - outerStart) / (outerEnd - outerStart)) * (innerEnd - innerStart) + innerStart;
-    }
-    void renderHorizontalFaceCutOut(
-            float x0,float x1,float z0,float z1,float y1,
-            float xh0, float xh1, float zh0, float zh1,
-            float u0,float u1,float v0,float v1,
-            PoseStack stack, VertexConsumer v,  PoseStack stack, int lightx2,
-            int color, int packedLight, int packedOverlay){
-
-// Interpolated UVs for the hole
-        float uh0 = interpolate(x0, x1, u0, u1, xh0);
-        float uh1 = interpolate(x0, x1, u0, u1, xh1);
-        float vh0 = interpolate(z0, z1, v0, v1, zh0);
-        float vh1 = interpolate(z0, z1, v0, v1, zh1);
-
-// Render the 8 surrounding quads
-// Quad 1: Top-left
-        vx2.addVertex( x0, y1, z0).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, z0).setNormal(0, 1, 0).setUv(uh0, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh0).setNormal(0, 1, 0).setUv(uh0, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x0, y1, zh0).setNormal(0, 1, 0).setUv(u0, vh0).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 2: Top
-        vx2.addVertex( xh0, y1, z0).setNormal(0, 1, 0).setUv(uh0, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, z0).setNormal(0, 1, 0).setUv(uh1, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, zh0).setNormal(0, 1, 0).setUv(uh1, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh0).setNormal(0, 1, 0).setUv(uh0, vh0).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 3: Top-right
-        vx2.addVertex( xh1, y1, z0).setNormal(0, 1, 0).setUv(uh1, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, z0).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, zh0).setNormal(0, 1, 0).setUv(u1, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, zh0).setNormal(0, 1, 0).setUv(uh1, vh0).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 4: Right
-        vx2.addVertex( xh1, y1, zh0).setNormal(0, 1, 0).setUv(uh1, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, zh0).setNormal(0, 1, 0).setUv(u1, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, zh1).setNormal(0, 1, 0).setUv(u1, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, zh1).setNormal(0, 1, 0).setUv(uh1, vh1).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 5: Bottom-right
-        vx2.addVertex( xh1, y1, zh1).setNormal(0, 1, 0).setUv(uh1, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, zh1).setNormal(0, 1, 0).setUv(u1, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, z1).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, z1).setNormal(0, 1, 0).setUv(uh1, v1).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 6: Bottom
-        vx2.addVertex( xh0, y1, zh1).setNormal(0, 1, 0).setUv(uh0, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, zh1).setNormal(0, 1, 0).setUv(uh1, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, z1).setNormal(0, 1, 0).setUv(uh1, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, z1).setNormal(0, 1, 0).setUv(uh0, v1).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 7: Bottom-left
-        vx2.addVertex( x0, y1, zh1).setNormal(0, 1, 0).setUv(u0, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh1).setNormal(0, 1, 0).setUv(uh0, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, z1).setNormal(0, 1, 0).setUv(uh0, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x0, y1, z1).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 8: Left
-        vx2.addVertex( x0, y1, zh0).setNormal(0, 1, 0).setUv(u0, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh0).setNormal(0, 1, 0).setUv(uh0, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh1).setNormal(0, 1, 0).setUv(uh0, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x0, y1, zh1).setNormal(0, 1, 0).setUv(u0, vh1).setColor(color).setLight(light).setOverlay(655360);
-
-    }
-    void renderHorizontalFaceCutOutReverse(
-            float x0,float x1,float z0,float z1,float y1,
-            float xh0, float xh1, float zh0, float zh1,
-            float u0,float u1,float v0,float v1,
-            PoseStack stack, VertexConsumer v,  PoseStack stack, int lightx2,
-            int color, int packedLight, int packedOverlay){
-
-// Interpolated UVs for the hole
-        float uh0 = interpolate(x0, x1, u0, u1, xh0);
-        float uh1 = interpolate(x0, x1, u0, u1, xh1);
-        float vh0 = interpolate(z0, z1, v0, v1, zh0);
-        float vh1 = interpolate(z0, z1, v0, v1, zh1);
-
-// Render the 8 surrounding quads
-// Quad 1: Top-left
-        vx2.addVertex( x0, y1, zh0).setNormal(0, 1, 0).setUv(u0, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh0).setNormal(0, 1, 0).setUv(uh0, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, z0).setNormal(0, 1, 0).setUv(uh0, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x0, y1, z0).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 2: Top
-        vx2.addVertex( xh0, y1, zh0).setNormal(0, 1, 0).setUv(uh0, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, zh0).setNormal(0, 1, 0).setUv(uh1, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, z0).setNormal(0, 1, 0).setUv(uh1, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, z0).setNormal(0, 1, 0).setUv(uh0, v0).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 3: Top-right
-        vx2.addVertex( xh1, y1, zh0).setNormal(0, 1, 0).setUv(uh1, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, zh0).setNormal(0, 1, 0).setUv(u1, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, z0).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, z0).setNormal(0, 1, 0).setUv(uh1, v0).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 4: Right
-        vx2.addVertex( xh1, y1, zh1).setNormal(0, 1, 0).setUv(uh1, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, zh1).setNormal(0, 1, 0).setUv(u1, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, zh0).setNormal(0, 1, 0).setUv(u1, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, zh0).setNormal(0, 1, 0).setUv(uh1, vh0).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 5: Bottom-right
-        vx2.addVertex( xh1, y1, z1).setNormal(0, 1, 0).setUv(uh1, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, z1).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x1, y1, zh1).setNormal(0, 1, 0).setUv(u1, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, zh1).setNormal(0, 1, 0).setUv(uh1, vh1).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 6: Bottom
-        vx2.addVertex( xh0, y1, z1).setNormal(0, 1, 0).setUv(uh0, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, z1).setNormal(0, 1, 0).setUv(uh1, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh1, y1, zh1).setNormal(0, 1, 0).setUv(uh1, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh1).setNormal(0, 1, 0).setUv(uh0, vh1).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 7: Bottom-left
-        vx2.addVertex( x0, y1, z1).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, z1).setNormal(0, 1, 0).setUv(uh0, v1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh1).setNormal(0, 1, 0).setUv(uh0, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x0, y1, zh1).setNormal(0, 1, 0).setUv(u0, vh1).setColor(color).setLight(light).setOverlay(655360);
-
-// Quad 8: Left
-        vx2.addVertex( x0, y1, zh1).setNormal(0, 1, 0).setUv(u0, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh1).setNormal(0, 1, 0).setUv(uh0, vh1).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( xh0, y1, zh0).setNormal(0, 1, 0).setUv(uh0, vh0).setColor(color).setLight(light).setOverlay(655360);
-        vx2.addVertex( x0, y1, zh0).setNormal(0, 1, 0).setUv(u0, vh0).setColor(color).setLight(light).setOverlay(655360);
-
-    }
-    void renderVerticalFluidCutOutTopDownFace(
-            TextureAtlasSprite fluidStill, MultiBufferSource source, int color, int light, int overlay,
-            float x0,float x1,float z0,float z1,float y0,float y1,
-            float xh0, float xh1, float zh0, float zh1,
-            float xh2, float xh3, float zh2, float zh3,
-            boolean rendery0,boolean rendery1
-    ){
-        RenderType r2 = RenderType.create("",
-                POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.Mode.QUADS,
-                32,
-                false,
-                true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                        .setOverlayState(OVERLAY)
-                        .setLightmapState(LIGHTMAP)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setOutputState(ITEM_ENTITY_TARGET)
-                        .setTextureState(new TextureStateShard(fluidStill.atlasLocation(), false, true))
-                        .createCompositeState(false)
-        );
-        VertexConsumer v,  PoseStack stack, int lightx2 = source.getBuffer(r2);
-        if(rendery0)
-            renderHorizontalFaceCutOut(x0,x1,z0,z1,y0,xh0,xh1,zh0,zh1,u0,u1,v0,v1,stack,vx2,color,light,overlay);
-        if(rendery1)
-            renderHorizontalFaceCutOutReverse(x0,x1,z0,z1,y1,xh2,xh3,zh2,zh3,u0,u1,v0,v1,stack,vx2,color,light,overlay);
-    }
-     */
 
 
     public static void renderHorizontalFluidFlowing(
             float x0, float x1, float z0, float z1, float y0, float y1,
             float u0, float u1, float v0, float v1,
             int color, Direction flowDirection,
-            VertexConsumer v, int light,
+            VertexConsumer v, int light, int overlay,
             float y0BottomOffsetNorth,
             float y0BottomOffsetSouth,
             float y0BottomOffsetEast,
@@ -409,171 +249,171 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
 
         if (flowDirection == Direction.NORTH) {
             //render top face
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
             //render bottom face
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
 
             // Render east face (x+ side)
             if (y1 - y0BottomOffsetEast > e) {
-                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
             }
             // Render west face (x- side)
             if (y1 - y0BottomOffsetWest > e) {
-                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
             }
             // Render south face (z+ side)
             if (y1 - y0BottomOffsetSouth > e) {
-                v.addVertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
             }
             // Render north face (z- side)
             if (y1 - y0BottomOffsetNorth > e) {
-                v.addVertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
             }
         }
 
         if (flowDirection == Direction.SOUTH) {
             //render top face
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
             //render bottom face
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
 
             // Render east face (x+ side)
             if (y1 - y0BottomOffsetEast > e) {
-                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z0).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z1).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
             }
             // Render west face (x- side)
             if (y1 - y0BottomOffsetWest > e) {
-                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z1).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z0).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
             }
             // Render south face (z+ side)
             if (y1 - y0BottomOffsetSouth > e) {
-                v.addVertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
             }
             // Render north face (z- side)
             if (y1 - y0BottomOffsetNorth > e) {
-                v.addVertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
             }
         }
         if (flowDirection == Direction.EAST) {
             //render top face
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
             //render bottom face
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
 
             // Render east face (x+ side)
             if (y1 - y0BottomOffsetEast > e) {
-                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z0).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
             }
             // Render west face (x- side)
             if (y1 - y0BottomOffsetWest > e) {
-                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z0).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
             }
             // Render south face (z+ side)
             if (y1 - y0BottomOffsetSouth > e) {
-                v.addVertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
             }
             // Render north face (z- side)
             if (y1 - y0BottomOffsetNorth > e) {
-                v.addVertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
             }
         }
         if (flowDirection == Direction.WEST) {
             //render top face
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
             //render bottom face
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
 
             // Render east face (x+ side)
             if (y1 - y0BottomOffsetEast > e) {
-                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z1).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+                v.addVertex((float) x1, (float) y0BottomOffsetEast, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
             }
             // Render west face (x- side)
             if (y1 - y0BottomOffsetWest > e) {
-                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z1).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+                v.addVertex((float) x0, (float) y0BottomOffsetWest, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
             }
             // Render south face (z+ side)
             if (y1 - y0BottomOffsetSouth > e) {
-                v.addVertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x1, (float) y0BottomOffsetSouth, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+                v.addVertex((float) x0, (float) y0BottomOffsetSouth, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
             }
             // Render north face (z- side)
             if (y1 - y0BottomOffsetNorth > e) {
-                v.addVertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-                v.addVertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+                v.addVertex((float) x0, (float) y0BottomOffsetNorth, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+                v.addVertex((float) x1, (float) y0BottomOffsetNorth, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
             }
         }
     }
@@ -583,47 +423,47 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float x0f, float x1f, float z0f, float z1f, float y0f, float y1f,
             float u0, float u1, float v0, float v1,
             int color,
-            VertexConsumer v, int light,
+            VertexConsumer v, int light, int overlay,
             Direction direction
     ) {
 
         //render top face
-        v.addVertex(x0f, y1f, z0f).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y1f, z1f).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y1f, z1f).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y1f, z0f).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex(x0f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex(x0f, y1f, z1f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex(x1f, y1f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+        v.addVertex(x1f, y1f, z0f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
         //render bottom face
-        v.addVertex(x1f, y0f, z0f).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x1f, y0f, z1f).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y0f, z1f).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-        v.addVertex(x0f, y0f, z0f).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+        v.addVertex(x1f, y0f, z0f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex(x1f, y0f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex(x0f, y0f, z1f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+        v.addVertex(x0f, y0f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
 
         if (direction != Direction.EAST && direction != Direction.WEST) {
             // Render east face (x+ side)
-            v.addVertex(x1f, y0f, z0f).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y1f, z0f).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y1f, z1f).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y0f, z1f).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex(x1f, y0f, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex(x1f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex(x1f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex(x1f, y0f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
 
             // Render west face (x- side)
-            v.addVertex(x0f, y0f, z1f).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y1f, z1f).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y1f, z0f).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y0f, z0f).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex(x0f, y0f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex(x0f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex(x0f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex(x0f, y0f, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
         }
         if (direction != Direction.NORTH && direction != Direction.SOUTH) {
             // Render south face (z+ side)#
-            v.addVertex(x1f, y0f, z1f).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y1f, z1f).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y1f, z1f).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y0f, z1f).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex(x1f, y0f, z1f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex(x1f, y1f, z1f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex(x0f, y1f, z1f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex(x0f, y0f, z1f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
 
             // Render north face (z- side)
-            v.addVertex(x0f, y0f, z0f).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x0f, y1f, z0f).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y1f, z0f).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex(x1f, y0f, z0f).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex(x0f, y0f, z0f).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex(x0f, y1f, z0f).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex(x1f, y1f, z0f).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex(x1f, y0f, z0f).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
         }
     }
 
@@ -631,164 +471,492 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float x0, float x1, float z0, float z1, float y0, float y1,
             float u0, float u1, float v0, float v1,
             int color, Direction flowDirection,
-            VertexConsumer v, int light
+            VertexConsumer v, int light, int overlay
     ) {
 
         if (flowDirection == Direction.NORTH) {
             // Render east face (x+ side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
 
             // Render west face (x- side)
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
 
             // Render up  face (y+ side)
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
             // Render down face (y- side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
         }
 
         if (flowDirection == Direction.SOUTH) {
             // Render east face (x+ side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
 
             // Render west face (x- side)
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
 
             // Render up  face (y+ side)
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
             // Render down face (y- side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
         }
 
         if (flowDirection == Direction.EAST) {
             // Render south face (z+ side)
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
 
             // Render north face (z- side)
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
 
             // Render up  face (y+ side)
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
             // Render down face (y- side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
         }
 
         if (flowDirection == Direction.WEST) {
             // Render south face (z+ side)
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
 
             // Render north face (z- side)
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
 
             // Render up  face (y+ side)
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 1, 0);
 
             // Render down face (y- side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, -1, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, -1, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, -1, 0);
         }
 
         if (flowDirection == Direction.UP) {
             // Render east face (x+ side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
 
             // Render west face (x- side)
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
 
             // Render south face (z+ side)
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
 
             // Render north face (z- side)
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
         }
 
         if (flowDirection == Direction.DOWN) {
             // Render east face (x+ side)
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(1, 0, 0);
 
             // Render west face (x- side)
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(-1, 0, 0).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(-1, 0, 0).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(-1, 0, 0).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(-1, 0, 0).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(-1, 0, 0);
 
             // Render south face (z+ side)
-            v.addVertex((float) x1, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z1).setNormal(0, 0, 1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y0, (float) z1).setNormal(0, 0, 1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x1, (float) y0, (float) z1).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x1, (float) y1, (float) z1).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y1, (float) z1).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
+            v.addVertex((float) x0, (float) y0, (float) z1).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, 1);
 
             // Render north face (z- side)
-            v.addVertex((float) x0, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u1, v1).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x0, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u1, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y1, (float) z0).setNormal(0, 0, -1).setUv(u0, v0).setColor(color).setLight(light).setOverlay(655360);
-            v.addVertex((float) x1, (float) y0, (float) z0).setNormal(0, 0, -1).setUv(u0, v1).setColor(color).setLight(light).setOverlay(655360);
+            v.addVertex((float) x0, (float) y0, (float) z0).setColor(color).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x0, (float) y1, (float) z0).setColor(color).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y1, (float) z0).setColor(color).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
+            v.addVertex((float) x1, (float) y0, (float) z0).setColor(color).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(0, 0, -1);
         }
+    }
+
+    // Helper to interpolate UV coordinates
+    static float interpolate(float outerStart, float outerEnd, float innerStart, float innerEnd, float value) {
+        return ((value - outerStart) / (outerEnd - outerStart)) * (innerEnd - innerStart) + innerStart;
+    }
+    static void renderDownFaceCutOut(
+            float x0,float x1,float z0,float z1,float y0,
+            float xh0, float xh1, float zh0, float zh1,
+            float u0,float u1,float v0,float v1,
+            VertexConsumer v, int light,
+            int color){
+
+// Interpolated UVs for the hole
+        float uh0 = interpolate(x0, x1, u0, u1, xh0);
+        float uh1 = interpolate(x0, x1, u0, u1, xh1);
+        float vh0 = interpolate(z0, z1, v0, v1, zh0);
+        float vh1 = interpolate(z0, z1, v0, v1, zh1);
+
+
+        v.addVertex( x0, y0, z0).setColor(color).setUv(u0, v0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh0, y0, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh0, y0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x0, y0, zh0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+
+        v.addVertex( xh0, y0, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh1, y0, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh1, y0, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh0, y0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+
+        v.addVertex( xh1, y0, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x1, y0, z0).setColor(color).setUv(u1, v0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x1, y0, zh0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh1, y0, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+
+        v.addVertex( xh1, y0, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x1, y0, zh0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x1, y0, zh1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh1, y0, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+
+        v.addVertex( xh1, y0, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x1, y0, zh1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x1, y0, z1).setColor(color).setUv(u1, v1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh1, y0, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+
+        v.addVertex( xh0, y0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh1, y0, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh1, y0, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh0, y0, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+
+        v.addVertex( x0, y0, zh1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh0, y0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh0, y0, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x0, y0, z1).setColor(color).setUv(u0, v1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+
+        v.addVertex( x0, y0, zh0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh0, y0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( xh0, y0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+        v.addVertex( x0, y0, zh1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(0, -1, 0);
+    }
+    static void renderUpFaceCutOut(
+            float x0,float x1,float z0,float z1,float y1,
+            float xh0, float xh1, float zh0, float zh1,
+            float u0,float u1,float v0,float v1,
+            VertexConsumer v, int light,
+            int color){
+
+// Interpolated UVs for the hole
+        float uh0 = interpolate(x0, x1, u0, u1, xh0);
+        float uh1 = interpolate(x0, x1, u0, u1, xh1);
+        float vh0 = interpolate(z0, z1, v0, v1, zh0);
+        float vh1 = interpolate(z0, z1, v0, v1, zh1);
+
+
+        v.addVertex( x0, y1, zh0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh0, y1, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh0, y1, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x0, y1, z0).setColor(color).setUv(u0, v0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+
+        v.addVertex( xh0, y1, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh1, y1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh1, y1, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh0, y1, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+
+        v.addVertex( xh1, y1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x1, y1, zh0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x1, y1, z0).setColor(color).setUv(u1, v0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh1, y1, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+
+        v.addVertex( xh1, y1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x1, y1, zh1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x1, y1, zh0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh1, y1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+
+        v.addVertex( xh1, y1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x1, y1, z1).setColor(color).setUv(u1, v1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x1, y1, zh1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh1, y1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+
+        v.addVertex( xh0, y1, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh1, y1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh1, y1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh0, y1, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+
+        v.addVertex( x0, y1, z1).setColor(color).setUv(u0, v1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh0, y1, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh0, y1, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x0, y1, zh1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+
+        v.addVertex( x0, y1, zh1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh0, y1, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( xh0, y1, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+        v.addVertex( x0, y1, zh0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(0, 1, 0);
+    }
+
+    static void renderEastFaceCutOut(
+            float z0, float z1, float y0, float y1, float x1,
+            float zh0, float zh1, float yh0, float yh1,
+            float u0, float u1, float v0, float v1,
+            VertexConsumer v, int light,
+            int color) {
+
+        // Interpolated UVs for the hole
+        float uh0 = interpolate(y0, y1, u0, u1, yh0);
+        float uh1 = interpolate(y0, y1, u0, u1, yh1);
+        float vh0 = interpolate(z0, z1, v0, v1, zh0);
+        float vh1 = interpolate(z0, z1, v0, v1, zh1);
+
+        v.addVertex(x1, yh1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y1, zh1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y1, z1).setColor(color).setUv(u1, v1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+
+        v.addVertex(x1, yh1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y1, zh0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y1, zh1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+
+        v.addVertex(x1, yh1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh0, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+
+        v.addVertex(x1, yh0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh0, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y0, z1).setColor(color).setUv(u0, v1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y0, zh1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+
+        v.addVertex(x1, yh0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y0, zh1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y0, zh0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+
+        v.addVertex(x1, yh0, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y0, zh0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y0, z0).setColor(color).setUv(u0, v0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+
+        v.addVertex(x1, yh1, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh0, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+
+        v.addVertex(x1, y1, z0).setColor(color).setUv(u1, v0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, y1, zh0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+        v.addVertex(x1, yh1, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(1, 0, 0);
+    }
+    static void renderWestFaceCutOut(
+            float z0, float z1, float y0, float y1, float x0,
+            float zh0, float zh1, float yh0, float yh1,
+            float u0, float u1, float v0, float v1,
+            VertexConsumer v, int light,
+            int color) {
+
+        // Interpolated UVs for the hole
+        float uh0 = interpolate(y0, y1, u0, u1, yh0);
+        float uh1 = interpolate(y0, y1, u0, u1, yh1);
+        float vh0 = interpolate(z0, z1, v0, v1, zh0);
+        float vh1 = interpolate(z0, z1, v0, v1, zh1);
+
+        v.addVertex(x0, yh1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, y1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, y1, zh1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+
+        v.addVertex(x0, y1, zh1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, y1, zh0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+
+        v.addVertex(x0, yh0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh0, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh1, zh1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+
+        v.addVertex(x0, y0, zh1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, y0, z1).setColor(color).setUv(u0, v1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh0, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+
+        v.addVertex(x0, y0, zh0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, y0, zh1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh0, zh1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+
+        v.addVertex(x0, y0, z0).setColor(color).setUv(u0, v0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, y0, zh0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh0, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+
+        v.addVertex(x0, yh0, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh0, zh0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh1, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+
+        v.addVertex(x0, yh1, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, yh1, zh0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, y1, zh0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+        v.addVertex(x0, y1, z0).setColor(color).setUv(u1, v0).setOverlay(0).setLight(light).setNormal(-1, 0, 0);
+    }
+
+    static void renderSouthFaceCutOut(
+            float x0, float x1, float y0, float y1, float z1,
+            float xh0, float xh1, float yh0, float yh1,
+            float u0, float u1, float v0, float v1,
+            VertexConsumer v, int light,
+            int color) {
+
+        // Interpolated UVs for the hole
+        float uh0 = interpolate(x0, x1, u0, u1, xh0);
+        float uh1 = interpolate(x0, x1, u0, u1, xh1);
+        float vh0 = interpolate(y0, y1, v0, v1, yh0);
+        float vh1 = interpolate(y0, y1, v0, v1, yh1);
+
+        v.addVertex(x1, y0, z1).setColor(color).setUv(u1, v0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x1, yh0, z1).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh1, yh0, z1).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh1, y0, z1).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+
+        v.addVertex(x1, yh0, z1).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x1, yh1, z1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh1, yh1, z1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh1, yh0, z1).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+
+        v.addVertex(x1, yh1, z1).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x1, y1, z1).setColor(color).setUv(u1, v1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh1, y1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh1, yh1, z1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+
+        v.addVertex(xh1, y0, z1).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh1, yh0, z1).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh0, yh0, z1).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh0, y0, z1).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+
+        v.addVertex(xh1, yh1, z1).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh1, y1, z1).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh0, y1, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh0, yh1, z1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+
+        v.addVertex(xh0, y0, z1).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh0, yh0, z1).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x0, yh0, z1).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x0, y0, z1).setColor(color).setUv(u0, v0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+
+        v.addVertex(xh0, yh0, z1).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh0, yh1, z1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x0, yh1, z1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x0, yh0, z1).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+
+        v.addVertex(xh0, yh1, z1).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(xh0, y1, z1).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x0, y1, z1).setColor(color).setUv(u0, v1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+        v.addVertex(x0, yh1, z1).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, 1);
+    }
+
+    static void renderNorthFaceCutOut(
+            float x0, float x1, float y0, float y1, float z0,
+            float xh0, float xh1, float yh0, float yh1,
+            float u0, float u1, float v0, float v1,
+            VertexConsumer v, int light,
+            int color) {
+
+        // Interpolated UVs for the hole
+        float uh0 = interpolate(x0, x1, u0, u1, xh0);
+        float uh1 = interpolate(x0, x1, u0, u1, xh1);
+        float vh0 = interpolate(y0, y1, v0, v1, yh0);
+        float vh1 = interpolate(y0, y1, v0, v1, yh1);
+
+        v.addVertex(xh1, y0, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh1, yh0, z0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x1, yh0, z0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x1, y0, z0).setColor(color).setUv(u1, v0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+
+        v.addVertex(xh1, yh0, z0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh1, yh1, z0).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x1, yh1, z0).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x1, yh0, z0).setColor(color).setUv(u1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+
+        v.addVertex(xh1, yh1, z0).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh1, y1, z0).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x1, y1, z0).setColor(color).setUv(u1, v1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x1, yh1, z0).setColor(color).setUv(u1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+
+        v.addVertex(xh0, y0, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh0, yh0, z0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh1, yh0, z0).setColor(color).setUv(uh1, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh1, y0, z0).setColor(color).setUv(uh1, v0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+
+        v.addVertex(xh0, yh1, z0).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh0, y1, z0).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh1, y1, z0).setColor(color).setUv(uh1, v1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh1, yh1, z0).setColor(color).setUv(uh1, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+
+        v.addVertex(x0, y0, z0).setColor(color).setUv(u0, v0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x0, yh0, z0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh0, yh0, z0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh0, y0, z0).setColor(color).setUv(uh0, v0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+
+        v.addVertex(x0, yh0, z0).setColor(color).setUv(u0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x0, yh1, z0).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh0, yh1, z0).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh0, yh0, z0).setColor(color).setUv(uh0, vh0).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+
+        v.addVertex(x0, yh1, z0).setColor(color).setUv(u0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(x0, y1, z0).setColor(color).setUv(u0, v1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh0, y1, z0).setColor(color).setUv(uh0, v1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
+        v.addVertex(xh0, yh1, z0).setColor(color).setUv(uh0, vh1).setOverlay(0).setLight(light).setNormal(0, 0, -1);
     }
 
     public static boolean shouldRenderCentered(Fluid f) {
@@ -796,7 +964,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
         return f.getFluidType().isLighterThanAir();
     }
 
-    public static void renderFluids(EntityPipe tile, VertexConsumer v, int light) {
+    public static void renderFluids(EntityPipe tile, VertexConsumer v, int light, int overlay) {
         BlockState tileState = tile.getLevel().getBlockState(tile.getBlockPos());
         if (!(tileState.getBlock() instanceof BlockPipe)) return;
         // render center
@@ -833,29 +1001,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 float x1 = actualW;
                 float z0 = -actualW;
                 float z1 = actualW;
-/*
-                float relativeFillAbove = (float) tile.connections.get(Direction.UP).tank.getFluidAmount() / tile.connections.get(Direction.UP).tank.getCapacity();
-                float actualWAbove = wMin + (wMax - wMin) * relativeFillAbove;
-                float xh2 = -actualWAbove;
-                float xh3 = actualWAbove;
-                float zh2 = -actualWAbove;
-                float zh3 = actualWAbove;
-                boolean renderAbove = actualWAbove < actualW;
 
-                float relativeFillBelow = (float) tile.connections.get(Direction.DOWN).tank.getFluidAmount() / tile.connections.get(Direction.DOWN).tank.getCapacity();
-                float actualWBelow = wMin + (wMax - wMin) * relativeFillBelow;
-                float xh0 = -actualWBelow;
-                float xh1 = actualWBelow;
-                float zh0 = -actualWBelow;
-                float zh1 = actualWBelow;
-                boolean renderBelow = actualWBelow < actualW;
-
-                renderVerticalFluidCutOutTopDownFace(spriteStill,source,stack,color,packedLight,packedOverlay,
-                        x0,x1,z0,z1,y0,y1,
-                        xh0,xh1,zh0,zh1,
-                        xh2,xh3,zh2,zh3,
-                        renderBelow,renderAbove);
- */
 
                 // first scan if it has only one output to use this as flow direction, second look if it has only one input to use as flow direction
                 Direction outFlow = null;
@@ -886,21 +1032,47 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
                             u0f, u1f, v0f, v1f,
-                            color, outFlow, v, light);
+                            color, outFlow, v, light, overlay);
 
                 } else if (numInputs == 1) {
                     // exactly one input is found, great! use this as flow direction
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
                             u0f, u1f, v0f, v1f,
-                            color, inFlow, v, light);
+                            color, inFlow, v, light, overlay);
                 } else {
                     // do not use flowing animation
                     renderVerticalFluidStill(
                             x0, x1, z0, z1, y0, y1,
                             u0s, u1s, v0s, v1s,
-                            color, v, light);
+                            color, v, light, overlay);
                 }
+
+
+                float relativeFillUp = (float) tile.connections.get(Direction.UP).tank.getFluidAmount() / tile.connections.get(Direction.UP).tank.getTankCapacity(0);
+                float actualWUp = 0;
+                if(relativeFillUp > e)
+                    actualWUp = wMin + (wMax - wMin) * relativeFillUp;
+                float xh2 = -actualWUp;
+                float xh3 = actualWUp;
+                float zh2 = -actualWUp;
+                float zh3 = actualWUp;
+                if(actualWUp+e < actualW){
+                    renderUpFaceCutOut(x0,x1,z0,z1,y1,xh2,xh3,zh2,zh3,u0s,u1s,v0s,v1s,v,light,color);
+                }
+
+                float relativeFillDown = (float) tile.connections.get(Direction.DOWN).tank.getFluidAmount() / tile.connections.get(Direction.DOWN).tank.getTankCapacity(0);
+                float actualWDown = 0;
+                if(relativeFillDown > e)
+                    actualWDown = wMin + (wMax - wMin) * relativeFillDown;
+                float xh0 = -actualWDown;
+                float xh1 = actualWDown;
+                float zh0 = -actualWDown;
+                float zh1 = actualWDown;
+                if(actualWDown-e < actualW){
+                    renderDownFaceCutOut(x0,x1,z0,z1,y0,xh0,xh1,zh0,zh1,u0s,u1s,v0s,v1s,v,light,color);
+                }
+
             } else {
                 if (!shouldRenderCentered(tile.tank.getFluid().getFluid())) {
                     // is horizontal render
@@ -974,7 +1146,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f,
-                                color, outFlow, v, light,
+                                color, outFlow, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
 
                     } else if (numInputs == 1) {
@@ -982,7 +1154,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f,
-                                color, inFlow, v, light,
+                                color, inFlow, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
 
                     } else {
@@ -990,11 +1162,12 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light,
+                                color, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
 
                     if (tile.connections.get(Direction.UP).isEnabled(tileState)) {
+
                         float relativeFill = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
 
                         float actualW = wMin + (wMax - wMin) * relativeFill;
@@ -1004,22 +1177,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         x1 = actualW;
                         z0 = -actualW;
                         z1 = actualW;
-/*
-                    float relativeFillAbove = (float) tile.connections.get(Direction.UP).tank.getFluidAmount() / tile.connections.get(Direction.UP).tank.getCapacity();
-                    float actualWAbove = wMin + (wMax - wMin) * relativeFillAbove;
-                    float xh2 = -actualWAbove;
-                    float xh3 = actualWAbove;
-                    float zh2 = -actualWAbove;
-                    float zh3 = actualWAbove;
-                    boolean renderAbove = actualWAbove < actualW;
-   renderVerticalFluidCutOutTopDownFace(
-                            spriteStill,source,stack,color,packedLight,packedOverlay,
-                            x0,x1,z0,z1,y0,y1,
-                            0,0,0,0,
-                            xh2,xh3,zh2,zh3,
-                            false,renderAbove
-                    );
- */
+
 
                         conn = tile.connections.get(Direction.UP);
                         if (conn.getsInputFromInside) {
@@ -1027,14 +1185,14 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                             renderFluidFlowingCentered(
                                     x0, x1, z0, z1, y0, y1,
                                     u0f, u1f, v0f, v1f,
-                                    color, Direction.UP, v, light);
+                                    color, Direction.UP, v, light, overlay);
                         }
                         if (conn.outputsToInside) {
                             //add render down animation
                             renderFluidFlowingCentered(
                                     x0, x1, z0, z1, y0, y1,
                                     u0f, u1f, v0f, v1f,
-                                    color, Direction.DOWN, v, light);
+                                    color, Direction.DOWN, v, light, overlay);
                         }
                     }
                 } else {
@@ -1060,46 +1218,112 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                             if (d == Direction.UP) {
                                 y0 = actualW;
                                 y1 = 0.25f;
+                                float relativeFillconn = (float) tile.connections.get(d).tank.getFluidAmount() / tile.connections.get(d).tank.getTankCapacity(0);
+                                float actualWconn = 0;
+                                if(relativeFillconn > e)
+                                    actualWconn = wMin + (wMax - wMin) * actualWconn;
+                                float xh0 = -actualWconn;
+                                float xh1 = actualWconn;
+                                float zh0 = -actualWconn;
+                                float zh1 = actualWconn;
+                                if(actualWconn-e < actualW){
+                                    renderUpFaceCutOut(x0,x1,z0,z1,y1,xh0,xh1,zh0,zh1,u0s,u1s,v0s,v1s,v,light,color);
+                                }
                             }
                             if (d == Direction.DOWN) {
                                 y0 = -0.25f;
                                 y1 = -actualW;
+                                float relativeFillconn = (float) tile.connections.get(d).tank.getFluidAmount() / tile.connections.get(d).tank.getTankCapacity(0);
+                                float actualWconn = 0;
+                                if(relativeFillconn > e)
+                                    actualWconn = wMin + (wMax - wMin) * actualWconn;
+                                float xh0 = -actualWconn;
+                                float xh1 = actualWconn;
+                                float zh0 = -actualWconn;
+                                float zh1 = actualWconn;
+                                if(actualWconn-e < actualW){
+                                    renderDownFaceCutOut(x0,x1,z0,z1,y0,xh0,xh1,zh0,zh1,u0s,u1s,v0s,v1s,v,light,color);
+                                }
                             }
                             if (d == Direction.EAST) {
                                 x0 = actualW;
                                 x1 = 0.25f;
+                                float relativeFillconn = (float) tile.connections.get(d).tank.getFluidAmount() / tile.connections.get(d).tank.getTankCapacity(0);
+                                float actualWconn = 0;
+                                if(relativeFillconn > e)
+                                    actualWconn = wMin + (wMax - wMin) * actualWconn;
+                                float zh0 = -actualWconn;
+                                float zh1 = actualWconn;
+                                float yh0 = -actualWconn;
+                                float yh1 = actualWconn;
+                                if(actualWconn-e < actualW){
+                                    renderEastFaceCutOut(z0,z1,y0,y1,x1,zh0,zh1,yh0,yh1,u0s,u1s,v0s,v1s,v,light,color);
+                                }
                             }
                             if (d == Direction.WEST) {
                                 x0 = -0.25f;
                                 x1 = -actualW;
+                                float relativeFillconn = (float) tile.connections.get(d).tank.getFluidAmount() / tile.connections.get(d).tank.getTankCapacity(0);
+                                float actualWconn = 0;
+                                if(relativeFillconn > e)
+                                    actualWconn = wMin + (wMax - wMin) * actualWconn;
+                                float xh0 = -actualWconn;
+                                float xh1 = actualWconn;
+                                float zh0 = -actualWconn;
+                                float zh1 = actualWconn;
+                                if(actualWconn-e < actualW){
+                                    renderWestFaceCutOut(z0,z1,y0,y1,x0,xh0,xh1,zh0,zh1,u0s,u1s,v0s,v1s,v,light,color);
+                                }
                             }
                             if (d == Direction.SOUTH) {
                                 z0 = actualW;
                                 z1 = 0.25f;
+                                float relativeFillconn = (float) tile.connections.get(d).tank.getFluidAmount() / tile.connections.get(d).tank.getTankCapacity(0);
+                                float actualWconn = 0;
+                                if(relativeFillconn > e)
+                                    actualWconn = wMin + (wMax - wMin) * actualWconn;
+                                float yh0 = -actualWconn;
+                                float yh1 = actualWconn;
+                                float xh0 = -actualWconn;
+                                float xh1 = actualWconn;
+                                if(actualWconn-e < actualW){
+                                    renderSouthFaceCutOut(x0,x1,y0,y1,z1,xh0,xh1,yh0,yh1,u0s,u1s,v0s,v1s,v,light,color);
+                                }
                             }
                             if (d == Direction.NORTH) {
                                 z0 = -0.25f;
                                 z1 = -actualW;
+                                float relativeFillconn = (float) tile.connections.get(d).tank.getFluidAmount() / tile.connections.get(d).tank.getTankCapacity(0);
+                                float actualWconn = 0;
+                                if(relativeFillconn > e)
+                                    actualWconn = wMin + (wMax - wMin) * actualWconn;
+                                float yh0 = -actualWconn;
+                                float yh1 = actualWconn;
+                                float xh0 = -actualWconn;
+                                float xh1 = actualWconn;
+                                if(actualWconn-e < actualW){
+                                    renderNorthFaceCutOut(x0,x1,y0,y1,z0,xh0,xh1,yh0,yh1,u0s,u1s,v0s,v1s,v,light,color);
+                                }
                             }
                             if (conn.outputsToInside) {
                                 numInputs++;
                                 inFlow = d;
                                 renderFluidFlowingCentered(
                                         x0, x1, z0, z1, y0, y1,
-                                        u0f, u1f, v0f, v1f,
-                                        color, d.getOpposite(), v, light);
+                                        u0f, u1f, v0f, v0f+(0.5f-actualW*2)*(v1f-v0f),
+                                        color, d.getOpposite(), v, light, overlay);
                             } else if (conn.getsInputFromInside) {
                                 numOutputs++;
                                 outFlow = d;
                                 renderFluidFlowingCentered(
                                         x0, x1, z0, z1, y0, y1,
-                                        u0f, u1f, v0f, v1f
-                                        , color, d, v, light);
+                                        u0f, u1f, v1f-(0.5f-actualW*2)*(v1f-v0f), v1f,
+                                        color, d, v, light, overlay);
                             } else {
                                 renderVerticalFluidStill(
                                         x0, x1, z0, z1, y0, y1,
                                         u0s, u1s, v0s, v1s,
-                                        color, v, light);
+                                        color, v, light, overlay);
                             }
                         }
                     }
@@ -1115,14 +1339,14 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         // exactly one output is found, great! use this as flow direction
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
-                                color, outFlow, v, light);
+                                u0f, u1f,  v0f+(0.5f-actualW*2)*(v1f-v0f), v1f-(0.5f-actualW*2)*(v1f-v0f),
+                                color, outFlow, v, light, overlay);
 
                         if (!tile.connections.get(outFlow.getOpposite()).isEnabled(tileState) || tile.connections.get(outFlow.getOpposite()).tank.isEmpty()) {
                             renderFluidCubeFacebyDirection(
                                     x0, x1, z0, z1, y0, y1,
                                     u0s, u1s, v0s, v1s,
-                                    outFlow.getOpposite(), color, v, light);
+                                    outFlow.getOpposite(), color, v, light, overlay);
                         }
 
 
@@ -1130,14 +1354,14 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         // exactly one input is found, great! use this as flow direction
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
-                                u0f, u1f, v0f, v1f,
-                                color, inFlow, v, light);
+                                u0f, u1f,  v0f+(0.5f-actualW*2)*(v1f-v0f), v1f-(0.5f-actualW*2)*(v1f-v0f),
+                                color, inFlow, v, light, overlay);
 
                         if (!tile.connections.get(inFlow.getOpposite()).isEnabled(tileState) || tile.connections.get(inFlow.getOpposite()).tank.isEmpty()) {
                             renderFluidCubeFacebyDirection(
                                     x0, x1, z0, z1, y0, y1,
                                     u0s, u1s, v0s, v1s,
-                                    inFlow.getOpposite(), color, v, light);
+                                    inFlow.getOpposite(), color, v, light, overlay);
                         }
 
                     } else {
@@ -1145,7 +1369,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderFluidCubeStill(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light);
+                                color, v, light, overlay);
                     }
                 }
             }
@@ -1160,10 +1384,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float v0f = conn.renderData.spriteFLowing.getV0();
             float v1f = conn.renderData.spriteFLowing.getV1();
 
-            float u0s = tile.renderData.spriteStill.getU0();
-            float u1s = tile.renderData.spriteStill.getU1();
-            float v0s = tile.renderData.spriteStill.getV0();
-            float v1s = tile.renderData.spriteStill.getV1();
+            float u0s = conn.renderData.spriteStill.getU0();
+            float u1s = conn.renderData.spriteStill.getU1();
+            float v0s = conn.renderData.spriteStill.getV0();
+            float v1s = conn.renderData.spriteStill.getV1();
 
             int color = conn.renderData.color;
 
@@ -1185,41 +1409,43 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
                             u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                            color, Direction.DOWN, v, light);
+                            color, Direction.DOWN, v, light, overlay);
                 } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
                             u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                            color, Direction.UP, v, light);
+                            color, Direction.UP, v, light, overlay);
                 } else {
                     renderVerticalFluidStill(
                             x0, x1, z0, z1, y0, y1,
                             u0s, u1s, v0s, v1s,
-                            color, v, light);
+                            color, v, light, overlay);
                 }
-/*
-                float relativeFillAbove = (float) tile.connections.get(Direction.UP).neighborFluidHandler().getFluidInTank(0).getAmount() / tile.connections.get(Direction.UP).neighborFluidHandler().getTankCapacity(0);
-                float actualWAbove = wMin + (wMax - wMin) * relativeFillAbove;
-                float xh2 = -actualWAbove;
-                float xh3 = actualWAbove;
-                float zh2 = -actualWAbove;
-                float zh3 = actualWAbove;
-                boolean renderAbove = actualWAbove < actualW;
 
-                float relativeFillBelow = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
-                float actualWBelow = wMin + (wMax - wMin) * relativeFillBelow;
-                float xh0 = -actualWBelow;
-                float xh1 = actualWBelow;
-                float zh0 = -actualWBelow;
-                float zh1 = actualWBelow;
-                boolean renderBelow = actualWBelow < actualW;
+                float relativeFillOut = (float) conn.neighborFluidHandler().getFluidInTank(0).getAmount() / conn.neighborFluidHandler().getTankCapacity(0);
+                float actualWOut = 0;
+                if(relativeFillOut > e)
+                    actualWOut = wMin + (wMax - wMin) * actualWOut;
+                float xh2 = -actualWOut;
+                float xh3 = actualWOut;
+                float zh2 = -actualWOut;
+                float zh3 = actualWOut;
+                if(actualWOut < actualW){
+                    renderUpFaceCutOut(x0,x1,z0,z1,y1,xh2,xh3,zh2,zh3,u0s,u1s,v0s,v1s,v,light,color);
+                }
 
-                renderVerticalFluidCutOutTopDownFace(spriteStill,source,stack,color,packedLight,packedOverlay,
-                        x0,x1,z0,z1,y0,y1,
-                        xh0,xh1,zh0,zh1,
-                        xh2,xh3,zh2,zh3,
-                        renderBelow,renderAbove);
- */
+                float relativeFillIn = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
+                float actualWIn = 0;
+                if(relativeFillIn > e)
+                    actualWIn = wMin + (wMax - wMin) * relativeFillIn;
+                float xh0 = -actualWIn;
+                float xh1 = actualWIn;
+                float zh0 = -actualWIn;
+                float zh1 = actualWIn;
+                if(actualWIn < actualW){
+                    renderDownFaceCutOut(x0,x1,z0,z1,y0,xh0,xh1,zh0,zh1,u0s,u1s,v0s,v1s,v,light,color);
+                }
+
             }
         }
         if (tile.connections.get(Direction.DOWN).isEnabled(tileState)) {
@@ -1230,10 +1456,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float v0f = conn.renderData.spriteFLowing.getV0();
             float v1f = conn.renderData.spriteFLowing.getV1();
 
-            float u0s = tile.renderData.spriteStill.getU0();
-            float u1s = tile.renderData.spriteStill.getU1();
-            float v0s = tile.renderData.spriteStill.getV0();
-            float v1s = tile.renderData.spriteStill.getV1();
+            float u0s = conn.renderData.spriteStill.getU0();
+            float u1s = conn.renderData.spriteStill.getU1();
+            float v0s = conn.renderData.spriteStill.getV0();
+            float v1s = conn.renderData.spriteStill.getV1();
 
             int color = conn.renderData.color;
 
@@ -1255,41 +1481,44 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
                             u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                            color, Direction.UP, v, light);
+                            color, Direction.UP, v, light, overlay);
                 } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                     renderFluidFlowingCentered(
                             x0, x1, z0, z1, y0, y1,
                             u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                            color, Direction.DOWN, v, light);
+                            color, Direction.DOWN, v, light, overlay);
                 } else {
                     renderVerticalFluidStill(
                             x0, x1, z0, z1, y0, y1,
                             u0s, u1s, v0s, v1s,
-                            color, v, light);
+                            color, v, light, overlay);
                 }
-                /*
-                float relativeFillAbove = (float) tile.mainTank.getFluidAmount() / tile.mainTank.getCapacity();
-                float actualWAbove = wMin + (wMax - wMin) * relativeFillAbove;
-                float xh2 = -actualWAbove;
-                float xh3 = actualWAbove;
-                float zh2 = -actualWAbove;
-                float zh3 = actualWAbove;
-                boolean renderAbove = actualWAbove < actualW;
 
-                float relativeFillBelow = (float) tile.connections.get(Direction.DOWN).neighborFluidHandler().getFluidInTank(0).getAmount() / tile.connections.get(Direction.DOWN).neighborFluidHandler().getTankCapacity(0);
-                float actualWBelow = wMin + (wMax - wMin) * relativeFillBelow;
-                float xh0 = -actualWBelow;
-                float xh1 = actualWBelow;
-                float zh0 = -actualWBelow;
-                float zh1 = actualWBelow;
-                boolean renderBelow = actualWBelow < actualW;
 
-                renderVerticalFluidCutOutTopDownFace(spriteStill,source,stack,color,packedLight,packedOverlay,
-                        x0,x1,z0,z1,y0,y1,
-                        xh0,xh1,zh0,zh1,
-                        xh2,xh3,zh2,zh3,
-                        renderBelow,renderAbove);
-                 */
+                float relativeFillOut = (float) conn.neighborFluidHandler().getFluidInTank(0).getAmount() / conn.neighborFluidHandler().getTankCapacity(0);
+                float actualWOut = 0;
+                if(relativeFillOut > e)
+                    actualWOut = wMin + (wMax - wMin) * relativeFillOut;
+                float xh2 = -actualWOut;
+                float xh3 = actualWOut;
+                float zh2 = -actualWOut;
+                float zh3 = actualWOut;
+                if(actualWOut < actualW){
+                    renderDownFaceCutOut(x0,x1,z0,z1,y0,xh2,xh3,zh2,zh3,u0s,u1s,v0s,v1s,v,light,color);
+                }
+
+                float relativeFillIn = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
+                float actualWIn = 0;
+                if(relativeFillIn > e)
+                    actualWIn = wMin + (wMax - wMin) * relativeFillIn;
+                float xh0 = -actualWIn;
+                float xh1 = actualWIn;
+                float zh0 = -actualWIn;
+                float zh1 = actualWIn;
+                if(actualWIn < actualW){
+                    renderUpFaceCutOut(x0,x1,z0,z1,y1,xh0,xh1,zh0,zh1,u0s,u1s,v0s,v1s,v,light,color);
+                }
+
             }
         }
         if (tile.connections.get(Direction.WEST).isEnabled(tileState)) {
@@ -1300,10 +1529,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float v0f = conn.renderData.spriteFLowing.getV0();
             float v1f = conn.renderData.spriteFLowing.getV1();
 
-            float u0s = tile.renderData.spriteStill.getU0();
-            float u1s = tile.renderData.spriteStill.getU1();
-            float v0s = tile.renderData.spriteStill.getV0();
-            float v1s = tile.renderData.spriteStill.getV1();
+            float u0s = conn.renderData.spriteStill.getU0();
+            float u1s = conn.renderData.spriteStill.getU1();
+            float v0s = conn.renderData.spriteStill.getV0();
+            float v1s = conn.renderData.spriteStill.getV1();
 
             int color = conn.renderData.color;
 
@@ -1330,19 +1559,19 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                                color, Direction.EAST, v, light,
+                                color, Direction.EAST, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                                color, Direction.WEST, v, light,
+                                color, Direction.WEST, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light,
+                                color, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
                 } else {
@@ -1359,17 +1588,41 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                                color, Direction.EAST, v, light);
+                                color, Direction.EAST, v, light, overlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                                color, Direction.WEST, v, light);
+                                color, Direction.WEST, v, light, overlay);
                     } else {
                         renderHorizontalFluidStillCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light, Direction.WEST);
+                                color, v, light, overlay, Direction.WEST);
+                    }
+
+                    float relativeFillOut = (float) conn.neighborFluidHandler().getFluidInTank(0).getAmount() / conn.neighborFluidHandler().getTankCapacity(0);
+                    float actualWOut = 0;
+                    if(relativeFillOut > e)
+                        actualWOut = wMin + (wMax - wMin) * relativeFillOut;
+                    float yh2 = -actualWOut;
+                    float yh3 = actualWOut;
+                    float zh2 = -actualWOut;
+                    float zh3 = actualWOut;
+                    if(actualWOut < actualW){
+                        renderWestFaceCutOut(z0,z1,y0,y1,x0,zh2,zh3,yh2,yh3 ,u0s,u1s,v0s,v1s,v,light,color);
+                    }
+
+                    float relativeFillIn = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
+                    float actualWIn = 0;
+                    if(relativeFillIn > e)
+                        actualWIn = wMin + (wMax - wMin) * relativeFillIn;
+                    float yh0 = -actualWIn;
+                    float yh1 = actualWIn;
+                    float zh0 = -actualWIn;
+                    float zh1 = actualWIn;
+                    if(actualWIn < actualW){
+                        renderEastFaceCutOut(z0,z1,y0,y1,x1,zh0,zh1,yh0,yh1 ,u0s,u1s,v0s,v1s,v,light,color);
                     }
                 }
             }
@@ -1382,10 +1635,10 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
             float v0f = conn.renderData.spriteFLowing.getV0();
             float v1f = conn.renderData.spriteFLowing.getV1();
 
-            float u0s = tile.renderData.spriteStill.getU0();
-            float u1s = tile.renderData.spriteStill.getU1();
-            float v0s = tile.renderData.spriteStill.getV0();
-            float v1s = tile.renderData.spriteStill.getV1();
+            float u0s = conn.renderData.spriteStill.getU0();
+            float u1s = conn.renderData.spriteStill.getU1();
+            float v0s = conn.renderData.spriteStill.getV0();
+            float v1s = conn.renderData.spriteStill.getV1();
 
             int color = conn.renderData.color;
 
@@ -1412,19 +1665,19 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                                color, Direction.WEST, v, light,
+                                color, Direction.WEST, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                                color, Direction.EAST, v, light,
+                                color, Direction.EAST, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light,
+                                color, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
                 } else {
@@ -1441,17 +1694,43 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                                color, Direction.WEST, v, light);
+                                color, Direction.WEST, v, light, overlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                                color, Direction.EAST, v, light);
+                                color, Direction.EAST, v, light, overlay);
                     } else {
                         renderHorizontalFluidStillCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light, Direction.EAST);
+                                color, v, light, overlay, Direction.EAST);
+                    }
+
+
+
+                    float relativeFillOut = (float) conn.neighborFluidHandler().getFluidInTank(0).getAmount() / conn.neighborFluidHandler().getTankCapacity(0);
+                    float actualWOut = 0;
+                    if(relativeFillOut > e)
+                        actualWOut = wMin + (wMax - wMin) * relativeFillOut;
+                    float yh2 = -actualWOut;
+                    float yh3 = actualWOut;
+                    float zh2 = -actualWOut;
+                    float zh3 = actualWOut;
+                    if(actualWOut < actualW){
+                        renderEastFaceCutOut(z0,z1,y0,y1,x1,zh2,zh3,yh2,yh3 ,u0s,u1s,v0s,v1s,v,light,color);
+                    }
+
+                    float relativeFillIn = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
+                    float actualWIn = 0;
+                    if(relativeFillIn > e)
+                        actualWIn = wMin + (wMax - wMin) * relativeFillIn;
+                    float yh0 = -actualWIn;
+                    float yh1 = actualWIn;
+                    float zh0 = -actualWIn;
+                    float zh1 = actualWIn;
+                    if(actualWIn < actualW){
+                        renderWestFaceCutOut(z0,z1,y0,y1,x0,zh0,zh1,yh0,yh1 ,u0s,u1s,v0s,v1s,v,light,color);
                     }
                 }
             }
@@ -1494,19 +1773,19 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                                color, Direction.NORTH, v, light,
+                                color, Direction.NORTH, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                                color, Direction.SOUTH, v, light,
+                                color, Direction.SOUTH, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light,
+                                color, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
                 } else {
@@ -1524,17 +1803,41 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                                color, Direction.NORTH, v, light);
+                                color, Direction.NORTH, v, light, overlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                                color, Direction.SOUTH, v, light);
+                                color, Direction.SOUTH, v, light, overlay);
                     } else {
                         renderHorizontalFluidStillCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light, Direction.SOUTH);
+                                color, v, light, overlay, Direction.SOUTH);
+                    }
+
+                    float relativeFillOut = (float) conn.neighborFluidHandler().getFluidInTank(0).getAmount() / conn.neighborFluidHandler().getTankCapacity(0);
+                    float actualWOut = 0;
+                    if(relativeFillOut > e)
+                        actualWOut = wMin + (wMax - wMin) * relativeFillOut;
+                    float yh2 = -actualWOut;
+                    float yh3 = actualWOut;
+                    float xh2 = -actualWOut;
+                    float xh3 = actualWOut;
+                    if(actualWOut < actualW){
+                        renderSouthFaceCutOut(x0,x1,y0,y1,z1,xh2,xh3,yh2,yh3 ,u0s,u1s,v0s,v1s,v,light,color);
+                    }
+
+                    float relativeFillIn = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
+                    float actualWIn = 0;
+                    if(relativeFillIn > e)
+                        actualWIn = wMin + (wMax - wMin) * relativeFillIn;
+                    float yh0 = -actualWIn;
+                    float yh1 = actualWIn;
+                    float xh0 = -actualWIn;
+                    float xh1 = actualWIn;
+                    if(actualWIn < actualW){
+                        renderNorthFaceCutOut(x0,x1,y0,y1,z0,xh0,xh1,yh0,yh1 ,u0s,u1s,v0s,v1s,v,light,color);
                     }
                 }
             }
@@ -1578,19 +1881,19 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                                color, Direction.SOUTH, v, light,
+                                color, Direction.SOUTH, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderHorizontalFluidFlowing(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                                color, Direction.NORTH, v, light,
+                                color, Direction.NORTH, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     } else {
                         renderHorizontalFluidStill(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light,
+                                color, v, light, overlay,
                                 y0BottomOffsetNorth, y0BottomOffsetSouth, y0BottomOffsetEast, y0BottomOffsetWest);
                     }
                 } else {
@@ -1608,17 +1911,41 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f + 0.5f * (v1f - v0f), v1f,
-                                color, Direction.SOUTH, v, light);
+                                color, Direction.SOUTH, v, light, overlay);
                     } else if (!conn.getsInputFromOutside && conn.getsInputFromInside) {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f, v0f, v1f - 0.5f * (v1f - v0f),
-                                color, Direction.NORTH, v, light);
+                                color, Direction.NORTH, v, light, overlay);
                     } else {
                         renderHorizontalFluidStillCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0s, u1s, v0s, v1s,
-                                color, v, light, Direction.NORTH);
+                                color, v, light, overlay, Direction.NORTH);
+                    }
+
+                    float relativeFillOut = (float) conn.neighborFluidHandler().getFluidInTank(0).getAmount() / conn.neighborFluidHandler().getTankCapacity(0);
+                    float actualWOut = 0;
+                    if(relativeFillOut > e)
+                        actualWOut = wMin + (wMax - wMin) * relativeFillOut;
+                    float yh2 = -actualWOut;
+                    float yh3 = actualWOut;
+                    float xh2 = -actualWOut;
+                    float xh3 = actualWOut;
+                    if(actualWOut < actualW){
+                        renderNorthFaceCutOut(x0,x1,y0,y1,z0,xh2,xh3,yh2,yh3 ,u0s,u1s,v0s,v1s,v,light,color);
+                    }
+
+                    float relativeFillIn = (float) tile.tank.getFluidAmount() / tile.tank.getCapacity();
+                    float actualWIn = 0;
+                    if(relativeFillIn > e)
+                        actualWIn = wMin + (wMax - wMin) * relativeFillIn;
+                    float yh0 = -actualWIn;
+                    float yh1 = actualWIn;
+                    float xh0 = -actualWIn;
+                    float xh1 = actualWIn;
+                    if(actualWIn < actualW){
+                        renderSouthFaceCutOut(x0,x1,y0,y1,z1,xh0,xh1,yh0,yh1 ,u0s,u1s,v0s,v1s,v,light,color);
                     }
                 }
             }
@@ -1650,7 +1977,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 tile.lastLight = packedLight;
                 tile.requiresMeshUpdate = false;
                 BufferBuilder bufferBuilder = new BufferBuilder(tile.myByteBuffer, VertexFormat.Mode.QUADS, POSITION_COLOR_TEXTURE_NORMAL_LIGHT);
-                RenderPipe.renderFluids(tile, bufferBuilder, packedLight);
+                RenderPipe.renderFluids(tile, bufferBuilder, packedLight, 0);
                 tile.mesh = bufferBuilder.build();
                 if (tile.mesh != null)
                     tile.vertexBuffer.upload(tile.mesh);
