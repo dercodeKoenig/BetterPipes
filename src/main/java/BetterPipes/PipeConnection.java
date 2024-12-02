@@ -174,6 +174,7 @@ void sync(){
         if (!last_tankFluid.isEmpty()) {
             Channel.sendToPlayer(new PacketFluidUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluid().getFluid(), System.currentTimeMillis()), player);
             Channel.sendToPlayer(new PacketFluidAmountUpdate(parent.getBlockPos(), myDirection.ordinal(), tank.getFluidAmount(), System.currentTimeMillis()), player);
+            Channel.sendToPlayer(new PacketFlowUpdate(parent.getBlockPos(), myDirection.ordinal(), getsInputFromOutside,getsInputFromInside, outputsToOutside, outputsToInside,System.currentTimeMillis()), player);
         }
     }
 

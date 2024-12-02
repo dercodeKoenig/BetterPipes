@@ -29,8 +29,6 @@ public class Registry {
             () -> BlockEntityType.Builder.of(EntityPipe::new, PIPE.get()).build(null)
     );
 
-    public static ShaderInstance PIPE_FLUID_SHADER;
-
     public static void register(IEventBus modBus) {
         ITEMS.register("pipe",() -> new BlockItem(PIPE.get(), new Item.Properties()));
 
