@@ -1425,7 +1425,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                 float relativeFillOut = (float) conn.neighborFluidHandler().getFluidInTank(0).getAmount() / conn.neighborFluidHandler().getTankCapacity(0);
                 float actualWOut = 0;
                 if(relativeFillOut > e)
-                    actualWOut = wMin + (wMax - wMin) * actualWOut;
+                    actualWOut = wMin + (wMax - wMin) * relativeFillOut;
                 float xh2 = -actualWOut;
                 float xh3 = actualWOut;
                 float zh2 = -actualWOut;
