@@ -35,7 +35,6 @@ import static BetterPipes.Registry.ENTITY_PIPE;
 import static net.minecraft.client.renderer.RenderType.TRANSIENT_BUFFER_SIZE;
 
 public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
-    private static final List<EntityPipe> ACTIVE_PIPES = new ArrayList<>();
 
     public static int MAX_OUTPUT_RATE = 40;
     public static int REQUIRED_FILL_FOR_MAX_OUTPUT = 200;
@@ -80,9 +79,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
     @Override
     public void onLoad() {
         super.onLoad();
-        if (!level.isClientSide) {
-            ACTIVE_PIPES.add(this);
-        }
         if (level.isClientSide) {
             UUID from = Minecraft.getInstance().player.getUUID();
             CompoundTag tag = new CompoundTag();
@@ -94,9 +90,6 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
 
     @Override
     public void setRemoved() {
-        if (!level.isClientSide) {
-            ACTIVE_PIPES.remove(this);
-        }
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
                 vertexBuffer.close();
