@@ -28,7 +28,6 @@ public class PipeConnection implements IFluidHandler {
     public int lastInputFromOutside;
     public boolean getsInputFromInside;
     public boolean getsInputFromOutside;
-    public boolean lastInputWasFromAnotherPipe;
 
     public int lastOutputToOutside;
     public int lastOutputToInside;
@@ -229,12 +228,6 @@ void sync(){
 
     @Override
     public int fill(FluidStack resource, FluidAction action) {
-        lastInputWasFromAnotherPipe = false;
-        return fill(resource, action, false);
-    }
-
-    public int fillFromOtherPipe(FluidStack resource, FluidAction action) {
-        lastInputWasFromAnotherPipe = true;
         return fill(resource, action, false);
     }
 
