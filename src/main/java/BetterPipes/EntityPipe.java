@@ -35,7 +35,6 @@ import java.util.*;
 import static BetterPipes.Registry.ENTITY_PIPE;
 
 public class EntityPipe extends BlockEntity implements PacketRequestInitialData.clientOnload {
-    private static final List<EntityPipe> ACTIVE_PIPES = new ArrayList<>();
 
     public static int MAX_OUTPUT_RATE = 40;
     public static int REQUIRED_FILL_FOR_MAX_OUTPUT = 200;
@@ -77,9 +76,6 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
     @Override
     public void onLoad() {
         super.onLoad();
-        if (!level.isClientSide) {
-            ACTIVE_PIPES.add(this);
-        }
         if (level.isClientSide) {
             ResourceKey<Level> key = level.dimension();
             Channel.sendToServer(new PacketRequestInitialData(key.location(), getBlockPos()));
@@ -88,9 +84,6 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
 
     @Override
     public void setRemoved() {
-        if (!level.isClientSide) {
-            ACTIVE_PIPES.remove(this);
-        }
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
                 vertexBuffer.close();
