@@ -156,8 +156,6 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
                             double speedMultiplier = Math.min(1, (float) has_free / target_free);
                             toTransfer = (int) (CONNECTION_MAX_OUTPUT_RATE * update_after_ticks * speedMultiplier * Math.min(1, transferRateMultiplier));
 
-                            if (toTransfer > CONNECTION_MAX_OUTPUT_RATE * update_after_ticks && !conn.lastInputWasFromAnotherPipe)
-                                toTransfer = CONNECTION_MAX_OUTPUT_RATE * update_after_ticks;
                             if (toTransfer == 0 && conn.ticksWithFluidInTank >= FORCE_OUTPUT_AFTER_TICKS / 2)
                                 toTransfer = 1;
 
