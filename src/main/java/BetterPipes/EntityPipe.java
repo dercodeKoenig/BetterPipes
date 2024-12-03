@@ -185,7 +185,7 @@ public class EntityPipe extends BlockEntity implements PacketRequestInitialData.
                                             FluidStack drained = conn.tank.drain(toTransfer, IFluidHandler.FluidAction.SIMULATE);
                                             int filled = conn.neighborFluidHandler().fill(drained, IFluidHandler.FluidAction.SIMULATE);
                                             toTransfer = Math.min(filled, toTransfer);
-                                            pipeconn.fillFromOtherPipe(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                            pipeconn.fill(conn.drain(toTransfer, IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
                                         }
                                     } else {
                                         // for others, output every tick
