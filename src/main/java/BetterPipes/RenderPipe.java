@@ -1383,7 +1383,7 @@ public class RenderPipe implements BlockEntityRenderer<EntityPipe> {
                         renderFluidFlowingCentered(
                                 x0, x1, z0, z1, y0, y1,
                                 u0f, u1f,  v0f+(0.5f-actualW*2)*(v1f-v0f), v1f-(0.5f-actualW*2)*(v1f-v0f),
-                                color, inFlow, v, light, overlay);
+                                color, inFlow.getOpposite(), v, light, overlay);
 
                         if (!tile.connections.get(inFlow.getOpposite()).isEnabled(tileState) || tile.connections.get(inFlow.getOpposite()).tank.isEmpty()) {
                             renderFluidCubeFacebyDirection(
