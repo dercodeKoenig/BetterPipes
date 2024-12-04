@@ -1,8 +1,9 @@
 package BetterPipes;
 
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -19,16 +20,17 @@ public class Registry {
     public static final net.neoforged.neoforge.registries.DeferredRegister<Item> ITEMS = net.neoforged.neoforge.registries.DeferredRegister.create(BuiltInRegistries.ITEM, "betterpipes");
 
     public static void registerBlockItem(String name, DeferredHolder<Block,Block> b){
-        ITEMS.register(name,() -> new BlockItem(b.get(), new Item.Properties()));
+        ITEMS.register(name,() -> new BlockItem(b.get(), new Item.Properties().setId(ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("betterpipes", name)))));
     }
 
     public static final DeferredHolder<Block, Block> PIPE = BLOCKS.register(
             "pipe",
-            () -> new BlockPipe(BlockBehaviour.Properties.of().noOcclusion().strength(1.0f).instabreak())
+            () -> new BlockPipe(BlockBehaviour.Properties.of().noOcclusion().strength(1.0f).instabreak().
+                    setId(ResourceKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("betterpipes", "pipe"))))
     );
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EntityPipe>> ENTITY_PIPE = BLOCK_ENTITIES.register(
             "entity_pipe",
-            () -> BlockEntityType.Builder.of(EntityPipe::new, PIPE.get()).build(null)
+            () -> new BlockEntityType<EntityPipe>(EntityPipe::new, PIPE.get())
     );
 
     public static void register(IEventBus modBus) {

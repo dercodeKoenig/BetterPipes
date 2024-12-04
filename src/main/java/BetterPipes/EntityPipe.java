@@ -1,5 +1,6 @@
 package BetterPipes;
 
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.sun.tools.jconsole.JConsoleContext;
@@ -68,7 +69,7 @@ public class EntityPipe extends BlockEntity implements INetworkTagReceiver {
         }
         if (FMLEnvironment.dist == Dist.CLIENT) {
             RenderSystem.recordRenderCall(() -> {
-                vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+                vertexBuffer = new VertexBuffer(BufferUsage.DYNAMIC_WRITE);
                 myByteBuffer = new ByteBufferBuilder(TRANSIENT_BUFFER_SIZE);
             });
         }

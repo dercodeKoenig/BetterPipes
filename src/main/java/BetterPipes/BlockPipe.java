@@ -2,15 +2,14 @@ package BetterPipes;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -125,8 +124,7 @@ public class BlockPipe extends Block implements EntityBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess sta, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource s) {
         BlockEntity tile = level.getBlockEntity(pos);
         if (!(tile instanceof EntityPipe pipe)) return state;
 
@@ -137,7 +135,7 @@ public class BlockPipe extends Block implements EntityBlock {
             state = state.setValue(connections.get(direction), ConnectionState.CONNECTED);
         } else {
 
-            if (neighborState.isSolidRender(tile.getLevel(), neighborPos)) {
+            if (neighborState.isSolidRender()) {
                 state = state.setValue(connections.get(direction), ConnectionState.STRUCTURE);
             }else{
                 state = state.setValue(connections.get(direction), ConnectionState.NONE);
